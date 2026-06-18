@@ -1,0 +1,42 @@
+{
+  "id": "https://openalex.org/W4389012345",
+  "doi": "https://doi.org/10.1234/jaip.2023.12.45",
+  "title": "Regulating Artificial Intelligence in Europe",
+  "display_name": "Regulating Artificial Intelligence in Europe",
+  "publication_year": 2023,
+  "publication_date": "2023-06-15",
+  "language": "en",
+  "type": "article",
+  "authorships": [
+    {"author": {"display_name": "Jane Doe"}},
+    {"author": {"display_name": "Karl Schmidt"}}
+  ],
+  "primary_location": {
+    "landing_page_url": "https://example.org/article",
+    "source": {
+      "display_name": "Journal of AI Policy",
+      "issn_l": "2049-1234",
+      "issn": ["2049-1234"]
+    }
+  },
+  "abstract_inverted_index": {
+    "This": [0],
+    "paper": [1],
+    "examines": [2],
+    "regulatory": [3],
+    "frameworks": [4]
+  },
+  "concepts": [
+    {"display_name": "Artificial intelligence", "score": 0.92},
+    {"display_name": "Political science", "score": 0.55},
+    {"display_name": "Low confidence noise", "score": 0.12}
+  ],
+  "cited_by_count": 21,
+  "open_access": {"is_oa": true, "oa_url": "https://example.org/pdf"},
+  "ids": {
+    "openalex": "https://openalex.org/W4389012345",
+    "doi": "https://doi.org/10.1234/jaip.2023.12.45",
+    "pmid": "https://pubmed.ncbi.nlm.nih.gov/12345678"
+  },
+  "biblio": {"volume": "12", "issue": "3", "first_page": "45", "last_page": "67"}
+}

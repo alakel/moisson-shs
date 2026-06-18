@@ -1,0 +1,109 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "moisson-shs"
+version = "0.3.0"
+description = "Moissonneur multi-sources d'articles SHS francophones (HAL, Isidore, OpenEdition, Cairn, Persée, Theses.fr, Érudit) vers Zotero JSON et CSL-JSON, avec serveur MCP pour Claude Desktop."
+readme = "README.md"
+authors = [{ name = "Amar Lakel", email = "amar.lakel@gmail.com" }]
+license = { text = "MIT" }
+requires-python = ">=3.10"
+keywords = [
+    "shs", "social-sciences", "humanities", "bibliography",
+    "zotero", "csl-json", "hal", "isidore", "openedition",
+    "cairn", "persee", "erudit", "theses-fr", "mcp",
+    "claude-desktop", "research",
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Science/Research",
+    "Intended Audience :: Education",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "Topic :: Sociology",
+    "Topic :: Text Processing :: Linguistic",
+    "Topic :: Scientific/Engineering :: Information Analysis",
+    "Natural Language :: French",
+]
+dependencies = [
+    "requests>=2.31.0",
+    "sickle>=0.7.0",
+    "lxml>=4.9.0",
+    "unidecode>=1.3.0",
+    "requests-cache>=1.2.0",
+]
+
+[project.optional-dependencies]
+# Serveur MCP local (stdio, Claude Desktop) ET socle du serveur distant.
+# starlette/uvicorn sont des dépendances transitives de `mcp`, mais on les
+# DÉCLARE explicitement : le serveur distant HTTP en dépend directement et ne
+# doit pas casser si `mcp` change ses transitifs.
+mcp = ["mcp>=1.0.0", "starlette>=0.46", "uvicorn>=0.30"]
+# Alias explicite pour le serveur distant HTTP (mêmes dépendances que [mcp]).
+http = ["mcp>=1.0.0", "starlette>=0.46", "uvicorn>=0.30"]
+# Serveur MCP distant complet (auth Bearer + sandbox + durcissement). Mêmes
+# dépendances que [http] ; alias sémantique pour le déploiement distant.
+remote = ["mcp>=1.0.0", "starlette>=0.46", "uvicorn>=0.30"]
+# Chargement automatique d'un .env pour les clés des sources internationales
+# (OpenAlex/Semantic Scholar/CORE). Optionnel : à défaut, variables du shell
+# ou bloc env MCP.
+dotenv = ["python-dotenv>=1.0.0"]
+dev = [
+    "pytest>=7.0",
+    "pytest-cov>=4.0",
+    "build>=1.0",
+    "python-dotenv>=1.0.0",
+]
+
+[project.scripts]
+# Commande principale : moisson-shs <sous-commande>
+# - moisson-shs setup       : configure le serveur MCP dans Claude Desktop
+# - moisson-shs serve       : lance le serveur MCP en mode stdio (debug)
+# - moisson-shs search Q    : moisson sur la requête Q
+# - moisson-shs Q           : alias rétro-compatible (assume search)
+moisson-shs = "cli:main"
+
+[project.urls]
+Homepage = "https://github.com/amarlakel/moisson-shs"
+Repository = "https://github.com/amarlakel/moisson-shs"
+Issues = "https://github.com/amarlakel/moisson-shs/issues"
+Documentation = "https://github.com/amarlakel/moisson-shs#readme"
+
+# === Setuptools : configuration src/ flat layout ===
+[tool.setuptools]
+py-modules = ["cli", "main", "mcp_server", "config", "setup_claude_desktop", "auth", "remote_auth", "oauth_provider"]
+
+[tool.setuptools.packages.find]
+include = ["connectors*", "mappers*", "utils*"]
+
+# === pytest ===
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+addopts = ["-ra", "--strict-markers", "--tb=short"]
+markers = [
+    "integration: tests nécessitant le réseau",
+    "slow: tests lents (> 5 s)",
+]
+
+# === coverage ===
+[tool.coverage.run]
+source = ["mappers", "utils", "connectors"]
+omit = ["tests/*", "venv/*"]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "raise NotImplementedError",
+    "if __name__ == .__main__.:",
+]

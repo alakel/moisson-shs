@@ -1,0 +1,82 @@
+name: Tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest]
+        python-version: ["3.10", "3.11", "3.12"]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+
+      - name: Install package + dev/mcp extras
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev,mcp]"
+
+      - name: Run unit tests (no network)
+        run: |
+          pytest tests/ -m "not integration" -v --cov=mappers --cov=utils --cov=connectors --cov-report=term-missing
+
+      - name: Coverage threshold
+        run: |
+          pytest tests/ -m "not integration" --cov=mappers --cov=utils --cov-fail-under=70
+
+  smoke:
+    # Test léger d'intégration : import du package et vérification
+    # que les entry_points fonctionnent. Pas d'appel réseau aux API SHS
+    # pour éviter de saturer les serveurs publics et les faux positifs.
+    runs-on: ubuntu-latest
+    needs: test
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install
+        run: pip install -e ".[mcp]"
+      - name: Test CLI entry point
+        run: |
+          moisson-shs version
+          moisson-shs --help
+          moisson-shs setup --help
+          moisson-shs setup --dry-run --skip-deps-check --output-dir /tmp/m_shs --config /tmp/claude.json
+      - name: Test MCP server imports
+        run: python -c "import mcp_server; print('OK')"
+
+  integration:
+    # Tests réseau des sources internationales. Les sources à clé sont 'skip'
+    # au niveau du test quand la variable d'env (issue des secrets du dépôt)
+    # est absente : le job ne tombe jamais en échec faute de secret. Limité aux
+    # push pour ne pas solliciter les API depuis les forks/PRs externes.
+    runs-on: ubuntu-latest
+    needs: test
+    if: ${{ github.event_name == 'push' }}
+    env:
+      OPENALEX_API_KEY: ${{ secrets.OPENALEX_API_KEY }}
+      SEMANTIC_SCHOLAR_API_KEY: ${{ secrets.SEMANTIC_SCHOLAR_API_KEY }}
+      CORE_API_KEY: ${{ secrets.CORE_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install
+        run: pip install -e ".[dev,mcp]"
+      - name: Run integration tests (network; key-gated tests skip without secret)
+        run: pytest tests/integration -m integration -v

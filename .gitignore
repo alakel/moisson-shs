@@ -1,0 +1,60 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg
+*.egg-info/
+build/
+dist/
+.eggs/
+
+# Virtualenv
+venv/
+.venv/
+env/
+
+# Tests / coverage
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+coverage.xml
+
+# Linters / formatters
+.ruff_cache/
+.mypy_cache/
+
+# Outputs du moissonneur (corpus et payloads bruts)
+output/raw/
+output/corpus_*.json
+output/corpus_*.csl.json
+output/corpus_*_stats.txt
+
+# Journal d'audit du serveur distant (Sprint 11)
+.audit/
+output/.audit/
+
+# Jetons distants (empreintes sha256) et build Docker local
+tokens.json
+.env.tmp_validate
+
+# Cache HTTP local
+.cache/
+~/.cache/moisson_shs/
+
+# OS / IDE
+.DS_Store
+.idea/
+.vscode/
+*.swp
+*~
+
+# Données utilisateurs
+.env
+.env.local
+secrets.json
+
+# Artefacts de développement internes (hors application)
+.claude/
+/PLAN.md

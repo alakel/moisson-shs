@@ -1,0 +1,13 @@
+{
+  "mcpServers": {
+    "moisson-shs": {
+      "command": "/REMPLACER/PAR/CHEMIN/VERS/moisson_shs/venv/bin/python",
+      "args": [
+        "/REMPLACER/PAR/CHEMIN/VERS/moisson_shs/mcp_server.py"
+      ],
+      "env": {
+        "MOISSON_OUTPUT_DIR": "/REMPLACER/PAR/CHEMIN/VERS/output"
+      }
+    }
+  }
+}

@@ -1,0 +1,38 @@
+# Reverse proxy TLS pour le serveur MCP distant moisson-shs.
+# Caddy termine HTTPS (Let's Encrypt automatique) et relaie vers le conteneur
+# `app` (uvicorn) sur le réseau Docker privé.
+#
+# Variables : MOISSON_DOMAIN (domaine public), ACME_EMAIL (compte Let's Encrypt).
+
+{
+	email {$ACME_EMAIL}
+}
+
+{$MOISSON_DOMAIN} {
+	encode gzip
+
+	# Limite de taille du corps de requête AU PROXY (point d'entrée réel) :
+	# complète la garde applicative (ContentLengthLimitMiddleware) et couvre le
+	# cas Transfer-Encoding: chunked. Aligner avec MOISSON_HTTP_MAX_BODY.
+	request_body {
+		max_size 1MB
+	}
+
+	reverse_proxy app:8000 {
+		# Indispensable au flux SSE (progression des moissons longues) : ne pas
+		# bufferiser les réponses.
+		flush_interval -1
+		# Transmet le Host public → cohérent avec MOISSON_ALLOWED_HOSTS
+		# (anti DNS-rebinding du serveur). L'en-tête Authorization est transmis
+		# par défaut par Caddy (ne pas le retirer).
+		header_up Host {host}
+		header_up X-Forwarded-For {remote_host}
+	}
+
+	header {
+		Strict-Transport-Security "max-age=31536000;"
+		X-Content-Type-Options "nosniff"
+		# Ne pas divulguer la stack.
+		-Server
+	}
+}

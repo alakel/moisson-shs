@@ -1,0 +1,43 @@
+# Déploiement DERRIÈRE un reverse proxy Nginx EXISTANT (ex. VPS multi-sites).
+#
+# Contrairement à docker-compose.yml (qui embarque Caddy pour le TLS), ce
+# fichier ne lance QUE l'app : Nginx (sur l'hôte) termine déjà TLS et proxie
+# vers le conteneur. L'app est publiée sur le LOOPBACK uniquement
+# (127.0.0.1:8010) → jamais accessible directement depuis l'extérieur, seul
+# Nginx peut l'atteindre.
+#
+# Usage :
+#   cp .env.example .env   # renseigner MOISSON_API_TOKEN, MOISSON_ALLOWED_HOSTS,
+#                          # MOISSON_PUBLIC_BASE_URL
+#   docker compose -f docker-compose.nginx.yml up -d --build
+
+services:
+  app:
+    build: .
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      MOISSON_HTTP_HOST: "0.0.0.0"      # interne au conteneur
+      MOISSON_HTTP_PORT: "8000"
+      MOISSON_OUTPUT_DIR: /data/output
+    ports:
+      # LOOPBACK hôte uniquement → Nginx proxie vers 127.0.0.1:8010.
+      - "127.0.0.1:8010:8000"
+    volumes:
+      - moisson_output:/data/output
+      - moisson_cache:/data/cache
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://127.0.0.1:8000/healthz').status==200 else 1)"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+volumes:
+  moisson_output:
+  moisson_cache:

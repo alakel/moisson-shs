@@ -1,0 +1,22 @@
+{
+  "type": "journal-article",
+  "title": ["Regulating Artificial Intelligence in Europe"],
+  "author": [
+    {"given": "Jane", "family": "Doe"},
+    {"given": "Karl", "family": "Schmidt"},
+    {"name": "AI Policy Lab"}
+  ],
+  "abstract": "<jats:p>This paper examines <jats:italic>regulatory</jats:italic> frameworks for AI.</jats:p>",
+  "container-title": ["Journal of AI Policy"],
+  "volume": "12",
+  "issue": "3",
+  "page": "45-67",
+  "issued": {"date-parts": [[2023, 6, 15]]},
+  "DOI": "10.1234/jaip.2023.12.45",
+  "ISSN": ["2049-1234"],
+  "URL": "https://doi.org/10.1234/jaip.2023.12.45",
+  "language": "en",
+  "publisher": "Policy Press",
+  "subject": ["Artificial Intelligence", "Law"],
+  "is-referenced-by-count": 17
+}

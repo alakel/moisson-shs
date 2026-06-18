@@ -1,0 +1,1521 @@
+{
+  "response": {
+    "header": {
+      "query": {
+        "@text": "discours numérique",
+        "@userId": "ae812f55-4834-4c42-a05e-f24c9b4eaa19",
+        "@sessionId": "ekoun4fdberkg7jvfddotmhscv",
+        "@date": "2026-05-23T08:57:32+0000",
+        "param": [
+          {
+            "@name": "lang",
+            "@value": "fr"
+          },
+          {
+            "@name": "q",
+            "@value": "discours numérique"
+          },
+          {
+            "@name": "replies",
+            "@value": "5"
+          }
+        ]
+      },
+      "performance": {
+        "@durationMs": "466"
+      }
+    },
+    "replies": {
+      "meta": {
+        "@items": "262129",
+        "@pageItems": "1"
+      },
+      "content": {
+        "reply": [
+          {
+            "@uri": "20.500.13089/hzcj",
+            "isidore": {
+              "title": [
+                {
+                  "@added": "true",
+                  "@xml:lang": "fr",
+                  "$": "Marie-Anne Paveau, L’analyse du discours numérique. Dictionnaire des formes et des pratiques"
+                },
+                {
+                  "@added": "true",
+                  "@xml:lang": "en",
+                  "$": "Marie-Anne Paveau, L’analyse du discours numérique. Dictionnaire des formes et des pratiques"
+                },
+                {
+                  "@added": "true",
+                  "@xml:lang": "es",
+                  "$": "Marie-Anne Paveau, L’analyse du discours numérique. Dictionnaire des formes et des pratiques"
+                },
+                "Marie-Anne Paveau, L’analyse du discours numérique. Dictionnaire des formes et des pratiques"
+              ],
+              "url": "https://doi.org/10.4000/lidil.6033",
+              "enrichedCreators": {
+                "creator": {
+                  "@origin": "Jacques, Marie-Paule",
+                  "@normalizedAuthor": "Jacques, Marie-Paule",
+                  "@idAuthor": "jacques_marie-paule",
+                  "firstname": "Marie-Paule",
+                  "lastname": "Jacques",
+                  "title": [],
+                  "sameAs": []
+                }
+              },
+              "date": {
+                "@origin": "2019",
+                "@startDate": "2019-01-01",
+                "@endDate": "2019-12-31",
+                "normalizedDate": "2019-01-01",
+                "century": "2000",
+                "decade": "2010",
+                "year": "2019"
+              },
+              "ore": {
+                "aggregates": [
+                  {
+                    "@crawl": "true",
+                    "$": "https://doi.org/10.4000/lidil.6033"
+                  },
+                  {
+                    "@crawl": "true",
+                    "$": "https://hdl.handle.net/20.500.13089/hzcj"
+                  },
+                  {
+                    "@crawl": "true",
+                    "$": "https://journals.openedition.org/lidil/6033"
+                  }
+                ]
+              },
+              "relations": {
+                "relation": [
+                  "info:eu-repo/semantics/reference/issn/1960-6052",
+                  "info:eu-repo/semantics/reference/issn/1146-6480"
+                ],
+                "url": [
+                  "https://hdl.handle.net/20.500.13089/hzgb",
+                  "https://doi.org/10.4000/lidil.5895"
+                ]
+              },
+              "abstract": "Le web 2.0 offre pour les discours un espace numérique qui a la particularité de déplacer les rôles de lecteur et de producteur, d’inscrire les discours produits dans des pré-formats contraints par les technologies numériques, telles que celles des blogs ou des tweets, de lui adjoindre des éléments numériques propres, en un mot bouleverse les formes du discours et impose, selon Marie-Anne Paveau, de construire un nouvel appareillage théorique qui intègre dans l’analyse du discours la part inévitable...",
+              "types": {
+                "type": [
+                  "review",
+                  "info:eu-repo/semantics/review"
+                ]
+              },
+              "source": {
+                "@handle": "10670/2.0dvdfi",
+                "@action": "crawl",
+                "@frequency": "1",
+                "name": [
+                  {
+                    "@added": "true",
+                    "@xml:lang": "en",
+                    "$": "Lidil"
+                  },
+                  {
+                    "@added": "true",
+                    "@xml:lang": "es",
+                    "$": "Lidil"
+                  },
+                  {
+                    "@xml:lang": "fr",
+                    "$": "Lidil"
+                  }
+                ],
+                "shortName": {
+                  "@xml:lang": "fr",
+                  "$": "lidil"
+                },
+                "description": {
+                  "@xml:lang": "fr",
+                  "$": "Revue de linguistique et de didactique des langues"
+                },
+                "url": "https://journals.openedition.org/lidil",
+                "issn": "1960-6052",
+                "topic": "http://aurehal.archives-ouvertes.fr/subject/shs.langue",
+                "scope": {
+                  "@uri": "http://isidore.science/subject#publications",
+                  "$": "Publications"
+                },
+                "type": "Article",
+                "uriPermanentPattern": "https://hdl.handle.net/(.+)",
+                "collection": {
+                  "name": [
+                    {
+                      "@added": "true",
+                      "@xml:lang": "fr",
+                      "$": "OpenEdition Journals"
+                    },
+                    {
+                      "@added": "true",
+                      "@xml:lang": "en",
+                      "$": "OpenEdition Journals"
+                    },
+                    {
+                      "@added": "true",
+                      "@xml:lang": "es",
+                      "$": "OpenEdition Journals"
+                    },
+                    "OpenEdition Journals"
+                  ],
+                  "shortName": "OpenEdition Journals",
+                  "url": "http://journals.openedition.org",
+                  "description": "Né en 1999, Revues.org est le plus ancien portail français de revues en ligne en sciences humaines et sociales. Il est développé par le Centre pour l'édition électronique ouverte (Cléo), un laboratoire associant le CNRS, l'EHESS, l'Université de Provence et l'Université d'Avignon. Depuis 2011, Revues.org fait partie du portail de ressources électronique OpenEdition.",
+                  "country": "FR"
+                },
+                "organization": {
+                  "name": [
+                    {
+                      "@added": "true",
+                      "@xml:lang": "fr",
+                      "$": "OpenEdition"
+                    },
+                    {
+                      "@added": "true",
+                      "@xml:lang": "en",
+                      "$": "OpenEdition"
+                    },
+                    {
+                      "@added": "true",
+                      "@xml:lang": "es",
+                      "$": "OpenEdition"
+                    },
+                    "OpenEdition"
+                  ],
+                  "url": "http://www.openedition.org",
+                  "description": "calenda@revues.org",
+                  "country": "FR"
+                }
+              },
+              "extraction": {
+                "entites_nommees": {
+                  "entite_nommee": [
+                    {
+                      "@type": "REGEXP",
+                      "@items": "4",
+                      "$": "Paveau"
+                    },
+                    {
+                      "@type": "REGEXP",
+                      "@items": "1",
+                      "$": "Jacques"
+                    },
+                    {
+                      "@type": "REGEXP",
+                      "@items": "1",
+                      "$": "Éditions - Université Grenoble Alpes"
+                    },
+                    {
+                      "@type": "REGEXP",
+                      "@items": "1",
+                      "$": "Marie-Anne Paveau"
+                    }
+                  ]
+                },
+                "references_bibliographiques": [
+                  {
+                    "@type": "doi"
+                  },
+                  {
+                    "@type": "hdl"
+                  },
+                  {
+                    "@type": "ark"
+                  },
+                  {
+                    "@type": "orcid"
+                  },
+                  {
+                    "@type": "idref"
+                  }
+                ]
+              },
+              "enrichment": {
+                "categories": {
+                  "@type": "ISIDORE_HAL_CATEGO",
+                  "category": {
+                    "@proba": "1.000",
+                    "@uri": "http://aurehal.archives-ouvertes.fr/subject/shs.langue",
+                    "inScheme": "http://aurehal.archives-ouvertes.fr/subjects",
+                    "prefLabel": [
+                      {
+                        "@xml:lang": "en",
+                        "$": "Linguistics"
+                      },
+                      {
+                        "@xml:lang": "fr",
+                        "$": "Linguistique"
+                      },
+                      {
+                        "@xml:lang": "es",
+                        "$": "Lingüística"
+                      }
+                    ],
+                    "expanded": {
+                      "@uri": "http://aurehal.archives-ouvertes.fr/subject/shs|http://aurehal.archives-ouvertes.fr/subject/shs.langue",
+                      "expandedLabel": [
+                        {
+                          "@xml:lang": "fr",
+                          "$": "Sciences de l'Homme et Société|Linguistique"
+                        },
+                        {
+                          "@xml:lang": "en",
+                          "$": "Humanities and Social Sciences|Linguistics"
+                        },
+                        {
+                          "@xml:lang": "es",
+                          "$": "Ciencias sociales|Lingüística"
+                        }
+                      ]
+                    },
+                    "semanticExpansion": {
+                      "category": {
+                        "@uri": "http://aurehal.archives-ouvertes.fr/subject/shs",
+                        "prefLabel": [
+                          {
+                            "@xml:lang": "es",
+                            "$": "Ciencias sociales"
+                          },
+                          {
+                            "@xml:lang": "en",
+                            "$": "Humanities and Social Sciences"
+                          },
+                          {
+                            "@xml:lang": "fr",
+                            "$": "Sciences de l'Homme et Société"
+                          }
+                        ],
+                        "definition": {
+                          "@xml:lang": "fr",
+                          "$": "Les sciences humaines et sociales sont un ensemble de disciplines qui se donnent pour objet d'étude, divers aspects de la réalité humaine. On les met en contraste avec les sciences dites « exactes » (parfois dites « sciences dures », en raison de leur statut épistémologique spécifique (bien que nulle science ne soit exempte de scepticisme et véritablement « exacte » au sens de la seule réalité, et bien que les sciences qui ne sont liées qu'à l'immatérialité dont la linguistique et la philosophie du langage aient pu faire l'objet de tentatives formalistes).  Selon les dictionnaires, les sciences humaines étudient ce qui concerne les cultures humaines, leur histoire, leurs réalisations, leurs modes de vie et leurs comportements individuels et sociaux, tandis que les sciences sociales auraient pour objet d'étude les sociétés humaines. Les sciences humaines ont néanmoins une interface avec les sciences de la nature de l'environnement, car l'homme fait partie des espèces vivantes, il a une empreinte écologique croissante et l'anthroposystème1 qu'il a créé interagit fortement avec les écosystèmes2. Celles-ci reconduisant ainsi, d'une certaine façon, l'opposition à l'âge classique entre la philosophie naturelle et la philosophie morale (qui incluait aussi la sociologie, la politique, l'économique, etc.). L'expression anglaise de « science sociale » serait apparue en 1824, dans un livre du coopératiste William Thompson3.  Les sciences dites sociales ou/et humaines ont toutes deux à résoudre une difficulté méthodologique de recherche d'objectivité dans l'étude de l'espèce humaine et des anthroposystèmes ; où l'objet étudié coïncide avec la culture du sujet qui l'analyse. Ce problème se confond donc avec de nombreux débats en épistémologie concernant le critère de scientificité et d'objectivité, à supposer qu'on puisse identifier les deux4. Cette objectivité des sciences humaines et sociales est structurée autour de plusieurs principes fondamentaux: la neutralité axiologique, théorisée par Max Weber; la distinction faits-valeurs et le vérificationnisme, théorisés par le Cercle de Vienne et formulées précisément par Alfred Ayer et Rudolf Carnap. Karl Popper s'est ensuite substitué au critère de réfutabilité, qui demeure en débat aujourd'hui.  Contenu soumis à la licence CC-BY-SA 3.0. Source : Article Sciences humaines et sociales de Wikipédia en français (auteurs)"
+                        }
+                      }
+                    },
+                    "exactMatch": [
+                      {
+                        "category": {
+                          "@uri": "http://calenda.org/categories.rdf#categorie268",
+                          "prefLabel": [
+                            {
+                              "@xml:lang": "en",
+                              "$": "Linguistics"
+                            },
+                            {
+                              "@xml:lang": "fr",
+                              "$": "Linguistique"
+                            },
+                            {
+                              "@xml:lang": "es",
+                              "$": "Lingüística"
+                            }
+                          ],
+                          "expanded": {
+                            "@uri": "http://calenda.org/categories.rdf#categorie259|http://calenda.org/categories.rdf#categorie267|http://calenda.org/categories.rdf#categorie268",
+                            "expandedLabel": [
+                              {
+                                "@xml:lang": "es",
+                                "$": "Pensamiento y lenguaje|Lenguaje|Lingüística"
+                              },
+                              {
+                                "@xml:lang": "en",
+                                "$": "Mind and language|Language|Linguistics"
+                              },
+                              {
+                                "@xml:lang": "fr",
+                                "$": "Esprit et Langage|Langage|Linguistique"
+                              }
+                            ]
+                          }
+                        }
+                      },
+                      {
+                        "@uri": "http://dbpedia.org/resource/Linguistics"
+                      }
+                    ]
+                  }
+                },
+                "concepts": {
+                  "@type": "ISIDORE_DC_SUBJECT",
+                  "concept": [
+                    {
+                      "@count": "2",
+                      "@uri": "http://ark.frantiq.fr/ark:/26678/pcrtS6MlG2v4Xy",
+                      "inScheme": "http://pactols.frantiq.fr/",
+                      "prefLabel": [
+                        {
+                          "@xml:lang": "es",
+                          "$": "análisis del discurso"
+                        },
+                        {
+                          "@xml:lang": "fr",
+                          "$": "analyse du discours"
+                        },
+                        {
+                          "@xml:lang": "en",
+                          "$": "discourse analysis"
+                        }
+                      ],
+                      "altLabel": {
+                        "@xml:lang": "fr",
+                        "$": "discours-analyse"
+                      },
+                      "expanded": {
+                        "@uri": "http://pactols.frantiq.fr/#6|http://ark.frantiq.fr/ark:/26678/pcrtunRW1jSBML|http://ark.frantiq.fr/ark:/26678/pcrtIDlTNGlpii|http://ark.frantiq.fr/ark:/26678/pcrtI1BWRwdhjp|http://ark.frantiq.fr/ark:/26678/pcrtkneHRb9veV|http://ark.frantiq.fr/ark:/26678/pcrtS6MlG2v4Xy",
+                        "expandedLabel": {
+                          "@xml:lang": "es",
+                          "$": "Tema|filología|lingüística|estructura de las lenguas|gramática|análisis del discurso"
+                        }
+                      },
+                      "definition": {
+                        "@xml:lang": "fr",
+                        "$": "Discipline connexe à la linguistique qui étudie la structure d'un énoncé supérieur à la phrase (discours) en le rapportant à ses conditions de productions (Lar.)"
+                      },
+                      "semanticExpansion": {
+                        "concept": {
+                          "@uri": "http://ark.frantiq.fr/ark:/26678/pcrtkneHRb9veV",
+                          "prefLabel": [
+                            {
+                              "@xml:lang": "es",
+                              "$": "gramática"
+                            },
+                            {
+                              "@xml:lang": "fr",
+                              "$": "grammaire"
+                            },
+                            {
+                              "@xml:lang": "en",
+                              "$": "grammar"
+                            }
+                          ],
+                          "expanded": {
+                            "@uri": "http://pactols.frantiq.fr/#6|http://ark.frantiq.fr/ark:/26678/pcrtunRW1jSBML|http://ark.frantiq.fr/ark:/26678/pcrtIDlTNGlpii|http://ark.frantiq.fr/ark:/26678/pcrtI1BWRwdhjp|http://ark.frantiq.fr/ark:/26678/pcrtkneHRb9veV",
+                            "expandedLabel": {
+                              "@xml:lang": "es",
+                              "$": "Tema|filología|lingüística|estructura de las lenguas|gramática"
+                            }
+                          },
+                          "definition": {
+                            "@xml:lang": "fr",
+                            "$": "Science des règles du langage (Lar.)"
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "@count": "2",
+                      "@uri": "http://data.bnf.fr/ark:/12148/cb11930887k",
+                      "inScheme": "http://rameau.bnf.fr/",
+                      "prefLabel": [
+                        {
+                          "@xml:lang": "fr",
+                          "$": "Analyse du discours"
+                        },
+                        {
+                          "@added": "true",
+                          "@xml:lang": "en",
+                          "$": "Analyse du discours"
+                        },
+                        {
+                          "@added": "true",
+                          "@xml:lang": "es",
+                          "$": "Analyse du discours"
+                        }
+                      ],
+                      "altLabel": [
+                        {
+                          "@xml:lang": "fr",
+                          "$": "Linguistique du discours"
+                        },
+                        {
+                          "@xml:lang": "fr",
+                          "$": "Texte, Analyse de"
+                        },
+                        {
+                          "@xml:lang": "fr",
+                          "$": "Analyse textuelle"
+                        },
+                        {
+                          "@xml:lang": "fr",
+                          "$": "Discours, Analyse du"
+                        },
+                        {
+                          "@xml:lang": "fr",
+                          "$": "Analyse de texte"
+                        },
+                        {
+                          "@xml:lang": "fr",
+                          "$": "Discours (linguistique)"
+                        },
+                        {
+                          "@xml:lang": "fr",
+                          "$": "Texte, Linguistique du"
+                        },
+                        {
+                          "@xml:lang": "fr",
+                          "$": "Linguistique textuelle"
+                        },
+                        {
+                          "@xml:lang": "fr",
+                          "$": "Analyse d'énoncé"
+                        },
+                        {
+                          "@xml:lang": "fr",
+                          "$": "Analyse de discours"
+                        },
+                        {
+                          "@xml:lang": "fr",
+                          "$": "Linguistique discursive"
+                        },
+                        {
+                          "@xml:lang": "fr",
+                          "$": "Linguistique du texte"
+                        },
+                        {
+                          "@xml:lang": "fr",
+                          "$": "Discours, Linguistique du"
+                        }
+                      ],
+                      "semanticExpansion": {
+                        "concept": {
+                          "@uri": "http://data.bnf.fr/ark:/12148/cb11932194d",
+                          "prefLabel": {
+                            "@xml:lang": "fr",
+                            "$": "Linguistique"
+                          },
+                          "altLabel": [
+                            {
+                              "@xml:lang": "fr",
+                              "$": "Science du langage"
+                            },
+                            {
+                              "@xml:lang": "fr",
+                              "$": "Théorie linguistique"
+                            },
+                            {
+                              "@xml:lang": "fr",
+                              "$": "Sciences du langage"
+                            },
+                            {
+                              "@xml:lang": "fr",
+                              "$": "Théories linguistiques"
+                            },
+                            {
+                              "@xml:lang": "fr",
+                              "$": "Langage, Science du"
+                            }
+                          ]
+                        }
+                      }
+                    },
+                    {
+                      "@count": "2",
+                      "@uri": "http://datos.bne.es/resource/XX527689",
+                      "@origin": "rameau",
+                      "prefLabel": [
+                        {
+                          "@xml:lang": "es",
+                          "$": "Análisis del discurso"
+                        },
+                        {
+                          "@added": "true",
+                          "@xml:lang": "fr",
+                          "$": "Análisis del discurso"
+                        },
+                        {
+                          "@added": "true",
+                          "@xml:lang": "en",
+                          "$": "Análisis del discurso"
+                        }
+                      ],
+                      "label": {
+                        "@xml:lang": "es",
+                        "$": "Análisis del discurso"
+                      },
+                      "altLabel": [
+                        {
+                          "@xml:lang": "es",
+                          "$": "Análisis del texto"
+                        },
+                        {
+                          "@xml:lang": "es",
+                          "$": "Análisis textual"
+                        },
+                        {
+                          "@xml:lang": "es",
+                          "$": "Discurso, Análisis del"
+                        },
+                        {
+                          "@xml:lang": "es",
+                          "$": "Gramática del discurso"
+                        },
+                        {
+                          "@xml:lang": "es",
+                          "$": "Gramática textual"
+                        }
+                      ]
+                    },
+                    {
+                      "@count": "1",
+                      "@uri": "http://data.culture.fr/thesaurus/resource/ark:/67717/T990-705",
+                      "inScheme": "http://data.culture.fr/thesaurus/resource/ark:/67717/T990",
+                      "prefLabel": [
+                        {
+                          "@xml:lang": "fr",
+                          "$": "Dictionnaire"
+                        },
+                        {
+                          "@added": "true",
+                          "@xml:lang": "en",
+                          "$": "Dictionnaire"
+                        },
+                        {
+                          "@added": "true",
+                          "@xml:lang": "es",
+                          "$": "Dictionnaire"
+                        }
+                      ],
+                      "altLabel": [
+                        {
+                          "@xml:lang": "fr",
+                          "$": "Lexique"
+                        },
+                        {
+                          "@xml:lang": "fr",
+                          "$": "Vocabulaire"
+                        }
+                      ],
+                      "expanded": {
+                        "@uri": "http://data.culture.fr/thesaurus/resource/ark:/67717/T990-2146|http://data.culture.fr/thesaurus/resource/ark:/67717/T990-1112|http://data.culture.fr/thesaurus/resource/ark:/67717/T990-712|http://data.culture.fr/thesaurus/resource/ark:/67717/T990-705",
+                        "expandedLabel": {
+                          "@xml:lang": "fr",
+                          "$": "062 Information - communication|Information|Documentation|Dictionnaire"
+                        }
+                      },
+                      "semanticExpansion": {
+                        "concept": {
+                          "@uri": "http://data.culture.fr/thesaurus/resource/ark:/67717/T990-712",
+                          "prefLabel": {
+                            "@xml:lang": "fr",
+                            "$": "Documentation"
+                          },
+                          "expanded": {
+                            "@uri": "http://data.culture.fr/thesaurus/resource/ark:/67717/T990-2146|http://data.culture.fr/thesaurus/resource/ark:/67717/T990-1112|http://data.culture.fr/thesaurus/resource/ark:/67717/T990-712"
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "@count": "3",
+                      "@uri": "http://data.bnf.fr/ark:/12148/cb11948542x",
+                      "inScheme": "http://rameau.bnf.fr/",
+                      "prefLabel": [
+                        {
+                          "@xml:lang": "fr",
+                          "$": "Discours"
+                        },
+                        {
+                          "@added": "true",
+                          "@xml:lang": "en",
+                          "$": "Discours"
+                        },
+                        {
+                          "@added": "true",
+                          "@xml:lang": "es",
+                          "$": "Discours"
+                        }
+                      ],
+                      "altLabel": [
+                        {
+                          "@xml:lang": "fr",
+                          "$": "Parties du discours (rhétorique)"
+                        },
+                        {
+                          "@xml:lang": "fr",
+                          "$": "Péroraisons"
+                        },
+                        {
+                          "@xml:lang": "fr",
+                          "$": "Speeches"
+                        },
+                        {
+                          "@xml:lang": "fr",
+                          "$": "Allocutions"
+                        },
+                        {
+                          "@xml:lang": "fr",
+                          "$": "Oraisons"
+                        },
+                        {
+                          "@xml:lang": "fr",
+                          "$": "Discours (genre littéraire)"
+                        },
+                        {
+                          "@xml:lang": "fr",
+                          "$": "Philippiques"
+                        },
+                        {
+                          "@xml:lang": "fr",
+                          "$": "Proclamations"
+                        },
+                        {
+                          "@xml:lang": "fr",
+                          "$": "Exortations"
+                        },
+                        {
+                          "@xml:lang": "fr",
+                          "$": "Exordes"
+                        },
+                        {
+                          "@xml:lang": "fr",
+                          "$": "Discours (rhétorique)"
+                        },
+                        {
+                          "@xml:lang": "fr",
+                          "$": "Harangues"
+                        }
+                      ],
+                      "semanticExpansion": [
+                        {
+                          "concept": {
+                            "@uri": "http://data.bnf.fr/ark:/12148/cb11931754k",
+                            "prefLabel": {
+                              "@xml:lang": "fr",
+                              "$": "Communication orale"
+                            },
+                            "altLabel": [
+                              {
+                                "@xml:lang": "fr",
+                                "$": "Expression orale"
+                              },
+                              {
+                                "@xml:lang": "fr",
+                                "$": "Transmission orale"
+                              },
+                              {
+                                "@xml:lang": "fr",
+                                "$": "Communication verbale"
+                              }
+                            ]
+                          }
+                        },
+                        {
+                          "concept": {
+                            "@uri": "http://data.bnf.fr/ark:/12148/cb11939456c",
+                            "prefLabel": {
+                              "@xml:lang": "fr",
+                              "$": "Littérature"
+                            },
+                            "altLabel": [
+                              {
+                                "@xml:lang": "fr",
+                                "$": "Oeuvres littéraires"
+                              },
+                              {
+                                "@xml:lang": "fr",
+                                "$": "Littérature universelle"
+                              },
+                              {
+                                "@xml:lang": "fr",
+                                "$": "Belles-lettres"
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "@count": "3",
+                      "@uri": "http://id.loc.gov/authorities/subjects/sh85126460",
+                      "@origin": "rameau",
+                      "prefLabel": [
+                        {
+                          "@xml:lang": "en",
+                          "$": "Speeches, addresses, etc"
+                        },
+                        {
+                          "@added": "true",
+                          "@xml:lang": "fr",
+                          "$": "Speeches, addresses, etc"
+                        },
+                        {
+                          "@added": "true",
+                          "@xml:lang": "es",
+                          "$": "Speeches, addresses, etc"
+                        }
+                      ],
+                      "altLabel": [
+                        {
+                          "@xml:lang": "en",
+                          "$": "Addresses"
+                        },
+                        {
+                          "@xml:lang": "en",
+                          "$": "Papers, Collected (Anthologies)"
+                        },
+                        {
+                          "@xml:lang": "en",
+                          "$": "Orations"
+                        },
+                        {
+                          "@xml:lang": "en",
+                          "$": "Collected papers (Anthologies)"
+                        },
+                        {
+                          "@xml:lang": "en",
+                          "$": "Discourses"
+                        }
+                      ]
+                    },
+                    {
+                      "@count": "3",
+                      "@uri": "http://datos.bne.es/resource/XX528471",
+                      "@origin": "rameau",
+                      "prefLabel": [
+                        {
+                          "@xml:lang": "es",
+                          "$": "Discursos"
+                        },
+                        {
+                          "@added": "true",
+                          "@xml:lang": "fr",
+                          "$": "Discursos"
+                        },
+                        {
+                          "@added": "true",
+                          "@xml:lang": "en",
+                          "$": "Discursos"
+                        }
+                      ],
+                      "label": {
+                        "@xml:lang": "es",
+                        "$": "Discursos"
+                      },
+                      "altLabel": {
+                        "@xml:lang": "es",
+                        "$": "Alocuciones"
+                      }
+                    },
+                    {
+                      "@count": "3",
+                      "@uri": "http://ark.frantiq.fr/ark:/26678/pcrtSlc5i5N1Zb",
+                      "inScheme": "http://pactols.frantiq.fr/",
+                      "prefLabel": [
+                        {
+                          "@xml:lang": "fr",
+                          "$": "discours"
+                        },
+                        {
+                          "@xml:lang": "es",
+                          "$": "discurso"
+                        },
+                        {
+                          "@xml:lang": "en",
+                          "$": "speech"
+                        }
+                      ],
+                      "altLabel": {
+                        "@xml:lang": "fr",
+                        "$": "discours politique"
+                      },
+                      "expanded": {
+                        "@uri": "http://pactols.frantiq.fr/#6|http://ark.frantiq.fr/ark:/26678/pcrtunRW1jSBML|http://ark.frantiq.fr/ark:/26678/pcrtIgoNn37WDP|http://ark.frantiq.fr/ark:/26678/pcrtUE3nKRRnjv|http://ark.frantiq.fr/ark:/26678/pcrtkGYsAjIN4u|http://ark.frantiq.fr/ark:/26678/pcrtSlc5i5N1Zb"
+                      },
+                      "semanticExpansion": {
+                        "concept": {
+                          "@uri": "http://ark.frantiq.fr/ark:/26678/pcrtkGYsAjIN4u",
+                          "prefLabel": [
+                            {
+                              "@xml:lang": "es",
+                              "$": "género oratorio"
+                            },
+                            {
+                              "@xml:lang": "fr",
+                              "$": "genre oratoire"
+                            },
+                            {
+                              "@xml:lang": "en",
+                              "$": "oratory genre"
+                            }
+                          ],
+                          "expanded": {
+                            "@uri": "http://pactols.frantiq.fr/#6|http://ark.frantiq.fr/ark:/26678/pcrtunRW1jSBML|http://ark.frantiq.fr/ark:/26678/pcrtIgoNn37WDP|http://ark.frantiq.fr/ark:/26678/pcrtUE3nKRRnjv|http://ark.frantiq.fr/ark:/26678/pcrtkGYsAjIN4u",
+                            "expandedLabel": {
+                              "@xml:lang": "fr",
+                              "$": "Sujets|philologie|littérature|genre littéraire|genre oratoire"
+                            }
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "@count": "1",
+                      "@uri": "http://ark.frantiq.fr/ark:/26678/pcrtXXK0nOUwSw",
+                      "inScheme": "http://pactols.frantiq.fr/",
+                      "prefLabel": [
+                        {
+                          "@xml:lang": "fr",
+                          "$": "espace"
+                        },
+                        {
+                          "@xml:lang": "es",
+                          "$": "espacio"
+                        },
+                        {
+                          "@xml:lang": "en",
+                          "$": "space"
+                        }
+                      ],
+                      "altLabel": {
+                        "@xml:lang": "fr",
+                        "$": "notion d'espace"
+                      },
+                      "expanded": {
+                        "@uri": "http://pactols.frantiq.fr/#6|http://ark.frantiq.fr/ark:/26678/pcrtBjGEQJB8ga|http://ark.frantiq.fr/ark:/26678/pcrtn0dT3guDl3|http://ark.frantiq.fr/ark:/26678/pcrtnDIRNkhxON|http://ark.frantiq.fr/ark:/26678/pcrtXXK0nOUwSw",
+                        "expandedLabel": {
+                          "@xml:lang": "en",
+                          "$": "Themes|philosophy|philosophy (notion)|space-time continuum|space"
+                        }
+                      },
+                      "semanticExpansion": {
+                        "concept": {
+                          "@uri": "http://ark.frantiq.fr/ark:/26678/pcrtnDIRNkhxON",
+                          "prefLabel": [
+                            {
+                              "@xml:lang": "fr",
+                              "$": "espace-temps"
+                            },
+                            {
+                              "@xml:lang": "es",
+                              "$": "espacio-tiempo"
+                            },
+                            {
+                              "@xml:lang": "en",
+                              "$": "space-time continuum"
+                            }
+                          ],
+                          "expanded": {
+                            "@uri": "http://pactols.frantiq.fr/#6|http://ark.frantiq.fr/ark:/26678/pcrtBjGEQJB8ga|http://ark.frantiq.fr/ark:/26678/pcrtn0dT3guDl3|http://ark.frantiq.fr/ark:/26678/pcrtnDIRNkhxON"
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "@count": "1",
+                      "@uri": "http://data.bnf.fr/ark:/12148/cb12011791z",
+                      "inScheme": "http://rameau.bnf.fr/",
+                      "prefLabel": [
+                        {
+                          "@xml:lang": "fr",
+                          "$": "Espace"
+                        },
+                        {
+                          "@added": "true",
+                          "@xml:lang": "en",
+                          "$": "Espace"
+                        },
+                        {
+                          "@added": "true",
+                          "@xml:lang": "es",
+                          "$": "Espace"
+                        }
+                      ]
+                    },
+                    {
+                      "@count": "1",
+                      "@uri": "http://id.loc.gov/authorities/subjects/sh2006003964",
+                      "@origin": "rameau",
+                      "prefLabel": [
+                        {
+                          "@xml:lang": "en",
+                          "$": "Space"
+                        },
+                        {
+                          "@added": "true",
+                          "@xml:lang": "fr",
+                          "$": "Space"
+                        },
+                        {
+                          "@added": "true",
+                          "@xml:lang": "es",
+                          "$": "Space"
+                        }
+                      ]
+                    },
+                    {
+                      "@count": "1",
+                      "@uri": "http://ark.frantiq.fr/ark:/26678/pcrtNotiJScWq0",
+                      "inScheme": "http://pactols.frantiq.fr/",
+                      "prefLabel": [
+                        {
+                          "@xml:lang": "fr",
+                          "$": "lecteur"
+                        },
+                        {
+                          "@xml:lang": "es",
+                          "$": "lector"
+                        },
+                        {
+                          "@xml:lang": "en",
+                          "$": "reader"
+                        }
+                      ],
+                      "expanded": {
+                        "@uri": "http://pactols.frantiq.fr/#6|http://ark.frantiq.fr/ark:/26678/pcrtvWHPMsEEqO|http://ark.frantiq.fr/ark:/26678/pcrtJq2OonWQss|http://ark.frantiq.fr/ark:/26678/pcrtNotiJScWq0"
+                      },
+                      "semanticExpansion": {
+                        "concept": {
+                          "@uri": "http://ark.frantiq.fr/ark:/26678/pcrtJq2OonWQss",
+                          "prefLabel": [
+                            {
+                              "@xml:lang": "en",
+                              "$": "daily practice"
+                            },
+                            {
+                              "@xml:lang": "es",
+                              "$": "práctica cotidiana"
+                            },
+                            {
+                              "@xml:lang": "fr",
+                              "$": "pratique quotidienne"
+                            }
+                          ],
+                          "expanded": {
+                            "@uri": "http://pactols.frantiq.fr/#6|http://ark.frantiq.fr/ark:/26678/pcrtvWHPMsEEqO|http://ark.frantiq.fr/ark:/26678/pcrtJq2OonWQss"
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "@count": "1",
+                      "@uri": "http://data.bnf.fr/ark:/12148/cb11932646x",
+                      "inScheme": "http://rameau.bnf.fr/",
+                      "prefLabel": [
+                        {
+                          "@xml:lang": "fr",
+                          "$": "Produits commerciaux"
+                        },
+                        {
+                          "@added": "true",
+                          "@xml:lang": "en",
+                          "$": "Produits commerciaux"
+                        },
+                        {
+                          "@added": "true",
+                          "@xml:lang": "es",
+                          "$": "Produits commerciaux"
+                        }
+                      ],
+                      "altLabel": [
+                        {
+                          "@xml:lang": "fr",
+                          "$": "Produits"
+                        },
+                        {
+                          "@xml:lang": "fr",
+                          "$": "Marchandises"
+                        }
+                      ]
+                    },
+                    {
+                      "@count": "1",
+                      "@uri": "http://id.loc.gov/authorities/subjects/sh85028954",
+                      "@origin": "rameau",
+                      "prefLabel": [
+                        {
+                          "@xml:lang": "en",
+                          "$": "Commercial products"
+                        },
+                        {
+                          "@added": "true",
+                          "@xml:lang": "fr",
+                          "$": "Commercial products"
+                        },
+                        {
+                          "@added": "true",
+                          "@xml:lang": "es",
+                          "$": "Commercial products"
+                        }
+                      ],
+                      "altLabel": [
+                        {
+                          "@xml:lang": "en",
+                          "$": "Products, Commercial"
+                        },
+                        {
+                          "@xml:lang": "en",
+                          "$": "Economic goods"
+                        },
+                        {
+                          "@xml:lang": "en",
+                          "$": "Merchandise"
+                        },
+                        {
+                          "@xml:lang": "en",
+                          "$": "Commodities"
+                        }
+                      ]
+                    },
+                    {
+                      "@count": "1",
+                      "@uri": "http://data.bnf.fr/ark:/12148/cb13601021t",
+                      "inScheme": "http://rameau.bnf.fr/",
+                      "prefLabel": [
+                        {
+                          "@xml:lang": "fr",
+                          "$": "Blogs"
+                        },
+                        {
+                          "@added": "true",
+                          "@xml:lang": "en",
+                          "$": "Blogs"
+                        },
+                        {
+                          "@added": "true",
+                          "@xml:lang": "es",
+                          "$": "Blogs"
+                        }
+                      ],
+                      "altLabel": [
+                        {
+                          "@xml:lang": "fr",
+                          "$": "Cyberjournaux"
+                        },
+                        {
+                          "@xml:lang": "fr",
+                          "$": "Carnets virtuels"
+                        },
+                        {
+                          "@xml:lang": "fr",
+                          "$": "Journaux sur le Web"
+                        },
+                        {
+                          "@xml:lang": "fr",
+                          "$": "Carnets Web"
+                        },
+                        {
+                          "@xml:lang": "fr",
+                          "$": "Blogues"
+                        },
+                        {
+                          "@xml:lang": "fr",
+                          "$": "Journaux personnels sur Internet"
+                        },
+                        {
+                          "@xml:lang": "fr",
+                          "$": "Weblogues"
+                        },
+                        {
+                          "@xml:lang": "fr",
+                          "$": "Blog-notes"
+                        },
+                        {
+                          "@xml:lang": "fr",
+                          "$": "Sites Web personnels"
+                        },
+                        {
+                          "@xml:lang": "fr",
+                          "$": "Journaux personnels en ligne"
+                        },
+                        {
+                          "@xml:lang": "fr",
+                          "$": "Journaux intimes sur Internet"
+                        },
+                        {
+                          "@xml:lang": "fr",
+                          "$": "Blogosphère"
+                        },
+                        {
+                          "@xml:lang": "fr",
+                          "$": "Jouebs"
+                        },
+                        {
+                          "@xml:lang": "fr",
+                          "$": "Weblogs"
+                        }
+                      ],
+                      "semanticExpansion": [
+                        {
+                          "concept": {
+                            "@uri": "http://data.bnf.fr/ark:/12148/cb11937929c",
+                            "prefLabel": {
+                              "@xml:lang": "fr",
+                              "$": "Interaction sociale"
+                            },
+                            "altLabel": {
+                              "@xml:lang": "fr",
+                              "$": "Interaction humaine"
+                            }
+                          }
+                        },
+                        {
+                          "concept": {
+                            "@uri": "http://data.bnf.fr/ark:/12148/cb125428495",
+                            "prefLabel": {
+                              "@xml:lang": "fr",
+                              "$": "Sites Web"
+                            },
+                            "altLabel": [
+                              {
+                                "@xml:lang": "fr",
+                                "$": "Pages d'accueil (Web)"
+                              },
+                              {
+                                "@xml:lang": "fr",
+                                "$": "Pages WWW"
+                              },
+                              {
+                                "@xml:lang": "fr",
+                                "$": "Sites WWW"
+                              },
+                              {
+                                "@xml:lang": "fr",
+                                "$": "Web, Pages"
+                              },
+                              {
+                                "@xml:lang": "fr",
+                                "$": "Pages Web"
+                              },
+                              {
+                                "@xml:lang": "fr",
+                                "$": "Web, Sites"
+                              }
+                            ]
+                          }
+                        },
+                        {
+                          "concept": {
+                            "@uri": "http://data.bnf.fr/ark:/12148/cb13183229d",
+                            "prefLabel": {
+                              "@xml:lang": "fr",
+                              "$": "Gestion des connaissances"
+                            },
+                            "altLabel": [
+                              {
+                                "@xml:lang": "en",
+                                "$": "KM"
+                              },
+                              {
+                                "@xml:lang": "fr",
+                                "$": "Gestion de la connaissance"
+                              },
+                              {
+                                "@xml:lang": "en",
+                                "$": "Knowledge management"
+                              },
+                              {
+                                "@xml:lang": "fr",
+                                "$": "Connaissances, Gestion des"
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "@count": "1",
+                      "@uri": "http://id.loc.gov/authorities/subjects/sh2003007727",
+                      "@origin": "rameau",
+                      "prefLabel": [
+                        {
+                          "@xml:lang": "en",
+                          "$": "Blogs"
+                        },
+                        {
+                          "@added": "true",
+                          "@xml:lang": "fr",
+                          "$": "Blogs"
+                        },
+                        {
+                          "@added": "true",
+                          "@xml:lang": "es",
+                          "$": "Blogs"
+                        }
+                      ],
+                      "altLabel": {
+                        "@xml:lang": "en",
+                        "$": "Weblogs"
+                      }
+                    },
+                    {
+                      "@count": "1",
+                      "@uri": "http://id.loc.gov/authorities/subjects/sh2003007728",
+                      "@origin": "rameau",
+                      "prefLabel": [
+                        {
+                          "@xml:lang": "en",
+                          "$": "Blogs"
+                        },
+                        {
+                          "@added": "true",
+                          "@xml:lang": "fr",
+                          "$": "Blogs"
+                        },
+                        {
+                          "@added": "true",
+                          "@xml:lang": "es",
+                          "$": "Blogs"
+                        }
+                      ],
+                      "altLabel": {
+                        "@xml:lang": "en",
+                        "$": "Weblogs"
+                      }
+                    },
+                    {
+                      "@count": "1",
+                      "@uri": "http://data.bnf.fr/ark:/12148/cb119497432",
+                      "inScheme": "http://rameau.bnf.fr/",
+                      "prefLabel": [
+                        {
+                          "@xml:lang": "fr",
+                          "$": "Mots et locutions"
+                        },
+                        {
+                          "@added": "true",
+                          "@xml:lang": "en",
+                          "$": "Mots et locutions"
+                        },
+                        {
+                          "@added": "true",
+                          "@xml:lang": "es",
+                          "$": "Mots et locutions"
+                        }
+                      ],
+                      "altLabel": [
+                        {
+                          "@xml:lang": "fr",
+                          "$": "Locutions"
+                        },
+                        {
+                          "@xml:lang": "fr",
+                          "$": "Termes"
+                        },
+                        {
+                          "@xml:lang": "fr",
+                          "$": "Expressions (linguistique)"
+                        },
+                        {
+                          "@xml:lang": "fr",
+                          "$": "Mots"
+                        },
+                        {
+                          "@xml:lang": "fr",
+                          "$": "Vocables"
+                        },
+                        {
+                          "@xml:lang": "fr",
+                          "$": "Mot"
+                        }
+                      ],
+                      "semanticExpansion": {
+                        "concept": {
+                          "@uri": "http://data.bnf.fr/ark:/12148/cb11935385q",
+                          "prefLabel": {
+                            "@xml:lang": "fr",
+                            "$": "Lexicologie"
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "@count": "1",
+                      "@uri": "http://datos.bne.es/resource/XX527050",
+                      "@origin": "rameau",
+                      "prefLabel": [
+                        {
+                          "@xml:lang": "es",
+                          "$": "Terminología"
+                        },
+                        {
+                          "@added": "true",
+                          "@xml:lang": "fr",
+                          "$": "Terminología"
+                        },
+                        {
+                          "@added": "true",
+                          "@xml:lang": "en",
+                          "$": "Terminología"
+                        }
+                      ],
+                      "label": {
+                        "@xml:lang": "es",
+                        "$": "Terminología"
+                      }
+                    },
+                    {
+                      "@count": "1",
+                      "@uri": "http://id.loc.gov/authorities/subjects/sh99001989",
+                      "@origin": "rameau",
+                      "prefLabel": [
+                        {
+                          "@xml:lang": "en",
+                          "$": "Terms and phrases"
+                        },
+                        {
+                          "@added": "true",
+                          "@xml:lang": "fr",
+                          "$": "Terms and phrases"
+                        },
+                        {
+                          "@added": "true",
+                          "@xml:lang": "es",
+                          "$": "Terms and phrases"
+                        }
+                      ],
+                      "altLabel": {
+                        "@xml:lang": "en",
+                        "$": "Phrases and terms"
+                      }
+                    },
+                    {
+                      "@count": "1",
+                      "@uri": "http://id.loc.gov/authorities/subjects/sh99001752",
+                      "@origin": "rameau",
+                      "prefLabel": [
+                        {
+                          "@xml:lang": "en",
+                          "$": "Terms and phrases"
+                        },
+                        {
+                          "@added": "true",
+                          "@xml:lang": "fr",
+                          "$": "Terms and phrases"
+                        },
+                        {
+                          "@added": "true",
+                          "@xml:lang": "es",
+                          "$": "Terms and phrases"
+                        }
+                      ],
+                      "altLabel": {
+                        "@xml:lang": "en",
+                        "$": "Phrases and terms"
+                      }
+                    },
+                    {
+                      "@count": "1",
+                      "@uri": "http://data.culture.fr/thesaurus/resource/ark:/67717/T990-576",
+                      "inScheme": "http://data.culture.fr/thesaurus/resource/ark:/67717/T990",
+                      "prefLabel": [
+                        {
+                          "@xml:lang": "fr",
+                          "$": "Construction"
+                        },
+                        {
+                          "@added": "true",
+                          "@xml:lang": "en",
+                          "$": "Construction"
+                        },
+                        {
+                          "@added": "true",
+                          "@xml:lang": "es",
+                          "$": "Construction"
+                        }
+                      ],
+                      "altLabel": {
+                        "@xml:lang": "fr",
+                        "$": "Appareillage"
+                      },
+                      "expanded": {
+                        "@uri": "http://data.culture.fr/thesaurus/resource/ark:/67717/T990-2127|http://data.culture.fr/thesaurus/resource/ark:/67717/T990-576",
+                        "expandedLabel": {
+                          "@xml:lang": "fr",
+                          "$": "010 Construction|Construction"
+                        }
+                      },
+                      "semanticExpansion": {
+                        "concept": {
+                          "@uri": "http://data.culture.fr/thesaurus/resource/ark:/67717/T990-2127",
+                          "prefLabel": {
+                            "@xml:lang": "fr",
+                            "$": "010 Construction"
+                          }
+                        }
+                      }
+                    }
+                  ]
+                },
+                "items": [
+                  {
+                    "@type": "ISIDORE_TYPE_FACET",
+                    "item": {
+                      "@uri": "http://isidore.science/ontology#recension",
+                      "prefLabel": [
+                        {
+                          "@xml:lang": "fr",
+                          "$": "Recensions"
+                        },
+                        {
+                          "@xml:lang": "en",
+                          "$": "Reviews"
+                        },
+                        {
+                          "@xml:lang": "es",
+                          "$": "Recensiónes"
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "@type": "ISIDORE_SCOPE_FACET",
+                    "item": {
+                      "@uri": "http://isidore.science/subject#publications",
+                      "prefLabel": [
+                        {
+                          "@xml:lang": "fr",
+                          "$": "Publications"
+                        },
+                        {
+                          "@xml:lang": "en",
+                          "$": "Publications"
+                        },
+                        {
+                          "@xml:lang": "es",
+                          "$": "Publicaciones"
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "@type": "ISIDORE_LANG",
+                    "item": {
+                      "@uri": "http://lexvo.org/id/iso639-3/fra",
+                      "prefLabel": [
+                        {
+                          "@xml:lang": "en",
+                          "$": "French"
+                        },
+                        {
+                          "@xml:lang": "fr",
+                          "$": "Français"
+                        },
+                        {
+                          "@xml:lang": "es",
+                          "$": "Idioma francés"
+                        }
+                      ]
+                    }
+                  }
+                ]
+              },
+              "dc:language": "fr",
+              "dc:rights": [
+                "info:eu-repo/semantics/openAccess",
+                "All rights reserved"
+              ]
+            }
+          }
+        ]
+      },
+      "page": {
+        "@current": "1",
+        "@next": "2"
+      }
+    }
+  }
+}

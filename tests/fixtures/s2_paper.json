@@ -1,0 +1,27 @@
+{
+  "title": "Large Language Models and Regulatory Discourse",
+  "abstract": "We study LLMs in policy contexts.",
+  "year": 2022,
+  "publicationDate": "2022-09-01",
+  "authors": [
+    {"name": "Alice Wong"},
+    {"name": "Bob Muller"}
+  ],
+  "externalIds": {
+    "DOI": "10.5555/llm.2022.99",
+    "CorpusId": 248123456,
+    "ArXiv": "2209.01234"
+  },
+  "citationCount": 34,
+  "influentialCitationCount": 5,
+  "publicationTypes": ["JournalArticle", "Review"],
+  "publicationVenue": {"name": "Computational Linguistics Review", "issn": "1234-9999"},
+  "journal": {"name": "Computational Linguistics Review", "volume": "8", "pages": "100-130"},
+  "openAccessPdf": {"url": "https://arxiv.org/pdf/2209.01234"},
+  "s2FieldsOfStudy": [
+    {"category": "Computer Science"},
+    {"category": "Linguistics"}
+  ],
+  "fieldsOfStudy": ["Computer Science"],
+  "url": "https://www.semanticscholar.org/paper/abc"
+}

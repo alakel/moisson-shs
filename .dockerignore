@@ -1,0 +1,42 @@
+# Contexte de build minimal et SANS secret.
+.git/
+.github/
+venv/
+.venv/
+env/
+
+# Données et sorties (jamais dans l'image — montées en volume).
+output/
+.cache/
+*.coverage
+.coverage
+htmlcov/
+coverage.xml
+
+# Caches
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+build/
+dist/
+
+# Secrets et config locale (NE JAMAIS embarquer).
+.env
+.env.local
+secrets.json
+claude_desktop_config.json
+
+# Docs/dev non nécessaires au runtime.
+.claude/
+docs/
+tests/
+*.md
+!README.md
+
+# OS / IDE
+.DS_Store
+.idea/
+.vscode/

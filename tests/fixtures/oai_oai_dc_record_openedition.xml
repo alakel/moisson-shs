@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="assets/oai/oai2.xsl"?>
+<OAI-PMH xmlns="http://www.openarchives.org/OAI/2.0/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.openarchives.org/OAI/2.0/ http://www.openarchives.org/OAI/2.0/OAI-PMH.xsd">
+    <responseDate>2026-05-23T08:57:33Z</responseDate>
+    <request  verb="GetRecord"  identifier="20.500.13089/lus6" metadataPrefix="oai_dc">https://metadata.openedition.org/oai</request>
+        <GetRecord>
+        <record>
+            <header>
+    <identifier>20.500.13089/lus6</identifier>
+    <datestamp>2019-01-31T09:45:45Z</datestamp>
+    <setSpec>journals</setSpec>
+    <setSpec>journals:zjr</setSpec>
+</header>
+                            <metadata>
+                    <oai_dc:dc
+    xmlns:dc="http://purl.org/dc/elements/1.1/"
+    xmlns:oai_dc="http://www.openarchives.org/OAI/2.0/oai_dc/"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.openarchives.org/OAI/2.0/oai_dc/
+    http://www.openarchives.org/OAI/2.0/oai_dc.xsd">
+        <dc:identifier>https://doi.org/10.4000/zjr.948</dc:identifier>
+    <dc:identifier>https://hdl.handle.net/20.500.13089/lus6</dc:identifier>
+    <dc:identifier>https://journals.openedition.org/zjr/948</dc:identifier>
+
+    <dc:title>Sufismus als Esoterik</dc:title>
+
+            <dc:creator>Yildirim, Cüneyd</dc:creator>
+    
+
+    <dc:rights>info:eu-repo/semantics/openAccess</dc:rights>
+    <dc:rights>https://creativecommons.org/licenses/by/4.0/</dc:rights>
+
+                        <dc:subject xml:lang="de">Sufismus</dc:subject>
+                    <dc:subject xml:lang="de">Esoterik</dc:subject>
+                    <dc:subject xml:lang="de">Epistemologie</dc:subject>
+                    <dc:subject xml:lang="de">Hermetismus</dc:subject>
+                    <dc:subject xml:lang="de">Offenbarung</dc:subject>
+                                    <dc:subject xml:lang="en">Sufism</dc:subject>
+                    <dc:subject xml:lang="en">Esotericism</dc:subject>
+                    <dc:subject xml:lang="en">Epistemology</dc:subject>
+                    <dc:subject xml:lang="en">Hermetism</dc:subject>
+                    <dc:subject xml:lang="en">Revelation</dc:subject>
+            
+            <dc:description xml:lang="de">In meist älteren, vergleichenden Studien findet sich häufig zur Umschreibung des Sufismus neben mystisch auch das Attribut esoterisch, ohne jedoch dessen Verwendung theoretisch zu untermauern. Der folgende Beitrag stellt einen Versuch dar, den Esoterikbegriff mithilfe der Einbeziehung zweier Theorien Jan Assmanns in der Sufismusforschung zu erneuern, nachdem er im Zuge der Cultural Turns in den Geisteswissenschaften weitestgehend verdrängt wurde. Im Mittelpunkt steht hier die Bestimmung der Struktur sufischen Wissens anhand einiger Klassiker der Sufi-Literatur. Für diesen Zweck dienen die Religio-duplex-Theorie Assmanns sowie dessen Charakterisierung des alexandrinischen Hermetismus als heuristische Modelle. Der vorgestellte Ansatz zur Erforschung der Epistemologie des Sufismus bietet ferner die Möglichkeit, die Machtverhältnisse zu analysieren, die jenes Wissen konstituiert.</dc:description>
+            <dc:description xml:lang="en">In most older, comparative studies of Sufism the term esoteric appears in addition to mystic, yet there is no theoretical justification for this. The following article aims to present a theoretical basis for the use of “esoteric” in the context of Sufism with the help of two models of Jan Assmann. The focus here is on the analysis of the structure of Sufi knowledge with reference to some classics of Sufi literature. The theory of the twofold religion (religio duplex) of Assmann as well as his characterisation of the Alexandrian Hermetism both serve as heuristic models. The proposed approach to the study of Sufi epistemology further enables the analysis of the power that is constituted by that knowledge.</dc:description>
+    
+            <dc:publisher>Deutsche Vereinigung für Religionswissenschaft</dc:publisher>
+    
+    <dc:date>2018</dc:date>
+    <dc:date>info:eu-repo/date/publication/2018-12-16</dc:date>
+
+    <dc:type>article</dc:type>
+    <dc:type>info:eu-repo/semantics/article</dc:type>
+
+<dc:format>text/html</dc:format>
+
+            <dc:language>de</dc:language>
+    
+    <dc:relation>info:eu-repo/semantics/reference/issn/1862-5886</dc:relation>
+    <dc:relation>https://hdl.handle.net/20.500.13089/lus0</dc:relation>
+    <dc:relation>https://doi.org/10.4000/zjr.893</dc:relation>
+
+
+</oai_dc:dc>
+                </metadata>
+                    </record>
+    </GetRecord>
+</OAI-PMH>

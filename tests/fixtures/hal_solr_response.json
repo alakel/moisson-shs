@@ -1,0 +1,174 @@
+{
+  "response": {
+    "numFound": 2635,
+    "start": 0,
+    "numFoundExact": true,
+    "docs": [
+      {
+        "docid": "1005566",
+        "openAccess_bool": true,
+        "domain_s": [
+          "0.shs",
+          "1.shs.langue"
+        ],
+        "title_s": [
+          "Pratiquer la twittérature à travers la twittécriture : position théorique, mise en pratique et retours d'expérience"
+        ],
+        "keyword_s": [
+          "Twittérature",
+          "Analyse du discours",
+          "Réseaux sociaux"
+        ],
+        "abstract_s": [
+          "L'objectif de cet article est de jeter des jalons caractéristiques de la twittérature (littérature sur Twitter) au regard de pratiques effectives de twittécriture (écriture sur Twitter) menées en cours au niveau Bac+2 (DUT Métiers du Multimédia et de l'Internet, 2ème année), et des pratiques réflexives des étudiants concernant la mise en pratique des consignes. Un aspect important concerne, pour le chercheur qui souhaite s'intéresser à ce phénomène de twittérature, comme pour l'enseignant qui souhaite en faire un usage pédagogique, la nécessité de pratiquer les réseaux pour pouvoir les penser et en étudier les réalités."
+        ],
+        "authFullName_s": [
+          "Julien Longhi"
+        ],
+        "language_s": [
+          "fr"
+        ],
+        "halId_s": "hal-01005566",
+        "uri_s": "https://hal.science/hal-01005566v1",
+        "docType_s": "COUV",
+        "submittedDate_s": "2014-06-12 21:58:39",
+        "producedDate_s": "2015-03-05",
+        "fileMain_s": "https://hal.science/hal-01005566/document"
+      },
+      {
+        "docid": "1009460",
+        "openAccess_bool": true,
+        "domain_s": [
+          "0.shs",
+          "1.shs.edu"
+        ],
+        "title_s": [
+          "Édition numérique scolaire en Afrique Subsaharienne. Production de la phase 1 du projet VSTICE"
+        ],
+        "keyword_s": [
+          "Synthesis",
+          "Digital publishing",
+          "Africa",
+          "Education -- Data processing",
+          "Information and communications technology",
+          "Educational technologies",
+          "Computer-assisted education",
+          "Education",
+          "Afrique",
+          "Édition numérique",
+          "Synthèse",
+          "Nouvelles technologies de l'information et de la communication",
+          "Education et informatique"
+        ],
+        "abstract_s": [
+          "Ce texte s'inscrit dans un travail de veille scientifique effectué à la demande de l'Agence universitaire de la Francophonie (AUF). Le projet a notamment eu pour enjeu la construction d'une vision prospective, nécessaire à l'élaboration de projets pérennes. Le présent rapport concerne spécifiquement l'édition scolaire numérique.",
+          "This report, corresponding to a project funded by The Francophone Universitary Agency (AUF). It aims at presenting a synthesis regarding the current state of the reflection in 2014 about francophone digital resources for education in sub saharian Africa."
+        ],
+        "authFullName_s": [
+          "Julia Tran Thanh",
+          "Aurélie Beauné",
+          "Annick Ouattara",
+          "Magali Boullé-Loffreda",
+          "Georges-Louis Baron"
+        ],
+        "language_s": [
+          "fr"
+        ],
+        "halId_s": "edutice-01009460",
+        "uri_s": "https://edutice.hal.science/edutice-01009460v1",
+        "docType_s": "REPORT",
+        "submittedDate_s": "2014-06-18 18:33:53",
+        "producedDate_s": "2014-03-24",
+        "fileMain_s": "https://edutice.hal.science/edutice-01009460/document"
+      },
+      {
+        "docid": "1010853",
+        "openAccess_bool": false,
+        "title_s": [
+          "De la confirmation à la subversion : Les figures d'animation face aux conventions du discours numérique"
+        ],
+        "journalTitle_s": "Protée. Revue internationale de théories et de pratiques sémiotiques",
+        "journalIssn_s": "0300-3523",
+        "authFullName_s": [
+          "Alexandra Saemmer"
+        ],
+        "language_s": [
+          "fr"
+        ],
+        "halId_s": "hal-01010853",
+        "uri_s": "https://univ-paris8.hal.science/hal-01010853v1",
+        "docType_s": "ART",
+        "page_s": "23-36",
+        "submittedDate_s": "2014-06-20 16:27:59",
+        "producedDate_s": "2011"
+      },
+      {
+        "docid": "1018392",
+        "openAccess_bool": true,
+        "domain_s": [
+          "0.shs",
+          "1.shs.edu"
+        ],
+        "title_s": [
+          "Tablettes tactiles et apprentissages langagiers. Le cas d'une étude menée en CLIN"
+        ],
+        "keyword_s": [
+          "Conduites tutorielles",
+          "Tablette tactile",
+          "École élémentaire",
+          "CLIN",
+          "Apprentissages langagiers",
+          "Conduites tutorielles"
+        ],
+        "abstract_s": [
+          "La recherche présentée dans ces lignes vise à rendre compte de l'impact potentiel del'utilisation collective de tablettes tactiles sur le développement de compétences langagières chez des élèves d'école élémentaire. Ces élèves, scolarisés dans une classe d'initiation (CLIN), ont pour particularité commune de ne pas avoir le français comme langue première.Nous avons, pour ce faire, porté notre attention sur une activité scolaire visant la réalisation par les élèves d'un livre - numérique ou papier - dans le cadre de la préparation d'une classe de découverte sur le thème des châteaux forts. Sur la base d'une approche comparée, entre les activités réalisées avec et sans tablettes tactiles par deux groupes d'élèves distincts, nous avons tenté d'évaluer la progression de ces derniers en terme d'acquisition de vocabulaire nouveau. Les résultats obtenus révèlent chez les élèves dotés de tablettesune progression plus importante, trouvant vraisemblablement son origine d'une part dans un engagement et une autonomie accrue face au travail proposé, et d'autre part dans la mise en place par ces derniers de pratiques collaboratives. A l'appui des travaux de Bruner (1983) dans le domaine des interactions de tutelle adulte-enfant, nous avons par ailleurs tenté de qualifier la conduite de l'activité instrumentée des élèvespar l'enseignant, conduite qui au regard des spécificités de celle-ci, s'est révélée essentiellement orientée vers la maintenance et la régulation."
+        ],
+        "authFullName_s": [
+          "François-Xavier Bernard",
+          "Laetitia Boulc'H",
+          "Susy Achard"
+        ],
+        "language_s": [
+          "fr"
+        ],
+        "halId_s": "halshs-01018392",
+        "uri_s": "https://shs.hal.science/halshs-01018392v1",
+        "docType_s": "COMM",
+        "page_s": "1-14",
+        "submittedDate_s": "2014-07-11 15:13:29",
+        "producedDate_s": "2013-08-27",
+        "fileMain_s": "https://shs.hal.science/halshs-01018392/document"
+      },
+      {
+        "docid": "1018920",
+        "openAccess_bool": true,
+        "domain_s": [
+          "0.shs",
+          "1.shs.psy"
+        ],
+        "title_s": [
+          "La construction identitaire chez les jeunes adolescentes à l'ère numérique. Exposition de soi sur Internet, exploration et engagement identitaire"
+        ],
+        "abstract_s": [
+          "Dans une culture de l'écran prédominante et valorisée grâce à l'évolution des technologies de l'information et de communication, les pratiques d'expression de soi sur Internet sont fortement investies par les préadolescentes et adolescentes (McLean & Breen, 2009). Celles-ci peuvent exprimer sur la toile leurs pensées, leurs doutes comme dans un journal intime mis régulièrement à jour (Lejeune & Bogaert, 2006), avec la motivation \" d'explorer le soi \" en parlant de soi, et de recueillir les avis des autres sur soi-même. Cette pratique d'Internet mobilise à la fois des activités socialisantes (présence du regard et du jugement de pairs, pratique à partir de laquelle peuvent (re)naître des liens sociaux, parfois \"intimistes\") et également des activités personnalisantes grâce auxquelles les jeunes adolescentes peuvent s'interroger et se définir dans ce \"Qui suis-je ?\" à l'écrit. Cette étude qualitative a pour objectif de mieux comprendre le sens que donnent les adolescentes à leurs pratiques d'échanges et d'expression de soi et le rapport qu'elles entretiennent à Internet. Quarante-sept adolescentes âgées de 11 à 15 ans ont répondu à un entretien semi-directif qui évaluait d'abord leur utilisation d'Internet, puis s'intéressait à la relation aux pairs et l'exploration de soi. Ces entretiens ont fait l'objet d'une analyse thématique classique et d'une analyse de discours informatisée avec le logiciel ALCESTE. Les processus d'exploration et d'engagement identitaires (Erikson, 1968 ; Marcia, 1966) ont été mesurés avec la GIDS (Bosma, 1994). L'analyse thématique classique révèle deux pratiques d'exposition de soi : 1) une \" réservée \", avec peu de publications et peu sur le soi, 2) une \" extime \", avec de nombreuses publications orientées sur le soi. L'analyse de discours informatisée sur ce même corpus met en évidence que les participantes ont été majoritairement initiées par des pairs du même sexe, ou par leurs frères et sœurs. Leurs usages des outils d'expression de soi tels que les blogs, les messageries instantanées ou les réseaux sociaux sont complémentaires à celui du téléphone et ont pour but premier de maintenir un contact, se faire entendre et être vue. Pour évaluer les liens entre les pratiques d'exposition de soi et la formation de l'identité, des Chi2 ont été effectués et ont montrés que la pratique \" réservée \" est liée aux scores faibles d'engagement et aux scores élevés d'exploration, tandis que la pratique \" extime \" est liée aux scores les plus élevés d'engagement."
+        ],
+        "authFullName_s": [
+          "Nancy Rodriguez",
+          "Claire Safont-Mottay",
+          "Yves Prêteur"
+        ],
+        "language_s": [
+          "fr"
+        ],
+        "halId_s": "hal-01018920",
+        "uri_s": "https://univ-tlse2.hal.science/hal-01018920v1",
+        "docType_s": "COMM",
+        "page_s": "304-311",
+        "submittedDate_s": "2014-07-06 20:58:13",
+        "producedDate_s": "2013-05-30",
+        "fileMain_s": "https://univ-tlse2.hal.science/hal-01018920/document"
+      }
+    ]
+  },
+  "nextCursorMark": "AoEnMTAxODkyMA=="
+}

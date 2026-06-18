@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<OAI-PMH xmlns="http://www.openarchives.org/OAI/2.0/"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://www.openarchives.org/OAI/2.0/
+         http://www.openarchives.org/OAI/2.0/OAI-PMH.xsd">
+ <responseDate>2026-05-23T08:57:32Z</responseDate>
+ <request verb="GetRecord" identifier="oai:cairn.info:AATC_125_0001" metadataPrefix="oai_dc">https://oai.cairn.info/oai.php</request>
+  <GetRecord>
+  <record>
+   <header>
+    <identifier>oai:cairn.info:AATC_125_0001</identifier>
+    <datestamp>2026-01-14</datestamp>
+    <setSpec>AATC</setSpec>
+   </header>
+   <metadata>
+     <oai_dc:dc
+       xmlns:oai_dc="http://www.openarchives.org/OAI/2.0/oai_dc/"
+       xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.openarchives.org/OAI/2.0/oai_dc/
+       http://www.openarchives.org/OAI/2.0/oai_dc.xsd">
+<dc:identifier>https://shs.cairn.info/revue-actualites-en-analyse-transactionnelle-2008-1-page-1?lang=fr</dc:identifier>
+<dc:identifier>https://doi.org/10.3917/aatc.125.0001</dc:identifier>
+<dc:title>La roue des permissions</dc:title><dc:creator xml:id="https://www.idref.fr/026916576">Hawkes, Laurie</dc:creator><dc:date>2008</dc:date><dc:language>fre</dc:language><dc:source>Actualités en analyse transactionnelle | 125 | 1 | 2008-03-01 | p. 1-14 | 1377-8935</dc:source><dc:isPartOf>AATC_125</dc:isPartOf><dc:description xml:lang='fr'>Dans les ann&#233;es 1980, Gysa Jaoui, une des grandes figures de l&#8217;analyse transactionnelle en France, mit au point un sch&#233;ma qui permettait de r&#233;sumer avec une &#233;l&#233;gante simplicit&#233; les principales ouvertures et limitations pr&#233;sentes dans le sc&#233;nario d&#8217;un individu. Elle l&#8217;appela &#171;&#160;la roue des permissions&#160;&#187;, &#171;&#160;roue&#160;&#187; en raison de sa forme circulaire, et &#171;&#160;permissions&#160;&#187; car cette nouvelle grille porte sur la libert&#233; plus ou moins grande que nous autorisent nos permissions dans diff&#233;rents domaines de la vie.Cet article d&#233;crit les concepts sous-jacents au sch&#233;ma ainsi que la fa&#231;on d&#8217;utiliser ce dernier, pour comprendre les clients et contribuer au plan de traitement.</dc:description><dc:rights>Cairn</dc:rights>       <dcterms:accessRights>free access</dcterms:accessRights>     </oai_dc:dc>
+   </metadata>
+  </record>
+ </GetRecord>
+</OAI-PMH>

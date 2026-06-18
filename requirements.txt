@@ -1,0 +1,15 @@
+requests>=2.31.0
+sickle>=0.7.0
+lxml>=4.9.0
+unidecode>=1.3.0
+requests-cache>=1.2.0
+# SDK MCP officiel pour le serveur Claude Desktop (Sprint 04 #7)
+mcp>=1.0.0
+# Socle du serveur MCP distant HTTP (Streamable HTTP). Transitifs de mcp, mais
+# déclarés explicitement car le mode `serve --http` en dépend directement.
+starlette>=0.46
+uvicorn>=0.30
+# Optionnel — chargement automatique d'un .env pour les clés des sources
+# internationales (OpenAlex/Semantic Scholar/CORE). À défaut, exporter les
+# variables dans le shell ou le bloc env MCP. Voir .env.example.
+python-dotenv>=1.0.0

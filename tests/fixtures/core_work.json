@@ -1,0 +1,19 @@
+{
+  "id": 12345678,
+  "title": "Open Access and AI Regulation",
+  "authors": [
+    {"name": "Chen Li"},
+    {"name": "Maria Garcia"}
+  ],
+  "abstract": "An open access study of AI regulation.",
+  "yearPublished": 2021,
+  "publishedDate": "2021-03-10",
+  "doi": "10.7777/core.2021.1",
+  "documentType": "research",
+  "language": {"code": "en", "name": "English"},
+  "journals": [{"title": "International Journal of Open Science"}],
+  "downloadUrl": "https://core.ac.uk/download/12345678.pdf",
+  "sourceFulltextUrls": ["https://repo.example.org/12345678"],
+  "fullText": "Full text content here ...",
+  "topics": ["Open Access", "Artificial Intelligence"]
+}
