@@ -89,7 +89,12 @@ _load_dotenv_files()
 
 
 class MissingAPIKey(RuntimeError):
-    """Clé API requise mais absente de l'environnement."""
+    """Clé API requise mais absente de l'environnement (``env_var`` : nom de
+    la variable à définir)."""
+
+    def __init__(self, message: str, env_var: Optional[str] = None):
+        super().__init__(message)
+        self.env_var = env_var
 
 
 def get_api_key(env_var_name: str, required: bool = False) -> Optional[str]:
@@ -116,7 +121,8 @@ def get_api_key(env_var_name: str, required: bool = False) -> Optional[str]:
             raise MissingAPIKey(
                 f"Clé API absente : définir la variable d'environnement "
                 f"{env_var_name} (dans .env, le shell, ou le bloc 'env' de "
-                f"claude_desktop_config.json). Voir .env.example."
+                f"claude_desktop_config.json). Voir .env.example.",
+                env_var_name,
             )
         return None
     return value

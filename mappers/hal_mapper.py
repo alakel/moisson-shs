@@ -57,6 +57,17 @@ def _join_pages(pages_field) -> str:
     return clean_string(pages_field)
 
 
+def _unique(values) -> List[str]:
+    """Valeurs non vides, dédoublonnées dans l'ordre d'apparition."""
+    seen, out = set(), []
+    for value in values:
+        text = str(value).strip()
+        if text and text not in seen:
+            seen.add(text)
+            out.append(text)
+    return out
+
+
 def map_hal_to_zotero(doc: Dict) -> Dict:
     """
     Convertit un document HAL Solr en item Zotero.
@@ -229,19 +240,21 @@ def map_hal_to_zotero(doc: Dict) -> Dict:
     if hal_id:
         append_to_extra(item, "HAL ID", hal_id)
 
-    # Domaine disciplinaire
+    # Domaine disciplinaire. HAL répète le code de niveau 0 devant chaque
+    # code de niveau 1 (« 0.shs, 1.shs.info, 0.shs, 1.shs.scipo ») : valeurs
+    # dédoublonnées dans l'ordre (retour d'expérience B9).
     domains = doc.get("domain_s") or doc.get("domainAllCode_s")
     if domains:
         if isinstance(domains, list):
-            append_to_extra(item, "HAL Domain", ", ".join(str(d) for d in domains))
+            append_to_extra(item, "HAL Domain", ", ".join(_unique(domains)))
         else:
             append_to_extra(item, "HAL Domain", str(domains))
 
-    # Structures de recherche
+    # Structures de recherche (dédoublonnées de même)
     labs = doc.get("labStructAcronym_s") or doc.get("labStructName_s")
     if labs:
         if isinstance(labs, list):
-            append_to_extra(item, "HAL Laboratory", ", ".join(str(l) for l in labs))
+            append_to_extra(item, "HAL Laboratory", ", ".join(_unique(labs)))
         else:
             append_to_extra(item, "HAL Laboratory", str(labs))
 

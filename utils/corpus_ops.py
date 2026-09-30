@@ -247,3 +247,57 @@ def format_merge_report(report: Dict[str, Dict[str, int]]) -> str:
             f"    Exclusifs     : {stats['only_to_this_corpus']}"
         )
     return "\n".join(lines)
+
+
+# === Comptages de corpus_analyze (retour d'expérience B7) ===
+
+def journal_key(name: str) -> str:
+    """
+    Clé de comptage d'un nom de revue : translittération, casse, « & » et
+    « and » ramenés à « et », ponctuation et espaces normalisés.
+    « Communication et organisation » et « Communication & Organisation »
+    comptent ensemble ; les notices ne sont pas modifiées.
+    """
+    import re
+    from unidecode import unidecode
+    text = unidecode(str(name or "")).lower().replace("&", " et ")
+    text = re.sub(r"[^a-z0-9]+", " ", text)
+    text = re.sub(r"\band\b", "et", text)
+    return re.sub(r"\s+", " ", text).strip()
+
+
+def author_key(creator: Dict) -> Tuple[str, str]:
+    """
+    Clé de comptage d'un auteur : nom de famille normalisé et initiale du
+    prénom (deux auteurs de même nom et de prénoms différents ne sont plus
+    confondus), et libellé affiché « Nom P. ».
+    """
+    from unidecode import unidecode
+    last = str(creator.get("lastName") or creator.get("name") or "").strip()
+    first = str(creator.get("firstName") or "").strip()
+    initial = unidecode(first[:1]).upper() if first else ""
+    key = unidecode(last).lower().strip() + ("|" + initial if initial else "")
+    label = last + (f" {initial}." if initial else "")
+    return key, label
+
+
+def top_forms(pairs, limit: int) -> List[Tuple[str, int]]:
+    """
+    Regroupe des couples ``(clé, forme affichée)`` par clé ; rend les
+    ``limit`` groupes les plus fréquents, chacun sous sa forme la plus
+    fréquente (à égalité, ordre alphabétique).
+    """
+    from collections import Counter, defaultdict
+    counts: Counter = Counter()
+    forms: Dict[str, Counter] = defaultdict(Counter)
+    for key, form in pairs:
+        if not key:
+            continue
+        counts[key] += 1
+        forms[key][form] += 1
+    ranked = sorted(counts.items(), key=lambda kv: (-kv[1], kv[0]))[:limit]
+    out = []
+    for key, n in ranked:
+        best = sorted(forms[key].items(), key=lambda kv: (-kv[1], kv[0]))[0][0]
+        out.append((best, n))
+    return out

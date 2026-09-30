@@ -84,9 +84,10 @@ class TestBuildCorpusToolResult:
             structured={"query": "x"},
         )
 
-        # Bloc 0 = résumé texte (toujours présent, non altéré sous le seuil)
+        # Bloc 0 = résumé texte (toujours présent, non altéré sous le seuil,
+        # terminé par un saut de ligne : séparateur B8)
         assert blocks[0].type == "text"
-        assert blocks[0].text == "résumé"
+        assert blocks[0].text == "résumé\n"
         # EmbeddedResource présent et porte bien le JSON complet
         embedded = _blocks_by_type(blocks, "resource")
         assert len(embedded) == 1

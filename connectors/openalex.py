@@ -45,7 +45,7 @@ logger = logging.getLogger(__name__)
 SELECT_FIELDS = ",".join([
     "id", "doi", "title", "display_name", "publication_year",
     "publication_date", "language", "type", "authorships",
-    "primary_location", "abstract_inverted_index", "concepts",
+    "primary_location", "locations", "abstract_inverted_index", "concepts",
     "cited_by_count", "open_access", "ids", "biblio",
     # Score de pertinence (OPT-12) : présent seulement s'il est demandé.
     "relevance_score",

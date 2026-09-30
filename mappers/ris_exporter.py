@@ -110,6 +110,11 @@ def _ris_name(c: Dict) -> str:
 
 
 def _container(item: Dict) -> str:
+    if item.get("itemType") == "preprint":
+        # Le support d'une prépublication est son dépôt (champ repository) ;
+        # une ligne « publicationTitle: » d'extra y venait d'un dépôt pris
+        # pour une revue (retour d'expérience B6).
+        return ""
     for name in ("publicationTitle", "bookTitle", "proceedingsTitle",
                  "encyclopediaTitle", "dictionaryTitle", "websiteTitle",
                  "blogTitle"):

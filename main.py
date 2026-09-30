@@ -628,6 +628,8 @@ Exemples :
     print("Statut par source :")
     for line in status_lines:
         print(line)
+    for line in result.flow_outage_lines():
+        print(f"ATTENTION : {line}")
     incomplete = result.not_complete
     if incomplete:
         print(f"ATTENTION : {len(incomplete)} source(s) incomplète(s) ou non "

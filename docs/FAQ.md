@@ -248,7 +248,7 @@ Avec `corpus_diff(corpus_a=<ancienne>, corpus_b=<nouvelle>)`, ou le prompt `veil
 
 ### Pourquoi le retour annonce-t-il un « succès partiel » ?
 
-Parce qu'une source a réellement perdu des notices : échec, annulation, source non exécutée, source arrêtée par l'échéance ou tronquée par une panne. Une moisson dont seules les sous-sources d'Isidore sont limitées par la fenêtre du fournisseur est annoncée « terminée, sans panne ». Le détail est dans `by_source_status` (statut, motif) et `lossy_sources` / `provider_limited_sources`. Si **toutes** les sources échouent, l'outil rend une erreur MCP (`isError`) et n'écrit aucun fichier.
+Parce qu'une source a réellement perdu des notices : échec, annulation, source non exécutée, source arrêtée par l'échéance ou tronquée par une panne. Une moisson dont seules les sous-sources d'Isidore sont limitées par la fenêtre du fournisseur est annoncée « terminée, sans panne ». Le détail est dans `by_source_status` (statut, motif) et `lossy_sources` / `provider_limited_sources`. Si **toutes** les sources échouent, l'outil rend une erreur MCP (`isError`) et n'écrit aucun fichier. Une source non configurée (clé d'API absente, ou refus 401 ou 403 reçu sans clé) n'est pas une perte : elle est nommée à part (« Sources non configurées », `unconfigured_sources`). Quand Isidore est indisponible, ses cinq sous-sources tombent avec lui : une ligne « Attention » le dit en une fois, avec les sources encore interrogées (`flow_outages`).
 
 ### Le serveur MCP expire (timeout) dans Claude Desktop
 

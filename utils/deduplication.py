@@ -1030,6 +1030,13 @@ def _merge_extra(infos: List[_MemberInfo], merged: Dict[str, Any],
     alt_urls: List[str] = []
     equivalence = (evidence or {}).get("doi_equivalence") or {}
     aliases: Dict[str, str] = dict(equivalence.get("aliases") or {})
+    # Clés à valeur unique (PAT-17) : une seule ligne « Open Access » par
+    # notice fusionnée (138 notices de 16 corpus portaient « yes » et
+    # « no » : HAL dit un fichier déposé dans HAL, OpenAlex une copie ouverte
+    # quelque part, CrossRef « unknown ») ; « language: und » (langue
+    # indéterminée de HAL) n'apporte rien.
+    open_access: List[str] = []
+    open_access_at: List[int] = []
     def add_line(raw: str, info: Optional[_MemberInfo]) -> None:
         nonlocal snippet_line, truncation_line
         line = raw.strip()
@@ -1057,6 +1064,17 @@ def _merge_extra(infos: List[_MemberInfo], merged: Dict[str, Any],
             return
         if key in _REBUILT_LINES:
             return
+        if key == "Open Access":
+            value = line.split(":", 1)[1].strip().lower()
+            if value:
+                open_access.append(value)
+            if not open_access_at:
+                open_access_at.append(len(lines))
+                lines.append(line)
+            return
+        if key == "language" and line.split(":", 1)[1].strip().lower() in (
+                "und", "undetermined", "zxx"):
+            return
         if key == "DOI":
             norm = normalize_doi(line.split(":", 1)[1])
             if norm:
@@ -1081,6 +1099,14 @@ def _merge_extra(infos: List[_MemberInfo], merged: Dict[str, Any],
         add_line(raw, None)
     for alias in sorted(aliases):
         add_line(f"{ALIAS_KEY}: {alias} ({aliases[alias]})", None)
+
+    if open_access_at:
+        # « yes » dès qu'une source atteste une copie ouverte ; puis « no » ;
+        # « unknown » seulement si aucune source ne sait.
+        value = ("yes" if "yes" in open_access
+                 else "no" if "no" in open_access
+                 else (open_access[0] if open_access else "unknown"))
+        lines[open_access_at[0]] = f"Open Access: {value}"
 
     chosen_url = (merged.get("url") or "").strip()
     alt_urls = [u for u in alt_urls if u != chosen_url]

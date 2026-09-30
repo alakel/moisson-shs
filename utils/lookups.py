@@ -103,7 +103,7 @@ _S2_FIELDS = (
 )
 _OPENALEX_SELECT = (
     "id,doi,title,display_name,publication_year,publication_date,language,"
-    "type,authorships,primary_location,abstract_inverted_index,concepts,"
+    "type,authorships,primary_location,locations,abstract_inverted_index,concepts,"
     "cited_by_count,open_access,ids,biblio"
 )
 
@@ -1699,7 +1699,13 @@ class AuthorSearchReport:
             elif r.status == STATUS_PARTIAL:
                 out.append(f"{r.display_name} : partielle ({r.reason_text()})")
             elif r.status in (STATUS_ERROR, STATUS_CANCELLED):
-                out.append(f"{r.display_name} : indisponible ({r.reason_text()})")
+                # Isidore couvre OpenEdition, Cairn, Persée, Érudit et
+                # Theses.fr dans la recherche d'auteur (PAT-16).
+                covered = (" ; OpenEdition, Cairn, Persée, Érudit et "
+                           "Theses.fr, lus par Isidore, manquent aussi"
+                           if r.source == "isidore" else "")
+                out.append(f"{r.display_name} : indisponible "
+                           f"({r.reason_text()}){covered}")
             elif r.status == STATUS_SKIPPED:
                 out.append(f"{r.display_name} : non interrogée ({r.reason_text()})")
             if r.excluded and not r.held:

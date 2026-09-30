@@ -519,4 +519,5 @@ def test_reference_harvest_return_is_at_most_15_kb(tmp_path, entry):
     out = tmp_path / entry / "output"
     manifest = next(out.glob("corpus_*.manifest.json"))
     assert manifest.exists()
-    assert ret["blocks"]["text"] == 2
+    # Résumé, digest, et un séparateur « \n » après chaque lien (B8).
+    assert ret["blocks"]["text"] == 2 + ret["blocks"].get("resource_link", 0)

@@ -696,14 +696,41 @@ def protect_title(text: Any, *, ascii: bool = False) -> str:
         if not esc:
             continue
         if _needs_case_protection(word, first=(i == 0)):
+            # La ponctuation qui entoure le mot reste hors des accolades
+            # (« {Branco}, », « {LLM}: », « ({LDM}) » ; retour d'expérience
+            # B10) ; le mot seul est protégé.
+            lead, core, trail = _split_edge_punct(word)
+            if not core:
+                core, lead, trail = word, "", ""
+            esc = latex_escape(core, ascii=ascii, braces_balanced=whole_balanced)
             # Pour BibTeX, un groupe de niveau 0 ouvert par une contre-oblique
             # est un « caractère spécial » dont change.case$ convertit les
             # lettres hors nom de commande ({\#MeToo} → {\#metoo}). Doublées,
             # les accolades extérieures forment un groupe protégé ordinaire.
             esc = ("{{" + esc + "}}") if esc.startswith("\\") \
                 else ("{" + esc + "}")
+            esc = (latex_escape(lead, ascii=ascii, braces_balanced=whole_balanced)
+                   + esc
+                   + latex_escape(trail, ascii=ascii,
+                                  braces_balanced=whole_balanced))
         out.append(esc)
     return " ".join(out)
+
+
+# Ponctuation qui peut entourer un mot de titre sans en faire partie ; les
+# accolades n'en sont pas (leur équilibre se juge sur le titre entier).
+_LEAD_PUNCT = "([«“‘\"'¿¡"
+_TRAIL_PUNCT = ")].,;:!?…»”’\"'"
+
+
+def _split_edge_punct(word: str) -> Tuple[str, str, str]:
+    """``(ponctuation de tête, mot, ponctuation de fin)``."""
+    i, j = 0, len(word)
+    while i < j and word[i] in _LEAD_PUNCT:
+        i += 1
+    while j > i and word[j - 1] in _TRAIL_PUNCT:
+        j -= 1
+    return word[:i], word[i:j], word[j:]
 
 
 _URL_UNSAFE = {"{": "%7B", "}": "%7D", "\\": "%5C", " ": "%20",
@@ -903,7 +930,12 @@ def _langid(language: str) -> str:
 
 
 def _container(item: Dict) -> str:
-    """Titre du conteneur (revue, ouvrage, actes, site…), selon le type."""
+    """Titre du conteneur (revue, ouvrage, actes, site…), selon le type.
+    Une prépublication n'en a pas : son support est le dépôt (champ
+    ``repository``, rendu plus loin) ; une ligne « publicationTitle: »
+    d'``extra`` y venait d'un dépôt pris pour une revue (B6)."""
+    if item.get("itemType") == "preprint":
+        return ""
     for name in ("publicationTitle", "bookTitle", "proceedingsTitle",
                  "encyclopediaTitle", "dictionaryTitle", "websiteTitle",
                  "blogTitle"):

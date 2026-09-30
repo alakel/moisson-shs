@@ -1982,7 +1982,12 @@ def _build_corpus_tool_result(
     if inline not in INLINE_MODES:
         inline = INLINE_FULL
     compact = inline != INLINE_FULL
-    blocks = [types.TextContent(type="text", text=summary_text)]
+    # Séparateurs (B8) : un client qui met les blocs bout à bout collait le
+    # résumé, les liens et le digest (« …/outputcorpus_… »,
+    # « ….jsoncorpus://… ») ; le résumé finit par un saut de ligne et chaque
+    # lien est suivi d'un bloc « \n ».
+    blocks = [types.TextContent(type="text",
+                                text=summary_text.rstrip("\n") + "\n")]
 
     # (a) LIENS : un ResourceLink par fichier → cliquable dans l'interface
     for path in resource_paths:
@@ -1995,6 +2000,7 @@ def _build_corpus_tool_result(
             ),
             description=_link_description(path, compact),
         ))
+        blocks.append(types.TextContent(type="text", text="\n"))
     primary_uri = corpus_uri(primary_path.name)
 
     if compact:
@@ -2073,9 +2079,9 @@ def _build_corpus_tool_result(
         # Message explicite pour les clients qui n'affichent pas les blocs
         blocks[0] = types.TextContent(
             type="text",
-            text=summary_text + (
+            text=summary_text.rstrip("\n") + (
                 f"\n\n(JSON non inliné : {skipped_note}. "
-                f"Corpus complet via la resource {primary_uri})"
+                f"Corpus complet via la resource {primary_uri})\n"
             ),
         )
 
@@ -3203,6 +3209,7 @@ def _run_moisson_sync(
         lines = [
             "Moisson en échec : aucune source n'a pu être moissonnée ; aucun "
             "corpus n'a été écrit.",
+            *(f"Attention : {line}" for line in result.flow_outage_lines()),
             "",
             f"Requête : {query}",
             f"Durée : {duration:.1f} s",
@@ -3257,9 +3264,20 @@ def _run_moisson_sync(
                 f"limitée(s) par le fournisseur, voir le statut par source.")
     else:
         head = "Moisson terminée."
+    # Panne d'un flux partagé (Isidore et ses cinq sous-sources) dite en une
+    # ligne, et sources non configurées nommées à part (PAT-16).
+    outages = result.flow_outages()
+    if outages:
+        structured["flow_outages"] = outages
+    unconfigured = [r.display_name for r in result.unconfigured]
+    if unconfigured:
+        structured["unconfigured_sources"] = unconfigured
     # === Construction de la réponse pour Claude ===
     lines = [
         head,
+        *(f"Attention : {line}" for line in result.flow_outage_lines()),
+        *([f"Sources non configurées (clé d'API absente) : "
+           f"{', '.join(unconfigured)}."] if unconfigured else []),
         f"",
         f"Requête : {query}",
         f"Durée : {duration:.1f} s",
@@ -3286,12 +3304,8 @@ def _run_moisson_sync(
             f"fusionnés) ; avec DOI : {stats['with_doi']} "
             f"({stats['doi_coverage_pct']} %), avec résumé : "
             f"{stats['with_abstract']} ({stats['abstract_coverage_pct']} %).",
-            f"Fichiers {stem_} : .json (Zotero interne, lu par les outils), "
-            f".csl.json (import Zotero Desktop : Fichier > Importer), "
-            f"_stats.txt"
-            + (", .manifest.json (plan, statuts, rangs et scores)"
-               if output_manifest else "")
-            + f" ; dossier {output_json.parent}",
+            _compact_files_line(output_json, output_manifest,
+                                "plan, statuts, rangs et scores"),
         ])
     else:
         lines.extend([
@@ -3385,9 +3399,12 @@ def _provider_limited(r) -> bool:
 
 def _lossy_sources(result) -> list:
     """Sources qui ont réellement perdu des notices : en échec, annulées,
-    non exécutées, ou partielles pour une panne ou l'échéance."""
+    non exécutées, ou partielles pour une panne ou l'échéance. Une source
+    non configurée (clé d'API absente) n'en est pas : elle est nommée à part
+    (PAT-16 ; toute moisson « all » sans clé affichait « succès partiel »)."""
     return [r for r in result.sources
-            if not r.succeeded and not _provider_limited(r)]
+            if not r.succeeded and not _provider_limited(r)
+            and not (r.status == "skipped" and r.reason == "missing_key")]
 
 
 def _language_filter_text(r, languages) -> str:
@@ -3661,16 +3678,20 @@ def _compact_author_structured(structured: dict, manifest_name) -> None:
     structured["report_compact"] = True
 
 
-def _compact_files_line(json_path: Path, manifest_path) -> str:
-    """Fichiers d'un corpus en une ligne (mode digest ou none, stdio) :
-    radical, rôles des fichiers et dossier une seule fois."""
+def _compact_files_line(json_path: Path, manifest_path,
+                        manifest_note: str = "rapport complet") -> str:
+    """Fichiers d'un corpus (mode digest ou none, stdio) : radical et rôles
+    des fichiers sur une ligne, dossier sur la suivante, terminé par « / »
+    (retour d'expérience B8 : le dossier nu, collé au bloc suivant par le
+    client, donnait « …/outputcorpus_… »)."""
     stem_ = json_path.name[:-len(".json")] if json_path.name.endswith(".json") \
         else json_path.stem
+    folder = str(json_path.parent).rstrip("/\\") + os.sep
     return (f"Fichiers {stem_} : .json (Zotero interne, lu par les outils), "
             f".csl.json (import Zotero Desktop : Fichier > Importer), "
             f"_stats.txt"
-            + (", .manifest.json (rapport complet)" if manifest_path else "")
-            + f" ; dossier {json_path.parent}")
+            + (f", .manifest.json ({manifest_note})" if manifest_path else "")
+            + f"\nDossier : {folder}")
 
 
 def _soft_deadline_reserve(result) -> int:
@@ -3831,29 +3852,38 @@ def _corpus_analyze_sync(args: dict[str, Any]) -> str:
     for year, count in stats["by_year"].items():
         lines.append(f"  - {year} : {count}")
 
-    # Enrichissements : top revues, top auteurs
-    from collections import Counter
-    journals = Counter(
-        item.get("publicationTitle", "")
-        for item in items
-        if item.get("publicationTitle")
-    )
+    # Enrichissements : top revues, top auteurs. Noms de revue regroupés par
+    # une clé normalisée (casse, accents, « & » et « et ») et dépôts écartés
+    # (« HAL (…) » n'est pas une revue) ; auteurs comptés par nom et initiale
+    # du prénom (retour d'expérience B7). Les notices ne sont pas modifiées.
+    from utils.corpus_ops import author_key, journal_key, top_forms
+    from utils.deduplication import is_repository_venue
+    venue_pairs, repositories = [], 0
+    for item in items:
+        name = str(item.get("publicationTitle") or "").strip()
+        if not name:
+            continue
+        if is_repository_venue(name):
+            repositories += 1
+            continue
+        venue_pairs.append((journal_key(name), name))
+    journals = top_forms(venue_pairs, 20)
     if journals:
         lines.append("")
         lines.append("Top 20 revues :")
-        for journal, count in journals.most_common(20):
+        for journal, count in journals:
             lines.append(f"  - {journal} : {count}")
+    if repositories:
+        lines.append(f"  ({repositories} notice(s) dont le support indiqué est "
+                     f"un dépôt, non comptées comme revues)")
 
-    authors = Counter()
-    for item in items:
-        for creator in item.get("creators", []):
-            name = creator.get("lastName") or creator.get("name", "")
-            if name:
-                authors[name] += 1
+    authors = top_forms((author_key(c) for item in items
+                         for c in item.get("creators", []) or []
+                         if isinstance(c, dict)), 30)
     if authors:
         lines.append("")
         lines.append("Top 30 auteurs (par nombre d'items) :")
-        for author, count in authors.most_common(30):
+        for author, count in authors:
             lines.append(f"  - {author} : {count}")
 
     return "\n".join(lines)

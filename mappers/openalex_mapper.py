@@ -15,6 +15,7 @@ Spécificités OpenAlex :
 
 from __future__ import annotations
 
+import re
 from typing import Dict, List, Optional
 
 from config import OPENALEX_CONCEPT_SCORE_MIN
@@ -58,6 +59,40 @@ def _clean_doi(doi: Optional[str]) -> str:
         "http://doi.org/", "").strip()
 
 
+# Types de source OpenAlex qui publient (la revue d'un article) ; un dépôt
+# (« repository ») héberge une copie.
+_PUBLICATION_SOURCE_TYPES = ("journal", "conference", "book series")
+_TRAILING_PAREN_RE = re.compile(r"\s*\([^()]*\)\s*$")
+
+
+def _is_repository(source: Dict) -> bool:
+    """Source de type dépôt : type OpenAlex « repository », ou, sans type,
+    nom de dépôt connu (liste de la déduplication)."""
+    stype = (source.get("type") or "").strip().lower()
+    if stype:
+        return stype == "repository"
+    from utils.deduplication import is_repository_venue
+    return is_repository_venue(source.get("display_name"))
+
+
+def _short_repository_name(name: str) -> str:
+    """« HAL (Le Centre pour…) » → « HAL », « arXiv (Cornell University) »
+    → « arXiv »."""
+    short = _TRAILING_PAREN_RE.sub("", name or "").strip()
+    return short or (name or "").strip()
+
+
+def _publication_source(raw: Dict) -> Optional[Dict]:
+    """Première localisation dont la source publie (revue, actes, collection),
+    parmi ``locations`` (demandé au ``select``) ; None sinon."""
+    for location in raw.get("locations") or []:
+        source = (location or {}).get("source") or {}
+        stype = (source.get("type") or "").strip().lower()
+        if source.get("display_name") and stype in _PUBLICATION_SOURCE_TYPES:
+            return source
+    return None
+
+
 def map_openalex_item(raw: Dict) -> Dict:
     """Convertit un Work OpenAlex (un élément de ``results``) en item Zotero."""
     item_type = openalex_type_to_zotero(raw.get("type", ""))
@@ -93,10 +128,24 @@ def map_openalex_item(raw: Dict) -> Dict:
     if raw.get("language"):
         item["language"] = raw["language"]
 
-    # Conteneur (revue / source primaire)
+    # Conteneur (revue / source primaire). Un dépôt (HAL, arXiv, Zenodo…)
+    # n'est jamais une revue (retour d'expérience B6 : « HAL (Le Centre pour
+    # la Communication Scientifique Directe) » classé parmi les revues et
+    # exporté en howpublished, ISSN d'arXiv recopié) : pour une prépublication
+    # il devient le champ « repository », sinon une ligne « Repository »
+    # d'extra ; la revue est alors cherchée dans les autres localisations.
     loc = raw.get("primary_location") or {}
     source = loc.get("source") or {}
     biblio = raw.get("biblio") or {}
+    repository = None
+    if source.get("display_name") and _is_repository(source):
+        repository = _short_repository_name(source["display_name"])
+        source = _publication_source(raw) or {}
+    if repository:
+        if item_type == "preprint":
+            item["repository"] = repository
+        else:
+            append_to_extra(item, "Repository", repository)
     if source.get("display_name"):
         if item_type == "journalArticle":
             item["publicationTitle"] = source["display_name"]
@@ -104,7 +153,7 @@ def map_openalex_item(raw: Dict) -> Dict:
             item["proceedingsTitle"] = source["display_name"]
         elif item_type == "bookSection":
             item["bookTitle"] = source["display_name"]
-        else:
+        elif item_type != "preprint":
             item["publicationTitle"] = source["display_name"]
 
     if biblio.get("volume"):

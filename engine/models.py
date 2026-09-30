@@ -967,3 +967,62 @@ class HarvestResult:
         """Une ligne par source : nom, notices, statut et motif."""
         return [f"{indent}{r.display_name} : {r.item_count} — {r.describe()}"
                 for r in self.sources]
+
+    @property
+    def unconfigured(self) -> List[SourceResult]:
+        """Sources non exécutées faute de clé d'API (non configurées) : une
+        configuration à compléter, pas une perte de la moisson (PAT-16)."""
+        return [r for r in self.sources
+                if r.status == STATUS_SKIPPED and r.reason == REASON_MISSING_KEY]
+
+    def flow_outages(self) -> List[Dict[str, Any]]:
+        """
+        Pannes d'un flux partagé (retour d'expérience du 2026-09-30) : quand
+        Isidore tombe, ses cinq sous-sources tombent avec lui, pour le même
+        motif. Une entrée par flux dont toutes les sources demandées sont en
+        échec, sans notice, pour le même motif et le même détail :
+        ``flow`` (nom du flux), ``label`` (source du flux), ``reason``,
+        ``detail``, ``dependents`` (autres sources du flux), ``remaining``
+        (sources encore interrogées, hors de ce flux).
+        """
+        from connectors.registry import shared_flow_of  # import tardif (cycle)
+
+        by_flow: Dict[str, List[SourceResult]] = {}
+        for r in self.sources:
+            flow = shared_flow_of(r.source)
+            if flow:
+                by_flow.setdefault(flow, []).append(r)
+        out = []
+        for flow, members in by_flow.items():
+            if len(members) < 2:
+                continue
+            if any(r.status != STATUS_ERROR or r.item_count for r in members):
+                continue
+            if len({(r.reason, r.detail) for r in members}) != 1:
+                continue
+            head = next((r for r in members if r.source == flow), members[0])
+            out.append({
+                "flow": flow, "label": head.display_name,
+                "reason": head.reason, "detail": head.detail,
+                "dependents": [r.display_name for r in members if r is not head],
+                "remaining": [r.display_name for r in self.sources
+                              if shared_flow_of(r.source) != flow and r.executed],
+            })
+        return out
+
+    def flow_outage_lines(self) -> List[str]:
+        """Une ligne lisible par panne de flux partagé."""
+        lines = []
+        for o in self.flow_outages():
+            label = REASON_LABELS.get(o["reason"], o["reason"] or "panne")
+            detail = f" : {o['detail']}" if o["detail"] else ""
+            deps = o["dependents"]
+            deps_text = (", ".join(deps[:-1]) + " et " + deps[-1]
+                         if len(deps) > 1 else deps[0])
+            remaining = (", ".join(o["remaining"]) if o["remaining"]
+                         else "aucune")
+            lines.append(
+                f"{o['label']} indisponible ({label}{detail}) : {deps_text} "
+                f"en dépendent et n'ont rien rendu ; sources encore "
+                f"interrogées : {remaining}.")
+        return lines

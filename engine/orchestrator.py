@@ -309,7 +309,11 @@ def run_source(
     except MissingAPIKey as exc:
         result.status = STATUS_SKIPPED
         result.reason = REASON_MISSING_KEY
-        result.detail = str(exc)
+        # Détail court : le libellé du motif dit déjà « clé d'API absente »
+        # (le message complet le répétait : PAT-16).
+        env_var = getattr(exc, "env_var", None)
+        result.detail = (f"définir {env_var} (.env, shell ou bloc env de "
+                         f"claude_desktop_config.json)" if env_var else str(exc))
         logger.warning(f"=== Source {name} ignorée : {exc} ===")
     except Exception as exc:  # noqa: BLE001 - une source n'arrête pas les autres
         reason, detail = classify_exception(exc)

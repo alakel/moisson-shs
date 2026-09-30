@@ -95,6 +95,7 @@ revérifiés en live les 2026-09-28 et 2026-09-29.
   `publication_year`, `type`, `language`, `is_oa`.
 - Tri : pertinence par défaut avec `search` (`relevance_score:desc`, score capturé).
 - Résumés : `abstract_inverted_index` (index inversé recomposé par le mapper).
+- Support : `primary_location.source` ; une source de type `repository` (HAL, arXiv, Zenodo) n'est jamais une revue (champ `repository` d'une prépublication, sinon ligne `Repository` d'`extra`, aucun ISSN repris) ; la revue est alors cherchée dans `locations` (demandé au `select` depuis le 2026-09-30, PAT-11).
 - Métadonnées riches : `concepts` (seuil `MOISSON_OPENALEX_CONCEPT_SCORE_MIN`, ligne `extra` « OpenAlex concepts », jamais en mots-clés), `cited_by_count`,
   `open_access`, `ids`, `referenced_works`.
 - Auteurs : `/authors` (profils), filtre `author.id` ou `author.orcid` sur `/works`, pagination par
