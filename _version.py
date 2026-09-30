@@ -10,4 +10,4 @@ la CLI la ``dist-info`` du venv, et les deux ne changent qu'à la
 réinstallation.
 """
 
-__version__ = "0.4.0.dev0"
+__version__ = "0.4.0"
