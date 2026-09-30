@@ -160,6 +160,29 @@ class TestTruncatedTitle:
                             year=2025, families=("Gjerstad",))])
         assert d["status"] == dr.STATUS_REJECTED
 
+    def test_cut_after_the_differing_word_rejected(self):
+        """Négatif de PAT-20 : titre coupé après « France », candidat sur
+        l'Italie, même auteur et même année : aucun DOI."""
+        d = dr.decide(_item("Comparing media coverage of migration flows in "
+                            "France and…", last="Rossi", year="2021"),
+                      [cand("Comparing media coverage of migration flows in "
+                            "Italy and Spain", year=2021, families=("Rossi",),
+                            doi="10.1000/it", ctype="journal-article")])
+        assert d["status"] == dr.STATUS_REJECTED
+
+    def test_cut_before_the_differing_word_is_ambiguous(self):
+        """Coupe avant le mot qui distingue deux travaux du même auteur et de
+        la même année : les deux candidats restent admissibles, aucun DOI
+        écrit. (Avec un seul candidat renvoyé par CrossRef, la coupe le rend
+        indiscernable : limite consignée au rapport du sprint.)"""
+        base = "Comparing media coverage of migration flows in"
+        d = dr.decide(_item(base + "…", last="Rossi", year="2021"),
+                      [cand(base + " Italy", year=2021, families=("Rossi",),
+                            doi="10.1000/it", ctype="journal-article"),
+                       cand(base + " France", year=2021, families=("Rossi",),
+                            doi="10.1000/fr", ctype="journal-article")])
+        assert d["status"] == dr.STATUS_AMBIGUOUS
+
     def test_untruncated_title_keeps_v3_behaviour(self):
         """Titre sans coupe : une corroboration suffit toujours (v3)."""
         d = dr.decide(_item("Imagining action on climate change"),

@@ -8,6 +8,7 @@ Moissonneur Python multi-sources d'articles SHS (douze sources : sept francophon
 - Dépendances : `requests`, `requests-cache`, `sickle` (OAI-PMH), `lxml`, `unidecode`
 - SDK MCP (extra `[mcp]`) : **`mcp>=1.27,<2`** — la série 2 retire les décorateurs du `Server` bas niveau ; versions exactes testées dans `constraints.txt` (`pip install -e ".[dev,mcp]" -c constraints.txt`)
 - venv local dans `venv/` ; toujours appeler `venv/bin/python` (ou `venv/bin/moisson-shs`)
+- Version : `_version.py`, seule source (0.4.0) ; commit, état de l'arbre et empreinte du code dans chaque manifeste (`utils/build_info.py`)
 
 ## Documentation principale
 
@@ -83,6 +84,26 @@ Plan : [.claude/dev/spritn_optimise.md](.claude/dev/spritn_optimise.md) (audit f
 
 **En attente de l'utilisateur** (détail et commandes : rapport § 10) : jugements d'OPT-15 (`output/eval/2026-09-29/fiches/`, environ une journée) puis reconstruction des ensembles et décision ; redéploiement du serveur distant puis rotation des jetons Bearer/OAuth et des clés ; archivage de la copie de référence d'avant chantier (répertoire temporaire) ; reconstruction de l'image Docker ; import manuel des exports dans Zotero ; décisions ouvertes (ordre de chargement du `.env`, sélections HTTP de `corpus_query`, critère « 100 notices < 15 s »).
 
+### Sprint patch (retour d'expérience du 30 septembre) — ✅ TERMINÉ (2026-09-30)
+
+Plan : [.claude/dev/sprint-patch.md](.claude/dev/sprint-patch.md) (PAT-01 à PAT-22, décisions DP-1 à DP-10) · Rapport : [.claude/dev/sprint-patch_report.md](.claude/dev/sprint-patch_report.md). Traite le retour « moisson-shs 0.3.0 : bugs et limitations constatés » (état évalué `e61c2b9`, tag local `v0.3.0`). Branche `sprint-patch`, un commit par lot (`95f7675` à `9e47931`), version **0.4.0**, tag local `v0.4.0` ; ni fusion dans `main` ni push.
+
+| Lot | Tâches | Objet | Statut |
+|-----|--------|-------|--------|
+| **0** Configuration | PAT-01, PAT-02 | Clés Semantic Scholar et CORE | à faire (utilisateur) |
+| **1** Traçabilité | PAT-03 | `_version.py` seule source de version ; `utils/build_info.py` : commit, état de l'arbre, empreinte du code dans manifestes, `_stats.txt`, `/healthz`, `moisson-shs version` ; `serverInfo.version` = version du paquet | ✅ |
+| **2** Correctifs, règles | PAT-04 à PAT-08, PAT-20 | Classifications automatiques (OpenAlex, S2, CrossRef) hors des mots-clés, tracées dans `extra` (B1) ; erreurs de source et 401/403 sans clé (B5) ; règles `dedup/2` : co-diffusion, versions Zenodo, chapitres Google Books (B2 à B4) ; `doi-match/4` (titre coupé : année **et** auteur) ; DOI des liens Taylor & Francis | ✅ (règles désactivées jusqu'au gate) |
+| **3** Vérification humaine | PAT-09 | `scripts/eval/rules_check.py` : fiches à l'aveugle, second jugement, kappa, gate G1 à G5 | ✅ (jugement à faire) |
+| **4** Instances | PAT-10 | Verrou de repli sans `flock` ; registre `OUTPUT_DIR/.instances/` ; avertissement d'une instance au code différent ; rangs appliqués si le manifeste décrit le fichier (SHA-256) | ✅ |
+| **5** Finitions | PAT-11 à PAT-17 | Dépôt ≠ revue (B6), comptages (B7), séparateurs (B8), HAL (B9), BibTeX (B10), statuts de source (panne d'Isidore groupée, sources non configurées à part), `extra` sans contradiction | ✅ |
+| **6** Carnet de bord | PAT-18, PAT-19, PAT-21, PAT-22 | Contexte des entrées d'une fusion (manifeste, `corpus_diff`) ; requêtes ambiguës (`on_ambiguity`) ; notices sans langue gardées et comptées (`keep_unknown_language`) ; HAL : texte intégral en option (`hal_fulltext`) | ✅ |
+
+**Règles optionnelles** (désactivées tant que le gate du sprint n'est pas passé ; `.env.example`) : `MOISSON_DEDUP_CODIFFUSION`, `MOISSON_DEDUP_ZENODO_VERSIONS`, `MOISSON_DEDUP_SCHOLAR_CHAPTERS`, `MOISSON_DOI_CHAPTER_PREFIX`. Autre variable : `MOISSON_BUILD_COMMIT` (image Docker). `config.py` : aucune constante ajoutée.
+
+**Mesures de clôture** : banc de référence identique à `e61c2b9` (3 requêtes, 328 notices en MCP, 0 fusion erronée, retour 14 997 octets) ; doublons résiduels sur 244 corpus 0,43 % (règles désactivées), 0,39 % (règles actives), déterminisme tenu dans les deux cas ; HAL cherche les métadonnées : « "modèle actantiel" » 7 notices, 228 avec le texte intégral (sondes du 2026-09-30). **Tests : 3 909 verts** hors intégration.
+
+**En attente de l'utilisateur** : clés S2 et CORE puis redémarrage complet de Claude Desktop ; jugement des fiches `output/eval/patch-2026-09-30/fiches/verification_regles.html` (environ 20 min) puis `verification_regles_B.html` (environ 4 min) et calcul (`rules_check.py metrics` puis `decide`) ; relecture puis fusion de `sprint-patch` dans `main` et push des tags ; redéploiement du serveur distant (FIN-02) ; ménage de `output/` (annexe B du plan).
+
 ## Rapports d'exécution
 
 Au fur et à mesure de la réalisation des sprints, un **fichier rapport** est produit dans `.claude/dev/` au format `sprint_0X_report.md`. Il documente les découvertes, corrections appliquées, résultats des tests et statut final des tâches. Les rapports sont la trace historique du projet — ne jamais les supprimer.
@@ -98,10 +119,11 @@ Au fur et à mesure de la réalisation des sprints, un **fichier rapport** est p
 | Extension internationale | [.claude/dev/PLAN_EXTENSION_INTERNATIONALE_report.md](.claude/dev/PLAN_EXTENSION_INTERNATIONALE_report.md) |
 | Extension Google Scholar | [.claude/dev/EXTENSION_GOOGLE_SCHOLAR_report.md](.claude/dev/EXTENSION_GOOGLE_SCHOLAR_report.md) |
 | Chantier optimisation | [.claude/dev/sprint-optimise_report.md](.claude/dev/sprint-optimise_report.md) |
+| Sprint patch | [.claude/dev/sprint-patch_report.md](.claude/dev/sprint-patch_report.md) |
 
-## Où nous en sommes (mise à jour 2026-09-29)
+## Où nous en sommes (mise à jour 2026-09-30)
 
-**État actuel** : chantier d'optimisation terminé (section ci-dessus) ; 12 sources, 12 outils MCP, 4 prompts, 3 681 tests verts hors intégration. Les sections qui suivent retracent l'historique des extensions et des sprints : les chiffres qu'elles citent (nombre de sources, d'outils, de tests, durées) sont ceux de leur date.
+**État actuel** : sprint patch terminé (version 0.4.0, branche `sprint-patch`, section ci-dessus) après le chantier d'optimisation ; 12 sources, 12 outils MCP, 4 prompts, 3 909 tests verts hors intégration. Les sections qui suivent retracent l'historique des extensions et des sprints : les chiffres qu'elles citent (nombre de sources, d'outils, de tests, durées) sont ceux de leur date.
 
 ### Extension internationale ✅ TERMINÉE (2026-06-16)
 
@@ -249,22 +271,22 @@ python -m pytest tests/ --cov=mappers --cov=utils -q       # avec couverture
 
 **Lien ProfilBiblio** : ProfilBiblio (profil bibliographique d'un chercheur) peut désormais déléguer la récupération bibliographique à `search_by_author` via MCP.
 
-### Outils MCP disponibles (12, état au 2026-09-29)
+### Outils MCP disponibles (12, état au 2026-09-30)
 
 | Outil | Description |
 |-------|-------------|
-| `moisson_search` | Moisson multi-sources (12 sources ; Google Scholar seulement nommé) ; digest de 40 notices en stdio, plan de requête, statuts par source, échéance souple 50 s |
+| `moisson_search` | Moisson multi-sources (12 sources ; Google Scholar seulement nommé) ; digest de 40 notices en stdio, plan de requête, statuts par source, échéance souple 50 s ; requête ambiguë refusée par défaut si une source facturée est demandée (`on_ambiguity`) ; texte intégral HAL en option (`hal_fulltext`) |
 | `corpus_analyze` | Stats descriptives d'un corpus |
 | `corpus_list` | Lister les corpus (index dérivé ; `limit`, `pattern`, `since`, `rebuild`) |
-| `corpus_filter` | Filtrer par critères (année, type, langue, source) |
+| `corpus_filter` | Filtrer par critères (année, type, langue, source) ; notices sans langue gardées et comptées (`keep_unknown_language`) |
 | `corpus_to_csl` | Conversion Zotero JSON → CSL-JSON |
 | `fetch_by_doi` | Récupération ciblée par DOI (six résolveurs en parallèle, DOI vérifié) |
 | `search_by_author` | Production d'un chercheur, par identifiants de préférence (idHal, ORCID, OpenAlex, S2) ; homonymes rendus comme candidats ; jamais présentée comme complète à tort |
 | `corpus_merge` | Fusion N corpus avec rapport |
-| `corpus_resolve_dois` | Résolution des DOI manquants par appariement CrossRef (règles `doi-match/3`, rapport `.doi_report.json`) |
+| `corpus_resolve_dois` | Résolution des DOI manquants par appariement CrossRef (règles `doi-match/4`, rapport `.doi_report.json`) |
 | `corpus_export` | Export BibTeX, BibLaTeX ou RIS |
 | `corpus_query` | Consultation d'un corpus : recherche classée, filtres, pagination, notices complètes par `ids` (≤ 20) |
-| `corpus_diff` | Comparaison de deux corpus d'une même requête (ajouts, retraits, enrichissements ; rapport `.diff.json`) |
+| `corpus_diff` | Comparaison de deux corpus d'une même requête (ajouts, retraits, enrichissements ; rapport `.diff.json`) ; une fusion garde le contexte de ses entrées |
 
 ### Sprint 04 ✅ TERMINÉ (2026-05-23)
 
@@ -344,7 +366,7 @@ venv/bin/moisson-shs setup --uninstall     # désinstallation propre
 venv/bin/moisson-shs serve
 venv/bin/moisson-shs serve --http --host 127.0.0.1 --port 8000
 
-# Tests (3 681 verts hors intégration au 2026-09-29)
+# Tests (3 909 verts hors intégration au 2026-09-30)
 venv/bin/python -m pytest tests/ -m "not integration" -q -p no:cacheprovider                # comme la CI, sans réseau externe
 venv/bin/python -m pytest tests/ -m "not integration and not sockets" -q -p no:cacheprovider # ni réseau ni socket locale
 venv/bin/python -m pytest tests/ -m sockets -q -p no:cacheprovider                           # transport HTTP local (25 tests)
@@ -363,6 +385,9 @@ venv/bin/python scripts/measure_duplicates.py --check-determinism --json-out /tm
 # Évaluation du classement (OPT-15, hors réseau une fois la collecte faite ; voir docs/EVALUATION.md)
 venv/bin/python scripts/eval/pool.py --date 2026-09-29 status
 venv/bin/python scripts/eval/pool.py --date 2026-09-29 build && venv/bin/python scripts/eval/sheets.py --date 2026-09-29 generate && venv/bin/python scripts/eval/metrics.py --date 2026-09-29 && venv/bin/python scripts/eval/decide.py --date 2026-09-29
+
+# Vérification des règles d'identité et de DOI du sprint patch (docs/EVALUATION.md § 9), une fois les fiches rendues
+venv/bin/python scripts/eval/rules_check.py metrics --date patch-2026-09-30 && venv/bin/python scripts/eval/rules_check.py decide --date patch-2026-09-30
 ```
 
 ## Système de suivi des tâches
@@ -375,8 +400,8 @@ Les 27 tâches du backlog complet sont suivies via `TaskList` / `TaskUpdate`. Ma
 - **Logs** : niveau INFO par défaut, DEBUG avec `--verbose`. Sur MCP (stdio), les logs vont sur stderr (stdout réservé au JSON-RPC).
 - **Tests** : `tests/test_sprint_0X.py` par sprint, exécutables avec `venv/bin/python tests/test_sprint_0X.py` (mode standalone) ou `pytest` ; chantier d'optimisation : `tests/unit/test_opt<NN>_*.py` et `tests/unit/test_lot*_integration.py`. Aucune clé ni `.env` pour les tests unitaires (`tests/conftest.py`) ; marqueurs `integration` (API réelles) et `sockets` (transport local).
 - **Pas de modification du config.py** sans mise à jour conjointe du report concerné — le fichier centralise les endpoints et constantes critiques. Toute constante ajoutée est surchargeable par une variable `MOISSON_*`, commentée, et recensée dans `.env.example`.
-- **Seuils d'identité et de DOI jamais abaissés** (0,90 titre, 0,97 sans corroboration, 0,93 passe floue, corroboration année et auteur) ; Google Scholar reste volontaire (hors `all` et `international`).
-- **Pas de commit git pour l'instant** — le dépôt existe (branche `main`, commit initial), mais aucun commit automatique : les commits se font à la demande de l'utilisateur, avec un message factuel.
+- **Seuils d'identité et de DOI jamais abaissés** (0,90 titre, 0,97 sans corroboration, 0,93 passe floue, corroboration année et auteur) ; Google Scholar reste volontaire (hors `all` et `international`). Les règles optionnelles `dedup/2` et `doi-match/4` (co-diffusion, versions Zenodo, chapitres Google Books) restent derrière leurs drapeaux tant que leur vérification humaine n'a pas passé le gate (`docs/EVALUATION.md` § 9).
+- **Git** : aucun commit automatique ; les commits se font à la demande de l'utilisateur, avec un message factuel signé de l'auteur et sans mention d'outil. `main` = `e61c2b9` (poussé, tag local `v0.3.0`) ; le sprint patch est sur la branche `sprint-patch` (tag local `v0.4.0`), ni fusionnée ni poussée.
 
 ## Lancer une moisson de test
 
