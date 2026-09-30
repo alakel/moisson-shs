@@ -875,9 +875,15 @@ def corpus_context(path: Path, items: Sequence[Dict], raw: bytes
     statuts (tri natif compris), filtres, plafond par source, date de la
     moisson de référence et sa provenance (``manifeste``, ``nom``,
     ``fichier``). Pour un corpus dérivé (filtre, résolution DOI, conversion),
-    le manifeste de son entrée est suivi (``inherited_from``).
+    le manifeste de son entrée est suivi (``inherited_from``) ; pour une
+    fusion, les contextes de ses entrées sont réunis (PAT-18,
+    :func:`_merged_context`). Aucune requête n'est tirée du nom d'une fusion
+    ni d'une recherche par auteur.
     """
-    from utils.manifest import KIND_HARVEST, KIND_LABELS, load_manifest_for, read_manifest
+    from utils.manifest import (
+        KIND_AUTHOR, KIND_HARVEST, KIND_LABELS, KIND_MERGE, harvest_ancestor,
+        load_manifest_for, merge_contexts,
+    )
 
     path = Path(path)
     stem = corpus_stem_of(path.name) or path.stem
@@ -890,25 +896,21 @@ def corpus_context(path: Path, items: Sequence[Dict], raw: bytes
         "kind": doc.get("kind") if doc else None,
         "kind_label": KIND_LABELS.get(doc.get("kind")) if doc else None,
     }
+    named_by_query = not (
+        (doc or {}).get("kind") in (KIND_MERGE, KIND_AUTHOR)
+        or stem.startswith(("corpus_merged_", "corpus_author_")))
+    if doc is not None and doc.get("kind") == KIND_MERGE:
+        contexts = merge_contexts(doc)
+        if any(contexts):
+            ctx.update(_merged_context(contexts))
+            if ctx.get("harvest_date") is None:
+                ctx.update(_reference_date(
+                    path, stem, [(doc, "manifeste (date de la fusion)")]))
+            return ctx
     # Manifeste porteur du contexte de moisson : le sien, ou celui de son
     # entrée pour un corpus dérivé (au plus _LINEAGE_MAX_DEPTH niveaux).
-    harvest_doc = doc
-    inherited = None
-    depth = 0
-    while harvest_doc is not None and not harvest_doc.get("sources") \
-            and depth < _LINEAGE_MAX_DEPTH:
-        inputs = [i for i in harvest_doc.get("inputs") or [] if isinstance(i, dict)]
-        if len(inputs) != 1 or not inputs[0].get("manifest"):
-            break
-        try:
-            name = validate_flat_name(str(inputs[0]["manifest"]))
-        except ValueError:
-            break
-        parent = read_manifest(path.parent / name)
-        if parent is None:
-            break
-        harvest_doc, inherited = parent, name
-        depth += 1
+    harvest_doc, inherited = harvest_ancestor(path.parent, doc,
+                                              max_depth=_LINEAGE_MAX_DEPTH)
     base = harvest_doc or {}
     harvest_doc_sources = bool(base.get("sources"))
     query = base.get("query")
@@ -921,7 +923,8 @@ def corpus_context(path: Path, items: Sequence[Dict], raw: bytes
     ctx.update({
         "inherited_from": inherited,
         "query": text,
-        "query_from_name": _query_from_name(stem) if not text else None,
+        "query_from_name": (_query_from_name(stem)
+                            if not text and named_by_query else None),
         "mode": query.get("mode"),
         "requested_sources": list(query.get("sources") or []),
         "filters": {
@@ -937,16 +940,28 @@ def corpus_context(path: Path, items: Sequence[Dict], raw: bytes
     })
     # Date de référence : début de la moisson (ou de la production), puis
     # horodatage du nom, puis date du fichier.
+    candidates = []
+    if harvest_doc is not None:
+        candidates.append((harvest_doc, "manifeste" + (f" ({inherited})"
+                                                       if inherited else "")))
+    if doc is not None and doc is not harvest_doc:
+        candidates.append((doc, "manifeste"))
+    ctx.update(_reference_date(path, stem, candidates))
+    return ctx
+
+
+def _reference_date(path: Path, stem: str,
+                    candidates: Sequence[Tuple[Dict[str, Any], str]]
+                    ) -> Dict[str, Any]:
+    """Date de référence d'un corpus : début (ou fin) de la première
+    production de ``candidates`` qui en porte une, puis horodatage du nom,
+    puis date du fichier."""
     when, basis = None, None
-    for source_doc in (harvest_doc, doc):
-        if source_doc is None:
-            continue
+    for source_doc, label in candidates:
         for key in ("started_at", "finished_at"):
             when = _parse_iso(source_doc.get(key))
             if when is not None:
-                basis = "manifeste" + (f" ({inherited})"
-                                       if source_doc is harvest_doc and inherited
-                                       else "")
+                basis = label
                 break
         if when is not None:
             break
@@ -959,10 +974,131 @@ def corpus_context(path: Path, items: Sequence[Dict], raw: bytes
             basis = "fichier"
         except OSError:
             when = None
-    ctx["harvest_date"] = when.isoformat(timespec="seconds") if when else None
-    ctx["harvest_day"] = list(_local_date(when)) if when else None
-    ctx["harvest_date_basis"] = basis
-    return ctx
+    return {
+        "harvest_date": when.isoformat(timespec="seconds") if when else None,
+        "harvest_day": list(_local_date(when)) if when else None,
+        "harvest_date_basis": basis,
+    }
+
+
+# État d'une source, du meilleur au pire, pour réunir les entrées d'une fusion.
+_STATE_ORDER = {"ok": 0, "truncated": 1, "failed": 2}
+
+
+def _merged_context(contexts: Sequence[Optional[Dict[str, Any]]]
+                    ) -> Dict[str, Any]:
+    """
+    Contexte réuni des entrées d'une fusion (PAT-18). Mode commun, sinon
+    « mixte » ; requête commune, sinon aucune (``input_queries`` les
+    nomme) ; union des sources, chacune dans son meilleur état (une source
+    complète dans une entrée n'est pas en échec pour la fusion), notices
+    additionnées ; fenêtre de dates englobante et langues réunies, connues
+    seulement si chaque entrée les donne ; plafond et classement communs,
+    sinon inconnus ou « mixte » ; date de référence : début de l'entrée la
+    plus ancienne. ``merged_inputs`` : nombre d'entrées, ``merged_unknown`` :
+    entrées sans contexte (corpus sans manifeste).
+    """
+    known = [c for c in contexts if isinstance(c, dict)]
+    unknown = len(contexts) - len(known)
+    queries = [c.get("query") if isinstance(c.get("query"), dict) else {}
+               for c in known]
+
+    def _common(values: List[Any]) -> Any:
+        if unknown or not values or any(v in (None, "", []) for v in values):
+            return None
+        return values[0] if all(v == values[0] for v in values) else None
+
+    modes = [q.get("mode") for q in queries]
+    distinct_modes = sorted({m for m in modes if m})
+    mode = _common(modes) or ("mixte" if distinct_modes else None)
+    texts = [q.get("text") if isinstance(q.get("text"), str) else None
+             for q in queries]
+    input_queries: List[str] = []
+    for text in texts:
+        if text and _fold(text) not in {_fold(t) for t in input_queries}:
+            input_queries.append(text)
+    query = (input_queries[0] if len(input_queries) == 1 and all(texts)
+             and not unknown else None)
+    requested: List[str] = []
+    for q in queries:
+        for name in q.get("sources") or []:
+            if name not in requested:
+                requested.append(name)
+    froms = [q.get("from_date") for q in queries]
+    tos = [q.get("to_date") for q in queries]
+    langs = [list(q.get("languages") or []) for q in queries]
+    complete = bool(known) and not unknown
+    filters = {
+        "from_date": (min(str(v) for v in froms)
+                      if complete and all(froms) else None),
+        "to_date": (max(str(v) for v in tos) if complete and all(tos) else None),
+        "languages": (sorted({lang for ls in langs for lang in ls})
+                      if complete and all(langs) else []),
+    }
+    caps = [(c.get("settings") or {}).get("max_per_source") for c in known]
+    rankings = [(c.get("ranking") or {}).get("mode") for c in known]
+    distinct_rankings = sorted({r for r in rankings if r})
+    by_source: Dict[str, List[Dict[str, Any]]] = {}
+    for c in known:
+        sources = c.get("sources") if isinstance(c.get("sources"), dict) else {}
+        for label, entry in sources.items():
+            if not isinstance(entry, dict):
+                continue
+            e = dict(entry, label=label)
+            e.setdefault("source", label)
+            by_source.setdefault(e["source"], []).append(e)
+    merged_sources = []
+    for key, entries in by_source.items():
+        best = min(entries, key=lambda e: _STATE_ORDER.get(source_state(e), 2))
+        sorts = {e.get("native_sort") for e in entries}
+        merged_sources.append({
+            "source": key,
+            "label": best["label"],
+            "status": best.get("status"),
+            "reason": best.get("reason"),
+            "items": sum(int(e.get("items") or 0) for e in entries),
+            "limit_reached": bool(best.get("limit_reached")),
+            "provider_window": bool(best.get("provider_window")),
+            "native_sort": sorts.pop() if len(sorts) == 1 else "mixte",
+            "inputs": len(entries),
+        })
+    merged_sources.sort(key=lambda e: e["label"])
+    oldest, oldest_ctx = None, None
+    for c in known:
+        when = _parse_iso(c.get("started_at"))
+        if when is None:
+            continue
+        try:
+            earlier = oldest is None or when < oldest
+        except TypeError:          # dates naïve et avec décalage
+            earlier = when.replace(tzinfo=None) < oldest.replace(tzinfo=None)
+        if earlier:
+            oldest, oldest_ctx = when, c
+    out: Dict[str, Any] = {
+        "inherited_from": None,
+        "query": query,
+        "query_from_name": None,
+        "mode": mode,
+        "requested_sources": requested,
+        "filters": filters,
+        "max_per_source": _common(caps),
+        "ranking_mode": _common(rankings) or ("mixte" if distinct_rankings
+                                              else None),
+        "sources": merged_sources,
+        "harvest": False,
+        "merged_inputs": len(contexts),
+        "merged_unknown": unknown,
+        "input_modes": distinct_modes,
+        "input_queries": input_queries,
+    }
+    if oldest is not None:
+        out.update({
+            "harvest_date": oldest.isoformat(timespec="seconds"),
+            "harvest_day": list(_local_date(oldest)),
+            "harvest_date_basis": "manifeste (entrée la plus ancienne de la "
+                                  "fusion)",
+        })
+    return out
 
 
 def _queried_sources(ctx: Dict[str, Any]) -> Dict[str, Dict[str, Any]]:
@@ -1357,6 +1493,29 @@ def queries_match(ctx_a: Dict[str, Any], ctx_b: Dict[str, Any]) -> bool:
     return bool(sa and sb) and sa == sb
 
 
+def _merged_warning(side: str, ctx: Dict[str, Any]) -> str:
+    """Avertissement ``corpus_fusionne`` d'un côté fusionné (PAT-18)."""
+    n = ctx.get("merged_inputs") or 0
+    bits = []
+    modes = ctx.get("input_modes") or []
+    if len(modes) > 1:
+        bits.append("modes " + ", ".join(modes))
+    queries = ctx.get("input_queries") or []
+    if len(queries) > 1:
+        bits.append("requêtes " + ", ".join(f"« {_short(q, 60)} »"
+                                            for q in queries[:4])
+                    + (" …" if len(queries) > 4 else ""))
+    if ctx.get("merged_unknown"):
+        bits.append(f"{ctx['merged_unknown']} entrée(s) sans contexte")
+    when = (ctx.get("harvest_date") or "")[:10]
+    return (f"{side} ({ctx.get('name')}) est une fusion de {n} corpus"
+            + (f" ({' ; '.join(bits)})" if bits else "")
+            + " : ses notices viennent de productions distinctes ; sources, "
+              "fenêtres de dates et plafonds de ses entrées sont réunis, et "
+              "la date de référence est celle de l'entrée la plus ancienne"
+            + (f" ({when})" if when else "") + ".")
+
+
 def diff_warnings(ctx_a: Dict[str, Any], ctx_b: Dict[str, Any],
                   counts: Dict[str, Any], *, fuzzy: bool = False
                   ) -> List[Dict[str, str]]:
@@ -1386,6 +1545,8 @@ def diff_warnings(ctx_a: Dict[str, Any], ctx_b: Dict[str, Any],
                 f"{side} ({ctx.get('name')}) est un corpus "
                 f"{ctx.get('kind_label') or ctx.get('kind') or 'dérivé'} sans "
                 f"contexte de moisson retrouvé : mode et tri inconnus."))
+        elif ctx.get("merged_inputs"):
+            out.append(_warning("corpus_fusionne", _merged_warning(side, ctx)))
         elif ctx.get("inherited_from"):
             out.append(_warning(
                 "corpus_derive",
@@ -1394,13 +1555,18 @@ def diff_warnings(ctx_a: Dict[str, Any], ctx_b: Dict[str, Any],
                 f"moisson repris de {ctx['inherited_from']}. Ses notices ne "
                 f"sont qu'une partie de la moisson d'origine."))
     known = {s: m for s, m in modes.items() if m}
+    input_modes = {"A": ctx_a.get("input_modes") or [],
+                   "B": ctx_b.get("input_modes") or []}
     if len(set(known.values())) > 1:
         out.append(_warning(
             "modes_differents",
             f"Modes différents (A : {modes['A']}, B : {modes['B']}) : la "
             f"sélection des notices n'obéit pas aux mêmes règles ; une partie "
             f"des ajouts et des retraits en découle."))
-    biblio = [s for s, m in known.items() if m == "bibliographie"]
+    # Une fusion dont une entrée est en mode bibliographie en hérite les
+    # réserves (PAT-18).
+    biblio = [s for s in ("A", "B") if known.get(s) == "bibliographie"
+              or "bibliographie" in input_modes[s]]
     if biblio:
         truncated = []
         for side in biblio:
@@ -1667,6 +1833,8 @@ def structured_summary(report: Dict[str, Any], sample: int = SAMPLE_DEFAULT,
             "name", "items", "manifest", "kind", "query", "query_from_name",
             "mode", "harvest_date", "harvest_date_basis", "inherited_from",
             "max_per_source", "filters")} | {
+            k: c[k] for k in ("merged_inputs", "input_modes", "input_queries")
+            if c.get(k)} | {
             "sources": [{k: e.get(k) for k in (
                 "label", "status", "reason", "items", "limit_reached",
                 "provider_window", "native_sort")} for e in c.get("sources") or []]}
@@ -1699,6 +1867,8 @@ def structured_summary(report: Dict[str, Any], sample: int = SAMPLE_DEFAULT,
 def _context_line(side: str, ctx: Dict[str, Any]) -> str:
     bits = [f"{ctx.get('items', 0)} notice(s)"]
     kind = ctx.get("kind_label") or ctx.get("kind")
+    if ctx.get("merged_inputs"):
+        kind = f"fusion de {ctx['merged_inputs']} corpus"
     if kind:
         bits.append(kind)
     if ctx.get("harvest_date"):
@@ -1711,6 +1881,8 @@ def _context_line(side: str, ctx: Dict[str, Any]) -> str:
     if query:
         bits.append(f"requête « {_short(query, 80)} »"
                     + (" (d'après le nom)" if not ctx.get("query") else ""))
+    elif len(ctx.get("input_queries") or []) > 1:
+        bits.append(f"{len(ctx['input_queries'])} requêtes")
     return f"{side} : {ctx.get('name')} — " + " · ".join(bits)
 
 

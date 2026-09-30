@@ -9,7 +9,7 @@ corpus_merge et (à terme) corpus_diff.
 import json
 import logging
 from pathlib import Path
-from typing import Dict, List, Sequence, Tuple
+from typing import Any, Dict, List, Optional, Sequence, Tuple
 
 from utils.deduplication import deduplicate_with_report
 
@@ -108,7 +108,19 @@ def merge_corpora(
     corpus_paths: List[Path],
 ) -> Tuple[List[Dict], Dict[str, Dict[str, int]]]:
     """
-    Fusionne plusieurs corpus avec rapport détaillé.
+    Fusionne plusieurs corpus avec rapport détaillé (voir
+    :func:`merge_corpora_detailed`, dont elle rend les deux premiers
+    éléments).
+    """
+    merged, report, _detail = merge_corpora_detailed(corpus_paths)
+    return merged, report
+
+
+def merge_corpora_detailed(
+    corpus_paths: List[Path],
+) -> Tuple[List[Dict], Dict[str, Dict[str, int]], Dict[str, Any]]:
+    """
+    Fusionne plusieurs corpus avec rapport détaillé et origine des notices.
 
     Les corpus sont indexés par **identité de fichier** (chemin résolu) et non
     par nom : deux fichiers homonymes de dossiers différents sont deux corpus
@@ -143,15 +155,23 @@ def merge_corpora(
 
         Le libellé est le nom du fichier, précédé de dossiers parents s'il a
         des homonymes parmi les entrées (voir :func:`corpus_labels`).
+
+        Troisième élément (PAT-18) : ``{"origins": [...], "loaded": [...]}``.
+        ``origins[i]`` liste, pour la i-ième notice fusionnée, les couples
+        ``(indice de l'entrée dans corpus_paths, position 1..n dans ce
+        corpus)`` des notices qu'elle réunit (indice de la première citation
+        du fichier) ; ``loaded[k]`` : notices chargées de l'entrée k (None
+        pour un fichier déjà cité).
     """
     if not corpus_paths:
-        return [], {}
+        return [], {}, {"origins": [], "loaded": []}
 
     # Identité de fichier : chemin résolu ; ordre de première citation.
     unique_paths: List[Path] = []
     identities: List[Path] = []
+    first_index: List[int] = []      # indice de la première citation
     duplicate_inputs = 0
-    for path in corpus_paths:
+    for index, path in enumerate(corpus_paths):
         path = Path(path)
         identity = _file_identity(path)
         if identity in identities:
@@ -159,6 +179,7 @@ def merge_corpora(
             continue
         identities.append(identity)
         unique_paths.append(path)
+        first_index.append(index)
 
     labels = corpus_labels(identities)
 
@@ -180,13 +201,20 @@ def merge_corpora(
     # chaque notice fusionnée sait de quels corpus viennent ses membres.
     all_items: List[Dict] = []
     origin: List[int] = []
+    local_position: List[int] = []
     for ci, items in enumerate(per_corpus):
         all_items.extend(items)
         origin.extend([ci] * len(items))
+        local_position.extend(range(1, len(items) + 1))
     merged, dedup_report = deduplicate_with_report(all_items, with_groups=True)
 
-    contributors = [{origin[i] for i in group}
-                    for group in dedup_report.get("groups", [])]
+    groups = dedup_report.get("groups", [])
+    contributors = [{origin[i] for i in group} for group in groups]
+    origins = [sorted((first_index[origin[i]], local_position[i]) for i in group)
+               for group in groups]
+    loaded: List[Optional[int]] = [None] * len(corpus_paths)
+    for ci, items in enumerate(per_corpus):
+        loaded[first_index[ci]] = len(items)
 
     # Construire le rapport
     report: Dict[str, Dict[str, int]] = {}
@@ -207,7 +235,7 @@ def merge_corpora(
         "duplicate_inputs": duplicate_inputs,
     }
 
-    return merged, report
+    return merged, report, {"origins": origins, "loaded": loaded}
 
 
 def _synth_id(item: Dict) -> str:

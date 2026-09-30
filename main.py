@@ -494,6 +494,23 @@ Exemples :
              "aucune requête réseau, aucun fichier",
     )
     parser.add_argument(
+        "--on-ambiguity",
+        choices=("warn", "refuse"),
+        default=None,
+        help="Requête ambiguë (OR mêlé sans parenthèses à des termes "
+             "juxtaposés, à AND ou à une exclusion) : warn l'envoie avec un "
+             "avertissement, refuse ne l'envoie pas. Défaut : refuse si une "
+             "source facturée (Google Scholar) est demandée, warn sinon",
+    )
+    parser.add_argument(
+        "--hal-fulltext",
+        action="store_true",
+        help="HAL cherche aussi dans le texte intégral des dépôts "
+             "(fulltext_t, 36 %% des dépôts ont un fichier indexé) ; sans "
+             "l'option, dans les métadonnées seulement (titre, résumé, "
+             "mots-clés). Ensemble bien plus large et plus bruité",
+    )
+    parser.add_argument(
         "--verbose",
         action="store_true",
         help="Active les logs DEBUG",
@@ -532,15 +549,32 @@ Exemples :
             workers=args.workers,
             query_variants=variants,
             languages=args.lang or [],
+            hal_fulltext=args.hal_fulltext,
         )
         plan = request.query_plan()
     except ValueError as exc:
         parser.error(str(exc))
     if args.plan_only:
         print("Aperçu : aucune moisson exécutée, aucun fichier écrit.")
+        for line in plan.ambiguity_lines():
+            print(line)
         for line in plan.text_lines():
             print(line)
         return 0
+    # Requête ambiguë (PAT-19, décision DP-7) : refusée par défaut quand une
+    # source facturée est demandée ; avertissement en tête sinon.
+    from connectors.registry import is_metered_source
+    metered = [e.label for e in plan.sources if is_metered_source(e.source)]
+    on_ambiguity = args.on_ambiguity or ("refuse" if metered else "warn")
+    if plan.ambiguities:
+        for line in plan.ambiguity_lines():
+            print(line)
+        if on_ambiguity == "refuse":
+            parser.error(
+                "requête ambiguë, non envoyée"
+                + (f" (source facturée demandée : {', '.join(metered)})"
+                   if metered else "")
+                + " : ajouter des parenthèses, ou --on-ambiguity warn")
 
     # Préparation des chemins de sortie. Identifiant d'exécution = horodatage
     # à la seconde + uuid court (OPT-16, C33) : deux moissons lancées dans la

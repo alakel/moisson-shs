@@ -58,7 +58,11 @@ Pour voir ce qui part vers chaque source, sans aucune requête ni fichier :
 moisson-shs search '"discours numérique" NOT politique' --sources all --plan-only
 ```
 
-En MCP : `plan_only: true`. La syntaxe Solr propre à HAL (plages `champ:[a TO b]`, proximité `"…"~N`, pondération `^N`, champs comme `authFullName_s:"…"`) est transmise telle quelle à HAL ; ailleurs, elle est retirée ou simplifiée, avec un avertissement.
+En MCP : `plan_only: true`. **Requête ambiguë** : OR mêlé sans parenthèses à des termes juxtaposés, à AND ou à une exclusion (`"actantial model" Greimas computational OR automatic` est lu `("actantial model" Greimas computational) OR automatic`) ; la lecture retenue est dite en tête du retour, et la requête n'est pas envoyée par défaut quand une source facturée (Google Scholar) est demandée : ajouter des parenthèses, ou `on_ambiguity: "warn"` (`--on-ambiguity warn`) pour l'envoyer telle quelle. La syntaxe Solr propre à HAL (plages `champ:[a TO b]`, proximité `"…"~N`, pondération `^N`, champs comme `authFullName_s:"…"`) est transmise telle quelle à HAL ; ailleurs, elle est retirée ou simplifiée, avec un avertissement.
+
+### HAL cherche-t-il dans le texte intégral ?
+
+Pas par défaut : la requête part dans le champ par défaut de HAL, qui couvre les métadonnées (titre, résumé, mots-clés). Sondes du 2026-09-30 : `"modèle actantiel"` rend 7 notices ainsi, 228 avec le texte intégral. Pour l'inclure : `hal_fulltext: true` (MCP) ou `--hal-fulltext` (CLI), qui envoie `(requête) OR fulltext_t:(requête)` à HAL seulement, ou `fulltext_t:"…"` écrit dans la requête. Seuls les dépôts avec fichier ont un texte indexé (36 %), et l'ensemble obtenu est bien plus large et plus bruité : une thèse qui cite l'expression une fois y entre.
 
 ### Les sources internationales reçoivent-elles une traduction de ma requête ?
 
@@ -67,6 +71,8 @@ Non, **jamais de traduction automatique**. Sans variante, CrossRef, OpenAlex, Se
 ### Comment filtrer par langue ?
 
 `--lang fr en` (CLI) ou `languages: ["fr", "en"]` (MCP). Le filtre est natif pour HAL, OpenAlex et Google Scholar, local pour Isidore, ses sous-sources et CORE (les notices sans langue lisible sont conservées), impossible pour CrossRef et Semantic Scholar (signalé dans le plan).
+
+Sur un corpus déjà moissonné, `corpus_filter` (`language`) et `corpus_query` (`filters.languages`) suivent la même règle : une notice sans langue lisible (CrossRef et Google Scholar n'en donnent pas, HAL et OpenAlex en laissent parfois « und ») est **gardée et comptée** à part dans le retour ; `keep_unknown_language: false` l'écarte. Les codes sont ramenés à l'ISO 639-1 (`fre`, `fra`, `French`, `français` → `fr`), et la langue d'un logiciel (Zenodo), reportée dans `extra`, est lue aussi.
 
 ### Quelle différence entre les modes `bibliographie` et `collecte` ?
 
@@ -150,7 +156,7 @@ Path("output/corpus_X.csl.json").write_text(json.dumps(export_corpus_to_csl(json
 
 ### Qu'est-ce que le manifeste ?
 
-`<radical>.manifest.json` (format `moisson-shs/manifest`) décrit une production : identifiant d'exécution, type (moisson, filtre, fusion, conversion CSL, auteur, résolution DOI, export), fichiers avec tailles et empreintes SHA-256, requête et plan, filtres, réglages, statut de chaque source, rapport de déduplication, échéance souple, versions des règles, et une entrée par notice (`records` : identifiant, rangs et scores natifs, rang et justification du classement). Il est publié **en dernier** : un corpus sans manifeste valide (publication interrompue) est `incomplete`, jamais présenté comme complet. Les rangs et les scores ne sont écrits que là, jamais dans les notices. Les corpus antérieurs au manifeste restent lisibles (`legacy`) ; `corpus_to_csl` ou `corpus_export` leur en ajoutent un.
+`<radical>.manifest.json` (format `moisson-shs/manifest`) décrit une production : identifiant d'exécution, type (moisson, filtre, fusion, conversion CSL, auteur, résolution DOI, export), fichiers avec tailles et empreintes SHA-256, requête et plan, filtres, réglages, statut de chaque source, rapport de déduplication, échéance souple, versions des règles, et une entrée par notice (`records` : identifiant, rangs et scores natifs, rang et justification du classement). Pour une fusion, chaque entrée (`inputs`) porte en plus son manifeste, son type et un contexte compact de sa moisson d'origine (requête, mode, sources, dates, statuts, plafonds, tris, versions du code), et chaque notice ses origines (`records[].origins` : entrée, position, rangs natifs), sans rang global : les classements de moissons distinctes ne se comparent pas. Il est publié **en dernier** : un corpus sans manifeste valide (publication interrompue) est `incomplete`, jamais présenté comme complet. Les rangs et les scores ne sont écrits que là, jamais dans les notices. Les corpus antérieurs au manifeste restent lisibles (`legacy`) ; `corpus_to_csl` ou `corpus_export` leur en ajoutent un.
 
 ### Qu'est-ce que `.index.json` ?
 
@@ -240,11 +246,13 @@ Avant le chantier, une moisson inlinait jusqu'à 300 notices complètes (environ
 
 ### Comment consulter un corpus sans tout charger ?
 
-Avec `corpus_query` : recherche classée dans le corpus (même normalisation que le classement local : casse, accents, élisions, pluriels, expressions exactes, `OR`, exclusions, troncature), filtres (`year_min`, `year_max`, `item_types`, `languages`, `sources`, `has_doi`, `has_abstract`), choix des champs (`fields`), tri (`relevance`, `rank`, `position`, `year_desc`, `year_asc`, `title`), pages stables (`offset`, `limit` jusqu'à 100), et notices complètes par identifiants (`ids`, 20 au plus, résumés entiers). Les ressources `corpus://<nom>?offset=<n>&limit=<n>` donnent aussi des pages (50 notices par défaut). Si le fichier change pendant la lecture, la page est refusée (« Corpus modifié pendant la lecture ») plutôt que rendue incohérente.
+Avec `corpus_query` : recherche classée dans le corpus (même normalisation que le classement local : casse, accents, élisions, pluriels, expressions exactes, `OR`, exclusions, troncature), filtres (`year_min`, `year_max`, `item_types`, `languages`, `sources`, `has_doi`, `has_abstract`, `keep_unknown_language`), choix des champs (`fields`), tri (`relevance`, `rank`, `position`, `year_desc`, `year_asc`, `title`), pages stables (`offset`, `limit` jusqu'à 100), et notices complètes par identifiants (`ids`, 20 au plus, résumés entiers). Les ressources `corpus://<nom>?offset=<n>&limit=<n>` donnent aussi des pages (50 notices par défaut). Si le fichier change pendant la lecture, la page est refusée (« Corpus modifié pendant la lecture ») plutôt que rendue incohérente.
 
 ### Comment comparer deux moissons (veille) ?
 
 Avec `corpus_diff(corpus_a=<ancienne>, corpus_b=<nouvelle>)`, ou le prompt `veille-mensuelle`, qui enchaîne moisson, `corpus_list` et comparaison avec le dernier corpus de même requête. L'appariement suit les règles de la déduplication (identifiants ; `fuzzy=true` ajoute la passe floue). Le résultat distingue les ajouts (nouvelle publication, nouveau dépôt HAL, notice récupérée, sans date), les retraits (avec leur motif probable : hors période, source non interrogée ou en échec) et les notices communes enrichies, modifiées ou identiques. Les avertissements signalent ce qui fausse la comparaison : modes ou tris différents, mode bibliographie (la sélection suit les scores), requêtes, sources ou filtres différents, sources incomplètes. Le rapport complet est écrit dans `<radical de B>.diff.json` (ou `<radical de B>_<uuid8>.diff.json` si ce nom est déjà pris).
+
+Une **fusion** comparée garde le contexte de ses entrées : mode commun, ou « mixte » ; requête commune, sinon aucune (jamais tirée du nom `corpus_merged_…`, ni de celui d'une recherche par auteur) ; union des sources, chacune dans son meilleur état ; date de référence de l'entrée la plus ancienne. Un avertissement (code « corpus_fusionne ») le rappelle, et le mode bibliographie d'une seule entrée suffit à déclencher sa réserve. Une fusion écrite avant la version 0.4.0 n'a pas ce contexte : elle est signalée « sans contexte de moisson retrouvé ».
 
 ### Pourquoi le retour annonce-t-il un « succès partiel » ?
 

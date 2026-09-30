@@ -913,7 +913,7 @@ def _digest_line(data: Dict[str, Any], terms: Sequence[Dict[str, Any]], *,
 # === corpus_query ===
 
 FILTER_KEYS = ("year_min", "year_max", "item_types", "languages", "sources",
-               "has_doi", "has_abstract")
+               "has_doi", "has_abstract", "keep_unknown_language")
 SORTS = ("relevance", "rank", "position", "year_desc", "year_asc", "title")
 # Champs projetables d'une page de résultats (les notices complètes passent
 # par ``ids``).
@@ -954,6 +954,18 @@ def _bool(name: str, value: Any) -> Optional[bool]:
     return value
 
 
+def _language_codes(values: List[str]) -> List[str]:
+    """Codes demandés ramenés à l'ISO 639-1 (« fre », « French » → fr) ; une
+    valeur non reconnue est gardée telle quelle, en minuscules."""
+    from utils.query_plan import item_languages
+    out: List[str] = []
+    for value in values:
+        for code in item_languages(value) or [value.lower()]:
+            if code not in out:
+                out.append(code)
+    return out
+
+
 @dataclass
 class Filters:
     """Filtres locaux de ``corpus_query``."""
@@ -965,6 +977,10 @@ class Filters:
     sources: List[str] = field(default_factory=list)
     has_doi: Optional[bool] = None
     has_abstract: Optional[bool] = None
+    # Notices sans langue lisible et filtre ``languages`` : gardées par
+    # défaut, comme dans la moisson (PAT-21, décision DP-8) ; False les
+    # écarte. None : défaut (non repris dans ``as_dict``).
+    keep_unknown_language: Optional[bool] = None
 
     @classmethod
     def parse(cls, value: Any) -> "Filters":
@@ -980,11 +996,13 @@ class Filters:
             year_min=_year_bound("year_min", value.get("year_min")),
             year_max=_year_bound("year_max", value.get("year_max")),
             item_types=_string_list("item_types", value.get("item_types")),
-            languages=[x.lower() for x in _string_list("languages",
-                                                        value.get("languages"))],
+            languages=_language_codes(_string_list("languages",
+                                                   value.get("languages"))),
             sources=_string_list("sources", value.get("sources")),
             has_doi=_bool("has_doi", value.get("has_doi")),
             has_abstract=_bool("has_abstract", value.get("has_abstract")),
+            keep_unknown_language=_bool("keep_unknown_language",
+                                        value.get("keep_unknown_language")),
         )
         if f.year_min and f.year_max and f.year_min > f.year_max:
             raise QueryError("year_min postérieur à year_max")
@@ -1013,9 +1031,14 @@ class Filters:
         if self.item_types and item.get("itemType") not in self.item_types:
             return False
         if self.languages:
-            from utils.query_plan import item_languages
-            langs = item_languages(item.get("language"))
-            if not any(lang in self.languages for lang in langs):
+            from utils.query_plan import notice_languages
+            langs = notice_languages(item)
+            if not langs:
+                # Langue inconnue (CrossRef, Google Scholar…) : gardée sauf
+                # keep_unknown_language=False.
+                if self.keep_unknown_language is False:
+                    return False
+            elif not any(lang in self.languages for lang in langs):
                 return False
         if self.sources:
             wanted = {canonical_source_key(s) for s in self.sources}
@@ -1028,6 +1051,14 @@ class Filters:
                 bool(str(item.get("abstractNote") or "").strip()) != self.has_abstract:
             return False
         return True
+
+    def unknown_language(self, item: Dict[str, Any]) -> bool:
+        """Notice retenue malgré le filtre ``languages`` faute de langue
+        lisible (comptée à part dans le résultat)."""
+        if not self.languages:
+            return False
+        from utils.query_plan import notice_languages
+        return not notice_languages(item)
 
 
 def normalize_id(value: Any) -> str:
@@ -1259,6 +1290,8 @@ class QueryResult:
     missing_ids: List[str] = field(default_factory=list)
     snapshot: Dict[str, Any] = field(default_factory=dict)
     unevaluated: List[str] = field(default_factory=list)
+    # Notices retenues sans langue lisible malgré le filtre ``languages``.
+    unknown_language_kept: int = 0
     # Appariement de chaque notice rendue (texte compact), non sérialisé.
     matches: List[Optional[Dict[str, Any]]] = field(default_factory=list)
 
@@ -1292,6 +1325,8 @@ class QueryResult:
             })
             if self.unevaluated:
                 out["query_unevaluated"] = self.unevaluated
+            if self.filters.get("languages"):
+                out["unknown_language_kept"] = self.unknown_language_kept
         else:
             out.update({
                 "requested_ids": self.requested_ids,
@@ -1444,6 +1479,7 @@ def _search(path: Path, view: ManifestView, snapshot: Dict[str, Any],
     # nombres par notice ; les champs ne sont projetés que pour la page).
     keys: List[Tuple] = []
     total = 0
+    unknown_kept = 0
     for pos, item in enumerate(iter_json_array(path)):
         total += 1
         if check is not None and pos % 256 == 0:
@@ -1455,6 +1491,8 @@ def _search(path: Path, view: ManifestView, snapshot: Dict[str, Any],
         m = matcher.match(item) if matcher else None
         if matcher and m["score"] <= 0:
             continue
+        if flt.unknown_language(item):
+            unknown_kept += 1
         rank = view.ranks[pos] if view.ranks and pos < len(view.ranks) else None
         rank_key = rank if rank is not None else 10 ** 9 + pos
         if sort == "relevance":
@@ -1490,7 +1528,7 @@ def _search(path: Path, view: ManifestView, snapshot: Dict[str, Any],
         corpus=path.name, mode="search", total_items=total, matched=len(keys),
         offset=off, limit=lim, sort=sort, order_label=order_label,
         filters=flt.as_dict(), query=query if matcher else None, fields=proj,
-        snapshot=snapshot)
+        snapshot=snapshot, unknown_language_kept=unknown_kept)
     if matcher:
         result.unevaluated = sorted({u for cs in matcher.concept_sets
                                      for u in cs.unevaluated})
@@ -1613,7 +1651,10 @@ def query_lines(result: QueryResult) -> List[str]:
         + (f" pour « {result.query} »" if result.query else "")
         + (f", filtres {json.dumps(result.filters, ensure_ascii=False)}"
            if result.filters else "")
-        + f" ; tri : {result.order_label}.",
+        + f" ; tri : {result.order_label}."
+        + (f" Dont {result.unknown_language_kept} sans langue lisible, "
+           "gardée(s) (filters.keep_unknown_language: false pour les écarter)."
+           if result.unknown_language_kept else ""),
         (f"Notices {result.offset + 1} à {end} :" if result.items
          else "Aucune notice sur cette page."),
     ]

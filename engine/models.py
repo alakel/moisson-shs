@@ -407,6 +407,8 @@ class SearchRequest:
             variante, la requête d'origine (aucune traduction implicite).
         languages: codes ISO 639-1 demandés (OPT-11) : filtre natif là où
             la source le permet, local sinon, signalé dans le plan.
+        hal_fulltext: HAL cherche aussi dans le texte intégral des dépôts
+            (PAT-22 ; ``fulltext_t``), avec un avertissement dans le plan.
         plan: plan de requête (``utils.query_plan.QueryPlan``) ; calculé à
             la demande par ``query_plan()`` s'il est absent.
     """
@@ -424,6 +426,7 @@ class SearchRequest:
     allow_metered: bool = True
     query_variants: Dict[str, str] = field(default_factory=dict)
     languages: List[str] = field(default_factory=list)
+    hal_fulltext: bool = False
     plan: Any = field(default=None, repr=False, compare=False)
 
     def __post_init__(self):

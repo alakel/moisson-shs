@@ -211,6 +211,21 @@ def normalize_item_language(value: Any) -> Optional[str]:
     return next(iter(item_languages(value)), None)
 
 
+def notice_languages(item: Dict[str, Any]) -> List[str]:
+    """
+    Langues reconnues d'une notice : champ ``language`` et lignes
+    ``language:`` d'``extra`` (un type Zotero sans champ de langue, comme
+    ``computerProgram``, y reporte la valeur). Liste vide : langue inconnue.
+    """
+    values: List[Any] = [item.get("language")]
+    extra = item.get("extra")
+    if isinstance(extra, str):
+        values.extend(line.split(":", 1)[1] for line in extra.split("\n")
+                      if line.split(":", 1)[0].strip().lower() == "language"
+                      and ":" in line)
+    return item_languages(values)
+
+
 def item_languages(value: Any) -> List[str]:
     """Toutes les langues reconnues d'une valeur ``language`` de notice."""
     if value is None:
@@ -263,7 +278,7 @@ def apply_local_language_filter(
     kept: List[Dict] = []
     removed = unknown = 0
     for item in items:
-        langs = item_languages(item.get("language"))
+        langs = notice_languages(item)
         if not langs:
             unknown += 1
             kept.append(item)
@@ -393,6 +408,10 @@ class ParsedQuery:
     tree: Any                 # nœud racine
     simple: bool              # mots seuls : envoyée telle quelle
     warnings: List[str] = field(default_factory=list)
+    # Lecture retenue quand la précédence de OR peut surprendre (PAT-19) :
+    # OR mêlé sans parenthèses à des termes juxtaposés, à AND ou à une
+    # exclusion ; None sinon.
+    ambiguity: Optional[str] = None
 
     @property
     def has_phrase(self) -> bool:
@@ -948,6 +967,8 @@ def parse_query(text: Any, *, label: str = "requête") -> ParsedQuery:
         text=normalized, tree=tree,
         simple=all(kind == "WORD" for kind, _ in tokens),
         warnings=warnings,
+        ambiguity=(_display(tree) if (parser.hoisted or parser.ambiguous)
+                   else None),
     )
 
 
@@ -1041,7 +1062,7 @@ class _Renderer:
                 return f"{node.name}:{self._atom(node.value)}"
             self.warnings.append(
                 f"recherche par champ « {node.name}: » non prise en charge : "
-                f"valeur cherchée en plein texte")
+                f"valeur cherchée sans restriction de champ")
             return self.render(node.value)
         if isinstance(node, Not):
             return self._negation(node.child)
@@ -1094,7 +1115,7 @@ def _adapt_tree(node, caps: SourceCapabilities, syntax: str,
     réellement envoyée :
 
     - champ non pris en charge : remplacé par sa valeur (groupe compris),
-      cherchée en plein texte ; une plage (« champ:[a TO b] ») ne peut pas
+      cherchée sans restriction de champ ; une plage (« champ:[a TO b] ») ne peut pas
       l'être : la clause est retirée ;
     - proximité « "…"~N » hors Solr : mots cherchés ensemble (ensemble plus
       large, rien n'est perdu) ; pondération « ^N » hors Solr : retirée ;
@@ -1116,7 +1137,7 @@ def _adapt_tree(node, caps: SourceCapabilities, syntax: str,
             return None
         warnings.append(
             f"recherche par champ « {node.name}: » non prise en charge : "
-            f"valeur cherchée en plein texte")
+            f"valeur cherchée sans restriction de champ")
         return _adapt_tree(node.value, caps, syntax, warnings, notes)
     if isinstance(node, Phrase):
         if not node.suffix or syntax == SYNTAX_SOLR:
@@ -1216,7 +1237,7 @@ def render_for_source(parsed: ParsedQuery, caps: SourceCapabilities,
         if fields:
             warnings.append(
                 "recherche par champ non prise en charge : valeurs cherchées "
-                "en plein texte (" + ", ".join(fields) + ")")
+                "sans restriction de champ (" + ", ".join(fields) + ")")
         if ranges:
             warnings.append(
                 "plage non prise en charge : critère retiré de la requête "
@@ -1345,6 +1366,7 @@ class QueryPlan:
     sources: List[SourcePlan]
     parsed: Dict[str, ParsedQuery]           # "original" et variantes
     warnings: List[str] = field(default_factory=list)
+    hal_fulltext: bool = False               # PAT-22
 
     def for_source(self, key: str) -> Optional[SourcePlan]:
         for entry in self.sources:
@@ -1379,7 +1401,27 @@ class QueryPlan:
             "derived": {name: p.summary() for name, p in self.parsed.items()},
             "sources": sources,
             "warnings": list(self.warnings),
+            "ambiguities": self.ambiguities,
+            "hal_fulltext": self.hal_fulltext,
         }
+
+    @property
+    def ambiguities(self) -> List[Dict[str, str]]:
+        """Requêtes (d'origine ou variantes) dont la lecture dépend de la
+        précédence de OR : ``{"query": nom, "reading": lecture retenue}``."""
+        return [{"query": name, "reading": p.ambiguity}
+                for name, p in self.parsed.items() if p.ambiguity]
+
+    def ambiguity_lines(self) -> List[str]:
+        """Avertissements à placer en tête du retour (PAT-19)."""
+        lines = []
+        for a in self.ambiguities:
+            which = ("" if a["query"] == "original"
+                     else f" (variante {a['query']})")
+            lines.append(f"Attention : requête{which} ambiguë, lue "
+                         f"« {a['reading']} » ; ajouter des parenthèses pour "
+                         f"fixer la lecture.")
+        return lines
 
     @property
     def trivial(self) -> bool:
@@ -1456,6 +1498,26 @@ def _date_granularity_warning(caps: SourceCapabilities,
     return None
 
 
+# Texte intégral de HAL (PAT-22) : le champ par défaut (``text``) couvre les
+# métadonnées (titre, résumé, mots-clés) ; ``fulltext_t`` indexe le texte des
+# dépôts avec fichier. Sondes du 2026-09-30 (rows=0) : « "modèle actantiel" »
+# rend 7 notices (toutes par le résumé), fulltext_t 224, dont 221 hors
+# métadonnées, l'union 228 ; texte intégral indexé pour 1 704 036 des
+# 4 679 411 documents (36 %).
+HAL_FULLTEXT_FIELD = "fulltext_t"
+HAL_FULLTEXT_WARNING = (
+    "texte intégral (hal_fulltext) : HAL cherche aussi dans le texte des "
+    "dépôts avec fichier (fulltext_t, 36 % des dépôts) ; ensemble bien plus "
+    "large et plus bruité (sonde du 2026-09-30 : « \"modèle actantiel\" », 7 "
+    "notices par les métadonnées, 228 avec le texte intégral)")
+
+
+def hal_fulltext_query(sent: str) -> str:
+    """Requête HAL étendue au texte intégral (PAT-22) : métadonnées (champ
+    par défaut) OU texte intégral des dépôts avec fichier."""
+    return f"({sent}) OR {HAL_FULLTEXT_FIELD}:({sent})"
+
+
 def build_query_plan(
     query: str,
     sources: Sequence[str],
@@ -1465,9 +1527,14 @@ def build_query_plan(
     mode: str = "bibliographie",
     from_date: Optional[str] = None,
     to_date: Optional[str] = None,
+    hal_fulltext: bool = False,
 ) -> QueryPlan:
     """
     Construit le plan de requête d'une moisson (sources déjà résolues).
+
+    ``hal_fulltext`` (PAT-22) : la requête envoyée à HAL cherche aussi dans
+    le texte intégral des dépôts (``(q) OR fulltext_t:(q)``), avec un
+    avertissement ; sans effet sur les autres sources.
 
     Raises:
         QueryPlanError: requête ou variante vide ou sans terme, code de
@@ -1514,6 +1581,9 @@ def build_query_plan(
         syntax = caps.syntax_for(mode)
         sent, translation, warnings, notes = render_for_source(base, caps,
                                                                syntax)
+        if hal_fulltext and key == "hal":
+            sent = hal_fulltext_query(sent)
+            warnings.append(HAL_FULLTEXT_WARNING)
         if lang == CORPUS_EN and origin == "original":
             english_without_variant = True
             kind = ("requête française" if looks_french(base.text)
@@ -1576,6 +1646,9 @@ def build_query_plan(
                 f"variante '{lang}' non utilisée : aucune source sélectionnée "
                 f"n'a ce fonds majoritaire (fr pour les sources francophones, "
                 f"en pour CrossRef, OpenAlex, Semantic Scholar et CORE)")
+    if hal_fulltext and "hal" not in sources:
+        plan_warnings.append("hal_fulltext sans effet : HAL n'est pas "
+                             "interrogé")
     if english_without_variant:
         plan_warnings.append(
             "aucune variante 'en' : les sources internationales reçoivent la "
@@ -1585,6 +1658,7 @@ def build_query_plan(
         original_query=original.text, query_variants=variants,
         languages=langs, mode=mode, from_date=from_date, to_date=to_date,
         sources=entries, parsed=parsed, warnings=plan_warnings,
+        hal_fulltext=bool(hal_fulltext),
     )
 
 
@@ -1595,6 +1669,7 @@ def plan_for_request(request) -> QueryPlan:
         query_variants=request.query_variants, languages=request.languages,
         mode=request.mode, from_date=request.from_date,
         to_date=request.to_date,
+        hal_fulltext=bool(getattr(request, "hal_fulltext", False)),
     )
 
 

@@ -141,6 +141,8 @@ moisson-shs search '"large language models" discourse' --sources scholar --max 4
 | `--query-en` | Variante anglaise de la requête, envoyée aux sources majoritairement anglophones (CrossRef, OpenAlex, Semantic Scholar, CORE) ; sans elle, aucune traduction automatique |
 | `--variant` | Variante explicite pour une langue, répétable : `--variant en='"digital discourse"'` |
 | `--plan-only` | Affiche le plan de requête (requête envoyée à chaque source, filtres natifs et locaux, avertissements) sans aucune requête réseau ni fichier |
+| `--on-ambiguity` | Requête ambiguë (OR mêlé sans parenthèses à des termes juxtaposés, à AND ou à une exclusion) : `warn` l'envoie avec un avertissement, `refuse` ne l'envoie pas ; défaut : `refuse` si une source facturée est demandée, `warn` sinon |
+| `--hal-fulltext` | HAL cherche aussi dans le texte intégral des dépôts (`fulltext_t`, 36 % des dépôts) ; sans l'option, dans les métadonnées seulement (titre, résumé, mots-clés). Ensemble bien plus large et plus bruité |
 | `--ranking` | Classement affiché en fin de moisson, sans modifier le fichier : `native` (défaut), `local` (expérimental), `off` |
 | `--cache` / `--no-cache` | Active ou désactive le cache HTTP local (24 h, `MOISSON_CACHE_TTL`) ; sans l'une ni l'autre, valeur de `MOISSON_CACHE` (désactivé par défaut) |
 | `--enrich-oai` | Enrichit OpenEdition, Cairn, Persée et Érudit par OAI-PMH (une requête par notice : plus lent) |
@@ -227,10 +229,10 @@ Les neuf outils historiques sont conservés avec leurs arguments ; `corpus_expor
 
 | Outil | Rôle | Arguments (défaut) |
 |-------|------|--------------------|
-| `moisson_search` † | Moisson multi-sources | `query` (requis), `sources` (groupe francophone), `max_per_source` (200), `from_date`, `to_date`, `mode` (bibliographie), `query_variants`, `languages`, `plan_only` (faux), `ranking` (native), `deadline_seconds` (50 en stdio), `cache` (actif), `workers` (4), `enrich_oai` (faux), `dedup` (vrai), `inline` (digest), `top` (40) |
+| `moisson_search` † | Moisson multi-sources | `query` (requis), `sources` (groupe francophone), `max_per_source` (200), `from_date`, `to_date`, `mode` (bibliographie), `query_variants`, `languages`, `plan_only` (faux), `on_ambiguity` (refus si source facturée, sinon avertissement), `hal_fulltext` (faux), `ranking` (native), `deadline_seconds` (50 en stdio), `cache` (actif), `workers` (4), `enrich_oai` (faux), `dedup` (vrai), `inline` (digest), `top` (40) |
 | `corpus_analyze` | Statistiques d'un corpus | `corpus_path` (requis) |
 | `corpus_list` | Corpus disponibles, lus dans l'index | `limit` (20), `pattern`, `since`, `rebuild` (faux) |
-| `corpus_filter` † | Filtre par année, type, source, langue, titre | `corpus_path` (requis), `year_min`, `year_max`, `item_types`, `sources`, `language`, `title_contains`, `output_suffix` (suffixe _filtered), `inline`, `top` |
+| `corpus_filter` † | Filtre par année, type, source, langue, titre | `corpus_path` (requis), `year_min`, `year_max`, `item_types`, `sources`, `language`, `keep_unknown_language` (vrai), `title_contains`, `output_suffix` (suffixe _filtered), `inline`, `top` |
 | `corpus_to_csl` † | Conversion Zotero → CSL-JSON | `corpus_path` (requis), `output_path`, `inline`, `top` |
 | `corpus_merge` † | Fusion de plusieurs corpus, déduplication comprise | `corpus_paths` (requis), `output_path`, `inline`, `top` |
 | `fetch_by_doi` | Notice d'un DOI (six résolveurs en parallèle) | `doi` (requis), `add_to_corpus` |

@@ -109,7 +109,8 @@ class SourceCapabilities:
             classement sans être exigés).
         field_search: description de la recherche par champ.
         native_fields: champs transmis tels quels (``nom:valeur``) ; un
-            champ absent de cette liste est ramené au plein texte, avec
+            champ absent de cette liste est ramené à la recherche sans
+            restriction de champ, avec
             avertissement. ``field_passthrough`` : tout champ est transmis.
         relevance_ranking: ordre par défaut = pertinence.
         sorts: tris disponibles.
@@ -230,8 +231,10 @@ HAL = SourceCapabilities(
     parentheses=True,
     implicit_operator="AND",
     field_search="champ:valeur Solr (title_t, abstract_t, authFullName_t, "
-                 "keyword_t…) ; « title_t:\"discours numérique\" » : 45 "
-                 "notices",
+                 "keyword_t, fulltext_t pour le texte intégral…) ; champ par "
+                 "défaut « text » : métadonnées (titre, résumé, mots-clés), "
+                 "pas le texte intégral ; « title_t:\"discours numérique\" » "
+                 ": 45 notices",
     field_passthrough=True,
     relevance_ranking=True,
     sorts="score desc par défaut (sans paramètre sort) ; tout champ triable "
@@ -270,6 +273,11 @@ HAL = SourceCapabilities(
         "n° 9 et 10 « écriture » = « ecriture » : 26 885",
         "n° 11 « l'école » : 696 079 ; n° 12 « école » : 1 024 777",
         "n° 13 start=10000 : notice servie",
+        "sondes du 2026-09-30 (PAT-22) : « modèle actantiel » 9 ; "
+        "« \"modèle actantiel\" » 7, identique à text:\"…\" et à "
+        "title_t OR abstract_t OR keyword_t (les 7 par abstract_t) ; "
+        "fulltext_t:\"modèle actantiel\" 224, dont 221 hors text ; union "
+        "228 ; fulltext_t:* 1 704 036 documents sur 4 679 411",
     ),
     docs=("https://api.archives-ouvertes.fr/docs/search",),
 )

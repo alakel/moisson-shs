@@ -91,7 +91,10 @@ class HALConnector(Connector):
         Recherche par mot-clé dans HAL.
 
         Args:
-            query: Requête full-text. Exemples :
+            query: Requête, cherchée dans le champ par défaut de HAL
+                (``text`` : métadonnées, dont titre, résumé et mots-clés ;
+                le texte intégral des dépôts est ``fulltext_t``, voir
+                l'option ``hal_fulltext`` du plan de requête). Exemples :
                 - 'discours numérique'
                 - '"intelligence artificielle" AND société'
                 - 'communication politique -publicité'
@@ -121,7 +124,7 @@ class HALConnector(Connector):
             return all_items
 
         # Paramètres Solr
-        # - q : requête full-text
+        # - q : requête (champ par défaut « text » : métadonnées)
         # - fl : champs retournés (limite le payload), plus le score
         # - wt : format JSON pour parsing direct
         # - rows : taille du lot, jamais plus que le plafond

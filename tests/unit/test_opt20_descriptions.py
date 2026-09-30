@@ -52,7 +52,7 @@ RETURN_FIELDS = {
     "doi_report",
 }
 # Noms extérieurs au code : outil d'un serveur Zotero tiers, format OAI.
-EXTERNAL_NAMES = {"zotero_add_by_doi", "oai_openaire"}
+EXTERNAL_NAMES = {"zotero_add_by_doi", "oai_openaire", "fulltext_t"}
 
 SNAKE = re.compile(r"\b[a-z][a-z0-9]*(?:_[a-z0-9]+)+\b")
 

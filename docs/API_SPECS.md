@@ -32,6 +32,15 @@ mettre à jour `config.py` en conséquence.
 - Taille de lot : `rows = min(HAL_ROWS_PER_BATCH, reste à collecter)` (1 000 au plus). Mesure live du
   2026-09-29 : `rows=200` en 0,37 s (0,85 Mo), `rows=1000` en 0,76 à 0,91 s (4,9 Mo).
 - Filtres natifs : dates (`fq=producedDateY_i:[…]`, ou au jour), langue (`language_s`), type.
+- Champ cherché : `q` part sans `df` ni `qf`, donc dans le champ par défaut de HAL, `text`, qui
+  couvre les **métadonnées** (titre, résumé, mots-clés…), **pas le texte intégral**. Sondes `rows=0`
+  du 2026-09-30 : `modèle actantiel` 9 notices ; `"modèle actantiel"` 7, autant que
+  `text:"…"` et que `title_t OR abstract_t OR keyword_t` (les 7 par le résumé) ;
+  `fulltext_t:"modèle actantiel"` 224, dont 221 où la phrase n'est pas dans les métadonnées ;
+  union 228. Le texte intégral n'est indexé que pour les dépôts avec fichier : `fulltext_t:*`
+  1 704 036 documents sur 4 679 411 (36 %). L'option `hal_fulltext` (MCP) ou `--hal-fulltext`
+  (CLI) envoie `(q) OR fulltext_t:(q)`, avec un avertissement dans le plan ; `fulltext_t:"…"`
+  écrit dans la requête est aussi transmis tel quel à HAL.
 - Contrôle live (2026-09-29, 1 963 résultats) : 198 des 200 notices retenues figurent dans le top 200
   d'une sonde triée par score ; les scores varient légèrement d'un réplica SolrCloud à l'autre.
 

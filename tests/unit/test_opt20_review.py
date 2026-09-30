@@ -162,10 +162,11 @@ class TestLanguageFilter:
         labels = _labels_without_language()
         assert "CrossRef" in labels and "Semantic Scholar" in labels
 
-    def test_corpus_query_language_filter_drops_notices_without_language(
+    def test_corpus_query_language_filter_keeps_notices_without_language(
             self, tmp_path):
-        """Comportement décrit par le prompt et la description : une notice
-        sans langue ne sort d'aucune des passes fr et en."""
+        """Comportement décrit par le prompt et la description (PAT-21,
+        décision DP-8) : une notice sans langue sort des deux passes fr et
+        en ; keep_unknown_language=False l'écarte des deux."""
         from utils.corpus_query import query_corpus
         corpus = _write_corpus(tmp_path / "corpus_lang_20260929.json", [
             _notice("Regulating platforms", "CrossRef", doi="10.1/cr"),
@@ -186,9 +187,14 @@ class TestLanguageFilter:
         everything = titles(None)
         in_fr = titles({"languages": ["fr"]})
         in_en = titles({"languages": ["en"]})
-        assert {"Regulating platforms", "Platforms and citations"} <= everything
-        assert "Regulating platforms" not in in_fr | in_en
-        assert "Platforms and citations" not in in_fr | in_en
+        unknown = {"Regulating platforms", "Platforms and citations"}
+        assert unknown <= everything
+        assert unknown <= in_fr and unknown <= in_en
+        assert "Platform governance" not in in_fr
+        strict = titles({"languages": ["fr", "en"],
+                         "keep_unknown_language": False})
+        assert not unknown & strict
+        assert strict == {"Régulation des plateformes", "Platform governance"}
 
     def test_etat_de_l_art_searches_subthemes_without_language_filter(self):
         text = _prompt("etat-de-l-art", PROMPT_ARGS["etat-de-l-art"])
@@ -198,7 +204,7 @@ class TestLanguageFilter:
         assert '"language"' in step5 and "fields=[" in step5
         # Tout usage du filtre de langue porte la réserve.
         if "languages" in step5:
-            assert "écarterait les notices sans langue" in step5
+            assert "garde dans chaque passe les notices sans langue" in step5
         for label in _labels_without_language():
             assert label in step5, label
         assert "langue non indiquée" in step5
@@ -218,7 +224,9 @@ class TestLanguageFilter:
     def test_corpus_query_filters_description(self):
         text = _tools()["corpus_query"].inputSchema["properties"]["filters"][
             "description"]
-        assert "languages écarte les notices sans langue" in text
+        assert "les notices sans langue lisible" in text
+        assert "sont gardées" in text
+        assert "keep_unknown_language: false les écarte" in text
         assert "notices sans année" in text
         for label in _labels_without_language():
             assert label in text, label

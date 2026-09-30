@@ -1463,6 +1463,176 @@ def inherited_records(source_doc: Optional[Dict[str, Any]],
     return out
 
 
+# === Contexte des entrées d'une fusion (PAT-18) ===
+
+# Niveaux de corpus dérivés remontés pour retrouver la moisson d'origine.
+LINEAGE_MAX_DEPTH = 3
+# Champs gardés du statut de chaque source dans un contexte compact.
+CONTEXT_SOURCE_KEYS = ("source", "status", "reason", "items", "limit_reached",
+                       "provider_window", "native_sort")
+
+
+def harvest_ancestor(directory: Path, doc: Optional[Dict[str, Any]], *,
+                     max_depth: int = LINEAGE_MAX_DEPTH,
+                     ) -> Tuple[Optional[Dict[str, Any]], Optional[str]]:
+    """
+    Manifeste porteur du contexte de moisson : ``doc`` lui-même, ou celui de
+    son entrée unique pour un corpus dérivé (filtre, résolution DOI,
+    conversion), au plus ``max_depth`` niveaux, dans ``directory``.
+
+    Returns:
+        ``(manifeste, nom du manifeste hérité ou None)``.
+    """
+    from utils.output_files import validate_flat_name
+
+    harvest_doc, inherited, depth = doc, None, 0
+    while harvest_doc is not None and not harvest_doc.get("sources") \
+            and depth < max_depth:
+        inputs = [i for i in harvest_doc.get("inputs") or [] if isinstance(i, dict)]
+        if len(inputs) != 1 or not inputs[0].get("manifest"):
+            break
+        try:
+            name = validate_flat_name(str(inputs[0]["manifest"]))
+        except ValueError:
+            break
+        parent = read_manifest(Path(directory) / name)
+        if parent is None:
+            break
+        harvest_doc, inherited = parent, name
+        depth += 1
+    return harvest_doc, inherited
+
+
+def compact_context(doc: Optional[Dict[str, Any]], *,
+                    inherited_from: Optional[str] = None,
+                    ) -> Optional[Dict[str, Any]]:
+    """
+    Contexte compact d'une production, pour les entrées d'une fusion
+    (PAT-18) : requête (texte, mode, sources demandées, dates, langues),
+    statut, plafond et tri de chaque source, plafond par source, mode de
+    classement, date de début et identité du code. None sans manifeste.
+    """
+    if not doc:
+        return None
+    query = doc.get("query")
+    if not isinstance(query, dict):
+        query = {"text": query} if isinstance(query, str) else {}
+    filters = doc.get("filters") if isinstance(doc.get("filters"), dict) else {}
+    settings = doc.get("settings") if isinstance(doc.get("settings"), dict) else {}
+    ranking = doc.get("ranking") if isinstance(doc.get("ranking"), dict) else {}
+    versions = doc.get("versions") if isinstance(doc.get("versions"), dict) else {}
+    sources: Dict[str, Any] = {}
+    raw_sources = doc.get("sources")
+    for label, entry in (raw_sources.items() if isinstance(raw_sources, dict)
+                         else ()):
+        if isinstance(entry, dict):
+            sources[label] = {k: entry.get(k) for k in CONTEXT_SOURCE_KEYS
+                              if entry.get(k) is not None}
+    text = query.get("text")
+    ctx: Dict[str, Any] = {
+        "kind": doc.get("kind"),
+        "query": {
+            "text": text if isinstance(text, str) else None,
+            "mode": query.get("mode"),
+            "sources": list(query.get("sources") or []),
+            "from_date": filters.get("from_date", query.get("from_date")),
+            "to_date": filters.get("to_date", query.get("to_date")),
+            "languages": list(filters.get("languages")
+                              or query.get("languages") or []),
+        },
+        "sources": sources,
+        "settings": {"max_per_source": settings.get("max_per_source")},
+        "ranking": {"mode": ranking.get("mode")},
+        "started_at": doc.get("started_at") or doc.get("finished_at"),
+        "versions": {k: versions.get(k) for k in ("package", "commit", "dirty")
+                     if k in versions},
+    }
+    if query.get("author"):
+        ctx["query"]["author"] = query.get("author")
+    if inherited_from:
+        ctx["inherited_from"] = inherited_from
+    return ctx
+
+
+def merge_contexts(doc: Optional[Dict[str, Any]]) -> List[Optional[Dict[str, Any]]]:
+    """
+    Contextes des entrées d'une fusion, fusions imbriquées aplaties ; None
+    pour une entrée sans contexte (corpus sans manifeste, ou fusion écrite
+    avant PAT-18).
+    """
+    out: List[Optional[Dict[str, Any]]] = []
+    for entry in (doc or {}).get("inputs") or []:
+        if not isinstance(entry, dict):
+            continue
+        ctx = entry.get("context")
+        if isinstance(ctx, dict) and isinstance(ctx.get("inputs"), list):
+            out.extend(c if isinstance(c, dict) else None for c in ctx["inputs"])
+        else:
+            out.append(ctx if isinstance(ctx, dict) else None)
+    return out
+
+
+def merge_input_entry(path: Path, *, items: Optional[int] = None,
+                      doc: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    """
+    Entrée ``inputs[i]`` du manifeste d'une fusion (PAT-18) : nom, taille,
+    empreinte, notices chargées, manifeste, type de production et contexte
+    compact (celui de la moisson d'origine pour un corpus dérivé ; les
+    contextes de ses entrées pour une fusion). Jamais de chemin disque.
+    """
+    path = Path(path)
+    try:
+        size, sha = file_digest(path)
+    except OSError:
+        size, sha = None, None
+    if doc is None:
+        doc = load_manifest_for(path)
+    stem = corpus_stem_of(path.name)
+    entry: Dict[str, Any] = {
+        "name": path.name, "bytes": size, "sha256": sha, "items": items,
+        "manifest": manifest_name(stem) if doc is not None and stem else None,
+        "kind": doc.get("kind") if doc else None,
+    }
+    if doc is not None and doc.get("kind") == KIND_MERGE:
+        entry["context"] = {"kind": KIND_MERGE, "inputs": merge_contexts(doc)}
+    else:
+        ancestor, inherited = harvest_ancestor(path.parent, doc)
+        entry["context"] = compact_context(ancestor, inherited_from=inherited)
+    return entry
+
+
+def merged_records(items: Sequence[Dict[str, Any]],
+                   origins: Sequence[Sequence[Tuple[int, int]]],
+                   input_docs: Sequence[Optional[Dict[str, Any]]],
+                   ) -> List[Dict[str, Any]]:
+    """
+    Entrées ``records`` d'une fusion (PAT-18) : position, clé forte et
+    origines de chaque notice : ``input`` (indice de l'entrée dans
+    ``inputs``, 0 pour la première), ``position`` dans ce corpus et rangs
+    natifs qu'y consigne son manifeste (``input_docs[k]``, None quand il ne
+    décrit pas le fichier). Aucun rang global : les classements de moissons
+    distinctes ne se comparent pas.
+    """
+    from utils.ranking import record_id
+
+    by_position: List[Dict[Any, Dict[str, Any]]] = []
+    for doc in input_docs:
+        by_position.append({r.get("position"): r
+                            for r in (doc or {}).get("records") or []
+                            if isinstance(r, dict)})
+    out: List[Dict[str, Any]] = []
+    for i, item in enumerate(items):
+        entries = []
+        for k, pos in (origins[i] if i < len(origins) else ()):
+            origin: Dict[str, Any] = {"input": k, "position": pos}
+            src = by_position[k].get(pos) if 0 <= k < len(by_position) else None
+            if src and src.get("native"):
+                origin["native"] = src["native"]
+            entries.append(origin)
+        out.append({"position": i + 1, "id": record_id(item), "origins": entries})
+    return out
+
+
 def soft_deadline_summary(result: Any, ctx: Any) -> Optional[Dict[str, Any]]:
     """Échéance souple de l'exécution (OPT-09 bis), ou None sans échéance."""
     at = getattr(ctx, "soft_deadline", None)

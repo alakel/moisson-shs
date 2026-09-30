@@ -73,7 +73,8 @@ from utils.http import HTTPClient, OperationCancelled, cache_enabled_from_env
 from utils.deduplication import deduplicate
 from utils.lookups import fetch_by_doi, search_by_author
 from utils.corpus_ops import (
-    CorpusFormatError, check_zotero_corpus, merge_corpora, format_merge_report,
+    CorpusFormatError, check_zotero_corpus, format_merge_report,
+    merge_corpora_detailed,
 )
 from connectors.registry import (
     CONNECTORS, resolve_sources, list_source_tokens, FRANCOPHONE_SOURCES,
@@ -90,9 +91,10 @@ from engine.outputs import cleanup_raw, corpus_stem, write_outputs
 from utils.http import attach_native_audit
 from utils.manifest import (
     KIND_AUTHOR, KIND_CSL, KIND_DOI, KIND_FILTER, KIND_LABELS, KIND_MERGE,
-    STATUS_LABELS, LockTimeout, Publication, directory_lock, file_digest,
+    STATUS_LABELS, LockTimeout, Publication, directory_lock,
     harvest_manifest_fields, inherited_records, list_corpora, load_index,
-    load_manifest_for, native_audit_for_run, now_iso, simple_records,
+    load_manifest_for, manifest_describes, merge_input_entry, merged_records,
+    native_audit_for_run, now_iso, simple_records,
 )
 # Classement des notices (OPT-13) : argument ranking, structuredContent.top_ranked.
 from utils.ranking import RANKING_MODES, top_ranked_payload
@@ -802,6 +804,32 @@ async def list_tools() -> list[types.Tool]:
                         ),
                         "default": False,
                     },
+                    "hal_fulltext": {
+                        "type": "boolean",
+                        "description": (
+                            "HAL cherche aussi dans le texte intégral des "
+                            "dépôts (fulltext_t ; 36 % des dépôts ont un "
+                            "fichier indexé). Sans lui, HAL ne cherche que "
+                            "dans les métadonnées (titre, résumé, mots-clés). "
+                            "Ensemble bien plus large et plus bruité : "
+                            "« \"modèle actantiel\" » rend 7 notices sans, "
+                            "228 avec. Sans effet sur les autres sources."
+                        ),
+                        "default": False,
+                    },
+                    "on_ambiguity": {
+                        "type": "string",
+                        "enum": ["warn", "refuse"],
+                        "description": (
+                            "Requête ambiguë (OR mêlé sans parenthèses à des "
+                            "termes juxtaposés, à AND ou à une exclusion) : "
+                            "« warn » l'envoie avec un avertissement en tête "
+                            "du retour, « refuse » ne l'envoie pas. Défaut : "
+                            "« refuse » quand une source facturée (Google "
+                            "Scholar) est demandée, « warn » sinon. plan_only "
+                            "ne refuse jamais."
+                        ),
+                    },
                     # Échéance souple en stdio (OPT-09 bis).
                     "deadline_seconds": _soft_deadline_schema(),
                     "ranking": {
@@ -1216,10 +1244,21 @@ async def list_tools() -> list[types.Tool]:
                     "language": {
                         "type": "string",
                         "description": (
-                            "Code langue (fr, en, es…), cherché dans le champ "
-                            "language des notices (notices sans langue "
-                            "écartées)."
+                            "Code langue (fr, en, es… ; « fre », « French » "
+                            "reconnus), lu dans le champ language des notices. "
+                            "Les notices sans langue lisible sont gardées et "
+                            "comptées, comme dans la moisson (CrossRef, "
+                            "Google Scholar n'en donnent pas) ; "
+                            "keep_unknown_language: false les écarte."
                         ),
+                    },
+                    "keep_unknown_language": {
+                        "type": "boolean",
+                        "description": (
+                            "Avec language : garder les notices sans langue "
+                            "lisible (défaut vrai)."
+                        ),
+                        "default": True,
                     },
                     "title_contains": {
                         "type": "string",
@@ -1502,14 +1541,14 @@ async def list_tools() -> list[types.Tool]:
                             "item_types (types Zotero), languages (codes "
                             "ISO 639-1), sources (HAL, Isidore, CrossRef… ; "
                             "casse, accents et mention entre parenthèses "
-                            "ignorés), has_doi, has_abstract (booléens). Les "
-                            "filtres d'année écartent les notices sans année, "
-                            "languages écarte les notices sans langue : "
-                            "celles venues seulement de "
-                            f"{_labels_without_language('ou')}, qui n'en portent "
-                            "pas, et certaines d'autres sources (pour les "
-                            "garder, chercher sans ce filtre et lire le champ "
-                            "language)."
+                            "ignorés), has_doi, has_abstract, "
+                            "keep_unknown_language (booléens). Les "
+                            "filtres d'année écartent les notices sans année ; "
+                            "avec languages, les notices sans langue lisible "
+                            "(celles venues seulement de "
+                            f"{_labels_without_language('ou')}, et certaines "
+                            "d'autres sources) sont gardées, comme dans la "
+                            "moisson ; keep_unknown_language: false les écarte."
                         ),
                         "properties": {
                             "year_min": {"type": "integer"},
@@ -1522,6 +1561,7 @@ async def list_tools() -> list[types.Tool]:
                                         "items": {"type": "string"}},
                             "has_doi": {"type": "boolean"},
                             "has_abstract": {"type": "boolean"},
+                            "keep_unknown_language": {"type": "boolean"},
                         },
                     },
                     "fields": {
@@ -2808,16 +2848,42 @@ async def _tool_moisson_search(args: dict[str, Any]) -> tuple[list, dict] | str:
 
     query_variants = args.get("query_variants") or None
     languages = args.get("languages") or None
+    hal_fulltext = args.get("hal_fulltext", False)
+    if not isinstance(hal_fulltext, bool):
+        return ToolError("Paramètre refusé : hal_fulltext doit être un "
+                         "booléen (true ou false)")
     try:
         plan = build_query_plan(
             query, resolve_sources(sources), query_variants=query_variants,
             languages=languages, mode=mode, from_date=from_date,
-            to_date=to_date,
+            to_date=to_date, hal_fulltext=hal_fulltext,
         )
     except ValueError as exc:     # QueryPlanError, source inconnue
         return ToolError(f"Paramètre refusé : {exc}")
     if args.get("plan_only"):
         return _plan_only_result(plan)
+    # Requête ambiguë (PAT-19, décision DP-7) : refusée par défaut quand une
+    # source facturée est demandée (la lecture retenue partait telle quelle
+    # vers SerpAPI), envoyée avec un avertissement en tête sinon.
+    from connectors.registry import is_metered_source
+    on_ambiguity = args.get("on_ambiguity")
+    if on_ambiguity is not None and on_ambiguity not in ("warn", "refuse"):
+        return ToolError(f"Paramètre refusé : on_ambiguity {on_ambiguity!r} "
+                         f"inconnu (attendu : warn, refuse).")
+    metered = [e.label for e in plan.sources if is_metered_source(e.source)]
+    if on_ambiguity is None:
+        on_ambiguity = "refuse" if metered else "warn"
+    if plan.ambiguities and on_ambiguity == "refuse":
+        readings = " ; ".join(f"« {a['reading']} »" for a in plan.ambiguities)
+        why = (f"source facturée demandée ({', '.join(metered)}) : "
+               if metered else "")
+        return ToolError(
+            f"Requête ambiguë, non envoyée : lue {readings}. {why}ajouter des "
+            f"parenthèses pour fixer la lecture, ou passer "
+            f"on_ambiguity='warn' pour l'envoyer telle quelle (plan_only "
+            f"montre la lecture sans rien envoyer).",
+            structured={"query": query, "ambiguities": plan.ambiguities,
+                        "query_plan": plan.as_dict()})
 
     # Plafond serveur DUR (anti-DoS) : clamp HTTP-only, indépendant de l'arg
     # client. En stdio (local), pas de clamp.
@@ -2854,6 +2920,8 @@ async def _tool_moisson_search(args: dict[str, Any]) -> tuple[list, dict] | str:
             extra["query_variants"] = query_variants
         if languages:
             extra["languages"] = languages
+        if hal_fulltext:
+            extra["hal_fulltext"] = True
         if ranking is not None:
             extra["ranking"] = ranking
         if args.get("inline") is not None:
@@ -2934,6 +3002,7 @@ def _plan_only_result(plan) -> tuple[list, dict]:
     lines = [
         "Aperçu du plan de requête : aucune moisson exécutée, aucun fichier "
         "écrit.",
+        *plan.ambiguity_lines(),
         "",
         *plan.text_lines(),
     ]
@@ -2944,6 +3013,8 @@ def _plan_only_result(plan) -> tuple[list, dict]:
         "query_plan": plan.as_dict(),
         "item_count": 0,
     }
+    if plan.ambiguities:
+        structured["warnings"] = plan.ambiguity_lines()
     if TRANSPORT_MODE == "http":
         structured["transport"] = "http"
     return [types.TextContent(type="text", text="\n".join(lines))], structured
@@ -3062,6 +3133,7 @@ def _run_moisson_sync(
     ranking: str | None = None,
     inline: str | None = None,
     top: int | None = None,
+    hal_fulltext: bool = False,
 ) -> tuple[list, dict] | ToolError:
     """
     Exécution synchrone de la moisson (dans un thread d'executor).
@@ -3143,6 +3215,7 @@ def _run_moisson_sync(
         mode=mode, max_per_source=max_per_source, enrich_oai=enrich_oai,
         dedup=do_dedup, cache=use_cache, workers=workers or 1,
         query_variants=query_variants or {}, languages=languages or [],
+        hal_fulltext=bool(hal_fulltext),
     )
     plan = request.query_plan()
     cache_dir = mcp_cache_dir()
@@ -3209,6 +3282,7 @@ def _run_moisson_sync(
         lines = [
             "Moisson en échec : aucune source n'a pu être moissonnée ; aucun "
             "corpus n'a été écrit.",
+            *plan.ambiguity_lines(),
             *(f"Attention : {line}" for line in result.flow_outage_lines()),
             "",
             f"Requête : {query}",
@@ -3273,8 +3347,11 @@ def _run_moisson_sync(
     if unconfigured:
         structured["unconfigured_sources"] = unconfigured
     # === Construction de la réponse pour Claude ===
+    if plan.ambiguities:
+        structured["warnings"] = plan.ambiguity_lines()
     lines = [
         head,
+        *plan.ambiguity_lines(),
         *(f"Attention : {line}" for line in result.flow_outage_lines()),
         *([f"Sources non configurées (clé d'API absente) : "
            f"{', '.join(unconfigured)}."] if unconfigured else []),
@@ -4055,6 +4132,7 @@ def _corpus_filter_sync(args: dict[str, Any]) -> str | tuple[list, dict]:
     item_types = set(args.get("item_types", []))
     sources_filter = set(args.get("sources", []))
     language = args.get("language", "").lower()
+    keep_unknown_language = args.get("keep_unknown_language", True) is not False
     title_contains = args.get("title_contains", "").lower()
     suffix = args.get("output_suffix", "_filtered")
     # En HTTP : valider le charset du suffixe (anti-traversal via un '/' ou '..').
@@ -4062,6 +4140,11 @@ def _corpus_filter_sync(args: dict[str, Any]) -> str | tuple[list, dict]:
         suffix = validate_suffix(suffix)
 
     from utils.cleaner import extract_year, normalize_for_fingerprint
+    from utils.query_plan import item_languages, notice_languages
+    # Langue demandée ramenée à un code ISO (« fre », « French » → fr) ; une
+    # valeur non reconnue garde l'ancienne recherche par sous-chaîne.
+    wanted_languages = set(item_languages(language)) if language else set()
+    unknown_language = {"kept": 0, "removed": 0}
     filtered = []
     for item in items:
         # Filtre par année
@@ -4092,9 +4175,21 @@ def _corpus_filter_sync(args: dict[str, Any]) -> str | tuple[list, dict]:
             if not sources_filter & found_sources:
                 continue
 
-        # Filtre par langue
-        if language and language not in item.get("language", "").lower():
-            continue
+        # Filtre par langue (PAT-21, décision DP-8) : notice sans langue
+        # lisible gardée et comptée, comme dans la moisson, sauf
+        # keep_unknown_language=False.
+        if language:
+            langs = notice_languages(item)
+            if not langs:
+                if not keep_unknown_language:
+                    unknown_language["removed"] += 1
+                    continue
+                unknown_language["kept"] += 1
+            elif wanted_languages:
+                if not wanted_languages & set(langs):
+                    continue
+            elif language not in str(item.get("language") or "").lower():
+                continue
 
         # Filtre par mot dans titre (normalisé)
         if title_contains:
@@ -4121,6 +4216,8 @@ def _corpus_filter_sync(args: dict[str, Any]) -> str | tuple[list, dict]:
         "language": language or None,
         "title_contains": title_contains or None,
     }
+    if language:
+        filters["keep_unknown_language"] = keep_unknown_language
     # Publication atomique et manifeste (OPT-16). Le nom reste dérivé du
     # corpus source et du suffixe (contrat de l'outil) : un nouveau filtrage
     # de même suffixe remplace le précédent, atomiquement.
@@ -4139,10 +4236,19 @@ def _corpus_filter_sync(args: dict[str, Any]) -> str | tuple[list, dict]:
         })
 
     retention = round(100 * len(filtered) / max(len(items), 1), 1)
+    unknown_line = ""
+    if language and unknown_language["kept"]:
+        unknown_line = (f"Notices sans langue lisible gardées : "
+                        f"{unknown_language['kept']} (keep_unknown_language: "
+                        f"false pour les écarter)\n")
+    elif language and unknown_language["removed"]:
+        unknown_line = (f"Notices sans langue lisible écartées : "
+                        f"{unknown_language['removed']}\n")
     summary = (
         f"Filtrage appliqué.\n"
         f"Corpus source : {corpus_path.name} ({len(items)} items)\n"
         f"Sous-corpus : {output_path.name} ({len(filtered)} items)\n"
+        f"{unknown_line}"
         f"Taux de rétention : {retention:.1f} %\n"
         f"Chemin complet : {output_path}\n"
         f"Manifeste : {manifest_path.name}"
@@ -4155,6 +4261,8 @@ def _corpus_filter_sync(args: dict[str, Any]) -> str | tuple[list, dict]:
         "filters": filters,
         "manifest": manifest_path.name,
     }
+    if language:
+        structured["unknown_language"] = dict(unknown_language)
     return _build_corpus_tool_result(
         summary_text=summary,
         primary_items=filtered,
@@ -5893,17 +6001,19 @@ def _corpus_merge_sync(args: dict[str, Any]) -> str | tuple[list, dict]:
     # Entrées au format Zotero interne seulement (OPT-16) : refus clair d'un
     # CSL-JSON, d'un manifeste ou d'un rapport DOI, avant toute écriture.
     try:
-        merged, report = merge_corpora(corpus_paths)
+        merged, report, detail = merge_corpora_detailed(corpus_paths)
     except CorpusFormatError as e:
         return ToolError(str(e))
 
-    inputs = []
-    for p in corpus_paths:
-        try:
-            size, sha = file_digest(p)
-        except OSError:
-            size, sha = None, None
-        inputs.append({"name": p.name, "bytes": size, "sha256": sha})
+    # Contexte de chaque entrée (PAT-18) : requête, mode, sources, dates,
+    # statuts, plafonds et tris de la moisson d'origine ; origine de chaque
+    # notice dans ``records`` (rangs natifs repris seulement d'un manifeste
+    # qui décrit encore son fichier).
+    inputs, input_docs = [], []
+    for k, p in enumerate(corpus_paths):
+        doc = load_manifest_for(p)
+        inputs.append(merge_input_entry(p, items=detail["loaded"][k], doc=doc))
+        input_docs.append(doc if manifest_describes(doc, p) else None)
     csl_path = output.parent / (output.stem + ".csl.json")
     stem = corpus_stem_of(output.name) or output.stem
     # Publication atomique et manifeste (OPT-16).
@@ -5912,7 +6022,7 @@ def _corpus_merge_sync(args: dict[str, Any]) -> str | tuple[list, dict]:
                      path_roots=_publication_roots(*corpus_paths)) as pub:
         pub.add_json(output, merged, role=ROLE_ZOTERO)
         pub.add_json(csl_path, export_corpus_to_csl(merged), role=ROLE_CSL)
-        records = simple_records(merged)
+        records = merged_records(merged, detail["origins"], input_docs)
         manifest_path = pub.commit({
             "inputs": inputs,
             "merge_report": report,
@@ -6892,8 +7002,9 @@ def _prompt_etat_de_l_art(args: dict[str, str]) -> str:
         "cherche les notices avec corpus_query (query = termes du sous-thème, "
         "SANS filtre de langue, en demandant le champ language : "
         "fields=[\"id\", \"title\", \"authors\", \"year\", \"venue\", "
-        "\"language\", \"sources\"]). Le filtre languages écarterait les "
-        "notices sans langue, dont toutes celles venues seulement de "
+        "\"language\", \"sources\"]). Le filtre languages ne trancherait "
+        "pas : il garde dans chaque passe les notices sans langue, dont "
+        "toutes celles venues seulement de "
         f"{_labels_without_language('ou')}, qui n'en portent pas. Classe "
         "ensuite les candidates d'après leur champ language : français, "
         "anglais, ou langue non indiquée (ne la devine pas). Lis les résumés "
