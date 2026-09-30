@@ -31,7 +31,7 @@ Variante Caddy (`docker-compose.yml`) :
 
 ```bash
 git pull
-docker compose build
+MOISSON_BUILD_COMMIT=$(git rev-parse HEAD) docker compose build
 docker compose up -d
 docker compose logs app | grep -E "Bearer statique|OAuth"
 curl -I https://moisson.example.org/healthz
@@ -41,12 +41,14 @@ Variante Nginx (`docker-compose.nginx.yml`, § 9) :
 
 ```bash
 git pull
-docker compose -f docker-compose.nginx.yml build
+MOISSON_BUILD_COMMIT=$(git rev-parse HEAD) docker compose -f docker-compose.nginx.yml build
 docker compose -f docker-compose.nginx.yml up -d
 docker compose -f docker-compose.nginx.yml logs app | grep -E "Bearer statique|OAuth"
 curl -I http://127.0.0.1:8010/healthz
 curl -I https://moisson.example.org/healthz
 ```
+
+`MOISSON_BUILD_COMMIT` (facultatif) inscrit le commit dans l'image, dont le contexte de construction exclut `.git` : `/healthz` rend alors `version` et `commit`, et chaque manifeste porte le commit, l'état de l'arbre et l'empreinte du code (PAT-03).
 
 Puis, dans cet ordre (variante Nginx : `docker compose -f docker-compose.nginx.yml` à la place
 de `docker compose` dans **chacune** des commandes ci-dessous, sans exception) :

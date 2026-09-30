@@ -59,11 +59,10 @@ Aide détaillée par sous-commande :
 
 
 def _get_version() -> str:
-    try:
-        from importlib.metadata import version
-        return version("moisson-shs")
-    except Exception:
-        return "0.3.0 (source / non installé)"
+    """Version, commit, état de l'arbre et empreinte du code (PAT-03) :
+    ``0.4.0.dev0 (commit e61c2b9, arbre modifié, code 26f50d42fd51)``."""
+    from utils.build_info import describe
+    return describe()
 
 
 def _dispatch_token(token_argv: list[str]) -> int:

@@ -339,30 +339,24 @@ def file_digest(path: Path, chunk: int = 1 << 20) -> Tuple[int, str]:
     return size, h.hexdigest()
 
 
-def _pyproject_version() -> Optional[str]:
-    try:
-        text = (Path(__file__).resolve().parents[1] / "pyproject.toml").read_text(
-            encoding="utf-8")
-    except OSError:
-        return None
-    match = re.search(r'(?m)^version\s*=\s*"([^"]+)"', text)
-    return match.group(1) if match else None
-
-
 @lru_cache(maxsize=1)
 def software_versions() -> Dict[str, Any]:
     """
-    Versions consignées dans chaque manifeste : paquet, schéma du manifeste,
-    règles de déduplication, classement, règles DOI, plan de requête.
+    Versions consignées dans chaque manifeste : paquet, identité du code
+    (commit, état de l'arbre, empreinte des modules : PAT-03), schéma du
+    manifeste, règles de déduplication, classement, règles DOI, plan de
+    requête.
     """
-    package = None
     try:
-        from importlib.metadata import version
-        package = version("moisson-shs")
-    except Exception:  # noqa: BLE001 - paquet non installé (arbre de travail)
-        package = None
+        from utils.build_info import build_info
+        info = build_info()
+    except Exception:  # noqa: BLE001 - identité du code indisponible
+        info = {}
     versions: Dict[str, Any] = {
-        "package": package or _pyproject_version() or "inconnue",
+        "package": info.get("version") or "inconnue",
+        "commit": info.get("commit"),
+        "dirty": info.get("dirty"),
+        "code_sha256": info.get("code_sha256"),
         "manifest": MANIFEST_VERSION,
         "python": platform.python_version(),
     }

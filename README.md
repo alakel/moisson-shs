@@ -200,7 +200,7 @@ En HTTP : authentification **Bearer** (et OAuth 2.1 en option), chemins confiné
 
 ### `moisson-shs token` et `moisson-shs version`
 
-`moisson-shs token {generate,rotate,status,revoke}` gère les jetons Bearer du serveur distant (seule l'empreinte SHA-256 est conservée) ; `moisson-shs version` affiche la version.
+`moisson-shs token {generate,rotate,status,revoke}` gère les jetons Bearer du serveur distant (seule l'empreinte SHA-256 est conservée) ; `moisson-shs version` affiche la version, le commit, l'état de l'arbre de travail et l'empreinte du code, les mêmes que ceux des manifestes.
 
 ---
 

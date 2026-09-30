@@ -13,7 +13,12 @@
 
 services:
   app:
-    build: .
+    build:
+      context: .
+      args:
+        # Commit du code (PAT-03) : MOISSON_BUILD_COMMIT=$(git rev-parse HEAD)
+        # devant la commande de construction ; vide sinon.
+        MOISSON_BUILD_COMMIT: ${MOISSON_BUILD_COMMIT:-}
     restart: unless-stopped
     env_file: .env
     environment:

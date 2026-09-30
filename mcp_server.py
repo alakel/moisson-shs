@@ -67,6 +67,8 @@ import mcp.types as types
 # Le serveur doit être lancé depuis le répertoire racine du projet
 sys.path.insert(0, str(Path(__file__).parent))
 
+from _version import __version__
+from utils.build_info import describe as describe_build
 from utils.http import HTTPClient, OperationCancelled, cache_enabled_from_env
 from utils.deduplication import deduplicate
 from utils.lookups import fetch_by_doi, search_by_author
@@ -331,11 +333,9 @@ def _metrics_snapshot() -> dict:
 
 
 def _get_version_string() -> str:
-    try:
-        from importlib.metadata import version
-        return version("moisson-shs")
-    except Exception:
-        return "unknown"
+    """Version du paquet, lue dans ``_version.py`` (PAT-03) et non dans les
+    métadonnées d'installation, qui peuvent retarder sur le code."""
+    return __version__
 
 
 def _audit_client_id() -> str | None:
@@ -419,7 +419,9 @@ def _is_tool_error(result) -> bool:
 
 
 # === Instanciation du serveur MCP ===
-server = Server("moisson-shs")
+# Version du paquet (PAT-03) : sans elle, le SDK annonce sa propre version
+# dans serverInfo.version (1.27.1 constaté le 2026-09-30).
+server = Server("moisson-shs", version=__version__)
 
 
 def _digest_arguments(export: bool = False) -> dict:
@@ -6905,7 +6907,8 @@ async def run_stdio():
     via stdin/stdout en utilisant le protocole JSON-RPC. Comportement
     historique inchangé (Sprint 05).
     """
-    logger.info("Démarrage serveur MCP moisson-shs (stdio)")
+    logger.info("Démarrage serveur MCP moisson-shs (stdio) : %s ; PID %d",
+                describe_build(), os.getpid())
     logger.info(f"OUTPUT_DIR = {OUTPUT_DIR}")
 
     async with stdio_server() as (read_stream, write_stream):
@@ -7251,9 +7254,12 @@ def build_http_app(
             writable = os.access(OUTPUT_DIR, os.W_OK)
         except Exception:
             writable = False
+        from utils.build_info import build_info
         return JSONResponse({
             "status": "ok",
             "version": _get_version_string(),
+            # Commit du code (PAT-03) : public comme le dépôt, jamais un chemin.
+            "commit": build_info().get("commit"),
             "mode": TRANSPORT_MODE,
             "uptime_s": round(time.monotonic() - _START_MONOTONIC, 1),
             "output_dir_writable": writable,
@@ -7496,7 +7502,8 @@ def serve_http(
     # Logging structuré JSON sur stderr (observabilité prod, Sprint 11).
     configure_json_logging()
 
-    logger.info("Démarrage serveur MCP moisson-shs (HTTP / Streamable HTTP)")
+    logger.info("Démarrage serveur MCP moisson-shs (HTTP / Streamable HTTP) : "
+                "%s ; PID %d", describe_build(), os.getpid())
     logger.info(f"OUTPUT_DIR = {OUTPUT_DIR}")
     logger.info(f"Écoute uvicorn : http://{host}:{port}{path}")
     logger.info(f"Allowed hosts : {allowed_hosts or '(aucun)'}")

@@ -4,7 +4,9 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "moisson-shs"
-version = "0.3.0"
+# Version lue dans _version.py (source unique, PAT-03) : voir
+# [tool.setuptools.dynamic] plus bas.
+dynamic = ["version"]
 description = "Moissonneur bibliographique SHS multi-sources (douze sources : HAL, Isidore, OpenEdition, Cairn, Persée, Theses.fr, Érudit, CrossRef, OpenAlex, Semantic Scholar, CORE, Google Scholar via SerpAPI) vers Zotero JSON, CSL-JSON, BibTeX et RIS, avec serveur MCP local (stdio) et distant (HTTP)."
 readme = "README.md"
 authors = [{ name = "Amar Lakel", email = "amar.lakel@gmail.com" }]
@@ -90,9 +92,13 @@ Repository = "https://github.com/amarlakel/moisson-shs"
 Issues = "https://github.com/amarlakel/moisson-shs/issues"
 Documentation = "https://github.com/amarlakel/moisson-shs#readme"
 
-# === Setuptools : configuration src/ flat layout ===
+# === Setuptools : layout plat (modules et paquets à la racine du dépôt) ===
 [tool.setuptools]
-py-modules = ["cli", "main", "mcp_server", "config", "setup_claude_desktop", "auth", "remote_auth", "oauth_provider"]
+# Garder cette liste identique à utils/build_info.PACKAGED_MODULES (test).
+py-modules = ["cli", "main", "mcp_server", "config", "setup_claude_desktop", "auth", "remote_auth", "oauth_provider", "_version"]
+
+[tool.setuptools.dynamic]
+version = { attr = "_version.__version__" }
 
 [tool.setuptools.packages.find]
 include = ["connectors*", "mappers*", "utils*", "engine*"]

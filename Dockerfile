@@ -43,6 +43,14 @@ COPY --from=builder /wheels /wheels
 RUN pip install --no-cache-dir --no-index --find-links=/wheels "moisson-shs[mcp]" \
     && rm -rf /wheels
 
+# Identité du code (PAT-03) : le contexte de construction exclut .git
+# (.dockerignore), le commit est donc passé en argument et recopié dans
+# l'environnement, où utils/build_info.py le lit (manifestes, /healthz,
+# journal de démarrage). Construction :
+#   docker build --build-arg MOISSON_BUILD_COMMIT=$(git rev-parse HEAD) -t moisson-shs .
+ARG MOISSON_BUILD_COMMIT=""
+ENV MOISSON_BUILD_COMMIT=${MOISSON_BUILD_COMMIT}
+
 # Répertoire de données persistant (corpus + cache), monté en volume.
 # MOISSON_CACHE_DIR : cache HTTP dans le volume /data/cache (le serveur écrit
 # /data/cache/http_mcp.sqlite), et non dans la couche inscriptible du

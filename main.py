@@ -252,10 +252,12 @@ def stats_text(stats: Dict, query: str) -> str:
         stats: Dict de stats
         query: Requête d'origine
     """
+    from utils.build_info import describe
     lines = [
         f"=== Statistiques du corpus ===",
         f"Requête : {query}",
         f"Date : {datetime.now().isoformat(timespec='seconds')}",
+        f"Version : moisson-shs {describe()}",
         f"",
         f"Total items : {stats['total_items']}",
         f"Items avec DOI : {stats['with_doi']} ({stats['doi_coverage_pct']}%)",
