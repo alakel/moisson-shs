@@ -215,7 +215,15 @@ class TestRegistryGroups:
 
     def test_source_groups_defined(self):
         from connectors.registry import SOURCE_GROUPS
-        assert set(SOURCE_GROUPS) == {"francophone", "international", "all"}
+        assert set(SOURCE_GROUPS) == {
+            "francophone", "international", "all", "scholar",
+        }
+
+    def test_metered_sources_excluded_from_free_groups(self):
+        """Une source facturée ne doit jamais être atteinte par `all`."""
+        from connectors.registry import METERED_SOURCES, SOURCE_GROUPS
+        for group in ("francophone", "international", "all"):
+            assert not METERED_SOURCES & set(SOURCE_GROUPS[group])
 
     def test_list_source_tokens_has_names_and_groups(self):
         from connectors.registry import list_source_tokens

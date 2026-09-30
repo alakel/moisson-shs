@@ -11,23 +11,33 @@ import setup_claude_desktop as S
 
 
 class _Args:
-    def __init__(self, openalex=None, s2=None, core=None):
+    def __init__(self, openalex=None, s2=None, core=None, serpapi=None):
         self.openalex_key = openalex
         self.semantic_scholar_key = s2
         self.core_key = core
+        self.serpapi_key = serpapi
+
+
+@pytest.fixture(autouse=True)
+def _isolated_api_key_env(monkeypatch):
+    """
+    Vide toutes les variables de clés API avant chaque test.
+
+    Sans cela, les tests lisent l'environnement réel : une clé présente dans
+    le `.env` du projet fausse les assertions et, pire, s'affiche en clair
+    dans le rapport d'échec de pytest (et donc dans les logs de CI).
+    """
+    for var in S.API_KEY_ENV_VARS:
+        monkeypatch.delenv(var, raising=False)
 
 
 class TestCollectApiKeyEnv:
-    def test_from_flags(self, monkeypatch):
-        for v in S.API_KEY_ENV_VARS:
-            monkeypatch.delenv(v, raising=False)
+    def test_from_flags(self):
         env = S.collect_api_key_env(_Args(openalex="OA", core="CO"))
         assert env == {"OPENALEX_API_KEY": "OA", "CORE_API_KEY": "CO"}
 
     def test_from_environment(self, monkeypatch):
         monkeypatch.setenv("SEMANTIC_SCHOLAR_API_KEY", "S2KEY")
-        monkeypatch.delenv("OPENALEX_API_KEY", raising=False)
-        monkeypatch.delenv("CORE_API_KEY", raising=False)
         env = S.collect_api_key_env(_Args())
         assert env == {"SEMANTIC_SCHOLAR_API_KEY": "S2KEY"}
 
@@ -36,14 +46,16 @@ class TestCollectApiKeyEnv:
         env = S.collect_api_key_env(_Args(openalex="FROM_FLAG"))
         assert env["OPENALEX_API_KEY"] == "FROM_FLAG"
 
-    def test_empty_not_injected(self, monkeypatch):
-        for v in S.API_KEY_ENV_VARS:
-            monkeypatch.delenv(v, raising=False)
+    def test_empty_not_injected(self):
         assert S.collect_api_key_env(_Args()) == {}
+
+    def test_serpapi_key_is_collected(self):
+        env = S.collect_api_key_env(_Args(serpapi="SERP"))
+        assert env == {"SERPAPI_API_KEY": "SERP"}
 
 
 class TestPromptMissingApiKeys:
-    def test_non_interactive_returns_empty(self):
+    def test_non_interactive_returns_empty(self):  # noqa: D102
         # Hors terminal interactif (ex. CI) : aucun prompt, jamais bloquant
         assert S.prompt_missing_api_keys({}, interactive=False) == {}
 
@@ -58,13 +70,18 @@ class TestPromptMissingApiKeys:
 
         def fake(prompt):
             asked.append(prompt)
-            return "S2VAL" if "SEMANTIC" in prompt else "COREVAL"
+            if "SEMANTIC" in prompt:
+                return "S2VAL"
+            if "SerpAPI" in prompt:
+                return "SERPVAL"
+            return "COREVAL"
 
         out = S.prompt_missing_api_keys(
             {"OPENALEX_API_KEY": "OA"}, interactive=True, prompt_func=fake,
         )
         assert out == {"SEMANTIC_SCHOLAR_API_KEY": "S2VAL",
-                       "CORE_API_KEY": "COREVAL"}
+                       "CORE_API_KEY": "COREVAL",
+                       "SERPAPI_API_KEY": "SERPVAL"}
         # OpenAlex jamais redemandé
         assert not any("OPENALEX" in p for p in asked)
 

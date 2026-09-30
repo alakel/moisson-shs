@@ -16,19 +16,19 @@ Identifiants OAI Érudit typiques :
 """
 
 import logging
-import time
 from typing import List, Dict, Optional
 
 from sickle import Sickle
 
 from connectors.base import Connector
 from connectors.isidore import IsidoreConnector
+from connectors.isidore_scan import annotate_proxy_source
 from mappers.oai_mapper import map_oai_dc_to_zotero
+from utils.http import OperationCancelled, polite_wait
 from config import (
     ERUDIT_OAI_URL,
     ERUDIT_OAI_FORMAT,
     ERUDIT_URL_MARKER,
-    REQUEST_DELAY,
     USER_AGENT,
 )
 
@@ -40,15 +40,22 @@ class EruditConnector(Connector):
 
     SOURCE_NAME = "Érudit"
 
-    def __init__(self, http_client=None, enrich_oai: bool = False, **kwargs):
+    def __init__(self, http_client=None, enrich_oai: bool = False,
+                 scan_registry=None, **kwargs):
         """
         Args:
-            http_client: Client HTTP partagé
+            http_client: Client HTTP partagé (porte le registre des flux
+                Isidore de l'exécution)
             enrich_oai: Si True, enrichit via GetRecord OAI sur oai.erudit.org
+            scan_registry: Registre de flux Isidore explicite (contexte
+                d'exécution), cf. connectors/isidore_scan.py
             **kwargs: absorbés depuis la signature uniforme
         """
         super().__init__(http_client, **kwargs)
         self.enrich_oai = enrich_oai
+        self.scan_registry = scan_registry
+        # Statut du dernier parcours Isidore (IsidoreScanStatus)
+        self.last_scan_status = None
         self._sickle = None
 
     def _get_sickle(self) -> Sickle:
@@ -82,28 +89,26 @@ class EruditConnector(Connector):
         """
         logger.info(f"[Érudit] Démarrage via proxy Isidore: {query}")
 
-        with IsidoreConnector(http_client=self.http) as isidore:
+        # Flux de pages Isidore partagé avec les autres consommateurs de
+        # l'exécution (cf. connectors/isidore_scan.py).
+        with IsidoreConnector(http_client=self.http,
+                              scan_registry=self.scan_registry,
+                              run_context=self.run_context) as isidore:
             items = isidore.search(
                 query,
                 max_results=max_results,
                 url_marker=ERUDIT_URL_MARKER,
                 from_date=from_date,
                 to_date=to_date,
+                source_label=self.SOURCE_NAME,
             )
+            self.last_scan_status = isidore.last_scan_status
+            # Compte rendu de collecte (OPT-07) : celui du parcours Isidore
+            # de cette sous-source (fenêtre, erreur partagée, plafond).
+            self.last_status = isidore.last_status
 
         # Annotation source canonique
-        for item in items:
-            extra = item.get("extra", "")
-            new_lines = []
-            for line in extra.split("\n"):
-                if line.startswith("Sources:"):
-                    sources = [s.strip() for s in line[len("Sources:"):].split(",")]
-                    if "Érudit" not in sources:
-                        sources.insert(0, "Érudit")
-                    new_lines.append("Sources: " + ", ".join(sources))
-                else:
-                    new_lines.append(line)
-            item["extra"] = "\n".join(new_lines)
+        annotate_proxy_source(items, "Érudit")
 
         logger.info(f"[Érudit] {len(items)} items via Isidore")
 
@@ -117,25 +122,53 @@ class EruditConnector(Connector):
         """Enrichit chaque item par GetRecord OAI Érudit."""
         logger.info(f"[Érudit] Enrichissement OAI de {len(items)} items")
         enriched = []
-        for i, item in enumerate(items):
-            oai_id = self._extract_oai_id(item)
-            if not oai_id:
-                enriched.append(item)
-                continue
-            try:
-                record = self._get_sickle().GetRecord(
-                    identifier=oai_id, metadataPrefix=ERUDIT_OAI_FORMAT,
-                )
-                oai_item = map_oai_dc_to_zotero(
-                    record.metadata, oai_identifier=oai_id, source_name="Érudit",
-                )
-                enriched.append(self._merge_records(item, oai_item))
-            except Exception as e:
-                logger.warning(f"[Érudit] Échec enrichissement {oai_id}: {e}")
-                enriched.append(item)
-            time.sleep(REQUEST_DELAY)
-            if (i + 1) % 50 == 0:
-                logger.info(f"[Érudit] Enrichi {i + 1}/{len(items)}")
+        report = self.last_status
+        failures = 0
+        try:
+            for i, item in enumerate(items):
+                # Annulation vérifiée entre deux enregistrements OAI.
+                self.check_cancelled()
+                oai_id = self._extract_oai_id(item)
+                if not oai_id:
+                    enriched.append(item)
+                    continue
+                try:
+                    # Politesse par hôte (utils.http) : créneau réservé avant
+                    # l'accès OAI, partagé entre threads (remplace le
+                    # sommeil fixe après chaque GetRecord).
+                    polite_wait(ERUDIT_OAI_URL, cancel=self.cancel_signal())
+                    record = self._get_sickle().GetRecord(
+                        identifier=oai_id, metadataPrefix=ERUDIT_OAI_FORMAT,
+                    )
+                    oai_item = map_oai_dc_to_zotero(
+                        record.metadata, oai_identifier=oai_id, source_name="Érudit",
+                    )
+                    enriched.append(self._merge_records(item, oai_item))
+                except Exception as e:
+                    logger.warning(f"[Érudit] Échec enrichissement {oai_id}: {e}")
+                    failures += 1
+                    enriched.append(item)
+                if (i + 1) % 50 == 0:
+                    logger.info(f"[Érudit] Enrichi {i + 1}/{len(items)}")
+        except OperationCancelled as exc:
+            # Échéance souple (OPT-09 ter, RunContext.soft_stop) entre deux
+            # enregistrements OAI : les notices déjà enrichies le restent, les
+            # autres gardent leurs métadonnées Isidore ; aucune requête OAI de
+            # plus. Toute autre annulation est propagée.
+            done = len(enriched)
+            if not self.soft_stopped(
+                    exc, report, len(items),
+                    detail=(f"enrichissement OAI interrompu par l'échéance souple "
+                            f"après {done} notice(s) traitée(s) sur {len(items)} : "
+                            f"les {len(items) - done} autre(s) gardent leurs "
+                            f"métadonnées Isidore"),
+                    during_enrichment=True):
+                raise
+            enriched.extend(items[done:])
+        if report is not None and failures:
+            report.bump("oai_failures", failures)
+            report.warn(f"enrichissement OAI en échec pour {failures} "
+                        f"notice(s) (métadonnées Isidore conservées)")
         return enriched
 
     @staticmethod

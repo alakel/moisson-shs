@@ -5,15 +5,17 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "moisson-shs"
 version = "0.3.0"
-description = "Moissonneur multi-sources d'articles SHS francophones (HAL, Isidore, OpenEdition, Cairn, Persée, Theses.fr, Érudit) vers Zotero JSON et CSL-JSON, avec serveur MCP pour Claude Desktop."
+description = "Moissonneur bibliographique SHS multi-sources (douze sources : HAL, Isidore, OpenEdition, Cairn, Persée, Theses.fr, Érudit, CrossRef, OpenAlex, Semantic Scholar, CORE, Google Scholar via SerpAPI) vers Zotero JSON, CSL-JSON, BibTeX et RIS, avec serveur MCP local (stdio) et distant (HTTP)."
 readme = "README.md"
 authors = [{ name = "Amar Lakel", email = "amar.lakel@gmail.com" }]
 license = { text = "MIT" }
 requires-python = ">=3.10"
 keywords = [
     "shs", "social-sciences", "humanities", "bibliography",
-    "zotero", "csl-json", "hal", "isidore", "openedition",
-    "cairn", "persee", "erudit", "theses-fr", "mcp",
+    "zotero", "csl-json", "bibtex", "biblatex", "ris",
+    "hal", "isidore", "openedition", "cairn", "persee", "erudit",
+    "theses-fr", "crossref", "openalex", "semantic-scholar", "core",
+    "google-scholar", "deduplication", "mcp", "model-context-protocol",
     "claude-desktop", "research",
 ]
 classifiers = [
@@ -46,12 +48,20 @@ dependencies = [
 # starlette/uvicorn sont des dépendances transitives de `mcp`, mais on les
 # DÉCLARE explicitement : le serveur distant HTTP en dépend directement et ne
 # doit pas casser si `mcp` change ses transitifs.
-mcp = ["mcp>=1.0.0", "starlette>=0.46", "uvicorn>=0.30"]
+#
+# Borne haute `<2` OBLIGATOIRE : mcp 2.x retire les décorateurs
+# `Server.list_tools` / `call_tool` / `list_resources` qu'utilise mcp_server.py
+# (`import mcp_server` lève alors AttributeError et le serveur ne démarre pas).
+# La migration vers la série 2 est un chantier distinct. Borne basse 1.27 :
+# plus ancienne version testée ; elle fournit `streamable_http_client`, qui
+# remplace le client déprécié `streamablehttp_client`. Versions exactes
+# testées : constraints.txt (`pip install ... -c constraints.txt`).
+mcp = ["mcp>=1.27,<2", "starlette>=0.46", "uvicorn>=0.30"]
 # Alias explicite pour le serveur distant HTTP (mêmes dépendances que [mcp]).
-http = ["mcp>=1.0.0", "starlette>=0.46", "uvicorn>=0.30"]
+http = ["mcp>=1.27,<2", "starlette>=0.46", "uvicorn>=0.30"]
 # Serveur MCP distant complet (auth Bearer + sandbox + durcissement). Mêmes
 # dépendances que [http] ; alias sémantique pour le déploiement distant.
-remote = ["mcp>=1.0.0", "starlette>=0.46", "uvicorn>=0.30"]
+remote = ["mcp>=1.27,<2", "starlette>=0.46", "uvicorn>=0.30"]
 # Chargement automatique d'un .env pour les clés des sources internationales
 # (OpenAlex/Semantic Scholar/CORE). Optionnel : à défaut, variables du shell
 # ou bloc env MCP.
@@ -61,6 +71,9 @@ dev = [
     "pytest-cov>=4.0",
     "build>=1.0",
     "python-dotenv>=1.0.0",
+    # Client HTTP des tests de transport (marqueur `sockets`) : importé
+    # directement par les tests, donc déclaré même s'il vient aussi avec mcp.
+    "httpx>=0.27.1",
 ]
 
 [project.scripts]
@@ -82,7 +95,7 @@ Documentation = "https://github.com/amarlakel/moisson-shs#readme"
 py-modules = ["cli", "main", "mcp_server", "config", "setup_claude_desktop", "auth", "remote_auth", "oauth_provider"]
 
 [tool.setuptools.packages.find]
-include = ["connectors*", "mappers*", "utils*"]
+include = ["connectors*", "mappers*", "utils*", "engine*"]
 
 # === pytest ===
 [tool.pytest.ini_options]
@@ -91,8 +104,11 @@ python_files = ["test_*.py"]
 python_classes = ["Test*"]
 python_functions = ["test_*"]
 addopts = ["-ra", "--strict-markers", "--tb=short"]
+# Marqueurs : garder cette liste IDENTIQUE à celle de pytest.ini (qui prime
+# sur cette section quand les deux existent).
 markers = [
     "integration: tests nécessitant le réseau",
+    "sockets: tests ouvrant des sockets locales (serveur uvicorn de test, client HTTP loopback)",
     "slow: tests lents (> 5 s)",
 ]
 

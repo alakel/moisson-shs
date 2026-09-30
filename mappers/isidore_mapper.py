@@ -36,7 +36,7 @@ Structure typique d'un item Isidore :
             {"@xml:lang": "fr", "$": "..."},
             {"@origin": "rameau", "$": "..."},
         ],
-        "language": "fr",
+        "dc:language": "fr",   # ou liste ["fr", "en"] ; "language" historique
         "source": {"@handle": "...", "name": [{"@xml:lang": "fr", "$": "Lidil"}]},
         "ore": {
             "aggregates": [
@@ -302,6 +302,39 @@ def _extract_all_urls(iso: Dict) -> List[str]:
     return urls
 
 
+def _extract_language(iso: Dict) -> str:
+    """
+    Langue(s) d'une notice Isidore, telles que publiées.
+
+    Les notices de l'API portent ``dc:language`` (vérifié le 2026-09-29 :
+    « fr », « fre », « en », ou une liste comme ``["fr", "en"]`` ou
+    ``["ENG", "FRA"]``) ; ``language`` et ``lang`` (forme historique) restent
+    lus. Une liste garde toutes ses langues, séparées par une virgule : n'en
+    retenir qu'une ferait écarter à tort une notice bilingue par le filtre
+    local de langue (OPT-11).
+
+    Args:
+        iso: Bloc ``isidore`` de l'enregistrement.
+
+    Returns:
+        Chaîne de langue(s), vide si aucune.
+    """
+    raw = None
+    for key in ("dc:language", "language", "lang"):
+        if iso.get(key):
+            raw = iso[key]
+            break
+    values = raw if isinstance(raw, list) else [raw]
+    langs: List[str] = []
+    for value in values:
+        if isinstance(value, dict):
+            value = value.get("$", "")
+        text = clean_string(str(value)) if value else ""
+        if text and text not in langs:
+            langs.append(text)
+    return ", ".join(langs)
+
+
 def map_isidore_to_zotero(record: Dict) -> Dict:
     """
     Convertit un enregistrement Isidore JSON en item Zotero.
@@ -342,13 +375,9 @@ def map_isidore_to_zotero(record: Dict) -> Dict:
         item["date"] = date_str
 
     # === Langue ===
-    lang = iso.get("language") or iso.get("lang")
-    if isinstance(lang, list) and lang:
-        lang = lang[0]
-    if isinstance(lang, dict):
-        lang = lang.get("$", "")
+    lang = _extract_language(iso)
     if lang:
-        item["language"] = clean_string(str(lang))
+        item["language"] = lang
 
     # === Mots-clés enrichis ===
     subjects = _all_multilang(iso.get("subject"))

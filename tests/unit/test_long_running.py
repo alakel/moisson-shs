@@ -11,12 +11,14 @@ Couvre la DoD :
 - Concurrence bornée : sémaphore plein → refus explicite (« serveur occupé »).
 - Plafond serveur : `max_per_source` clampé en HTTP, libre en stdio.
 
-Aucun réseau (run_source est stubé).
+Aucun réseau (run_source est stubé ; depuis OPT-07, celui du moteur :
+``engine.orchestrator.run_source``).
 """
 
 import asyncio
 import json
 import sys
+import threading
 import time
 from pathlib import Path
 
@@ -49,27 +51,12 @@ class _FakeReporter:
         pass
 
 
-class _CancelAfter:
-    """`is_set()` renvoie True après `after` appels (annulation déclenchée
-    entre deux sources)."""
-    def __init__(self, after):
-        self.calls = 0
-        self.after = after
-
-    def is_set(self):
-        self.calls += 1
-        return self.calls > self.after
-
-    def set(self):
-        self.after = -1
-
-
 # === Progression ===
 
 class TestProgress:
     def test_one_report_per_source(self, tmp_path, monkeypatch):
         monkeypatch.setattr(mcp_server, "OUTPUT_DIR", tmp_path)
-        monkeypatch.setattr("main.run_source",
+        monkeypatch.setattr("engine.orchestrator.run_source",
                             lambda name, *a, **k: _items(name))
         reporter = _FakeReporter()
         mcp_server._run_moisson_sync(
@@ -84,7 +71,7 @@ class TestProgress:
 
     def test_no_progress_without_reporter(self, tmp_path, monkeypatch):
         monkeypatch.setattr(mcp_server, "OUTPUT_DIR", tmp_path)
-        monkeypatch.setattr("main.run_source",
+        monkeypatch.setattr("engine.orchestrator.run_source",
                             lambda name, *a, **k: _items(name))
         # progress=None → aucune notification, moisson OK.
         blocks, structured = mcp_server._run_moisson_sync(
@@ -99,35 +86,44 @@ class TestProgress:
 class TestCancellation:
     def test_cancel_between_sources(self, tmp_path, monkeypatch):
         monkeypatch.setattr(mcp_server, "OUTPUT_DIR", tmp_path)
+        cancel = threading.Event()
+        ran, written = [], []
 
         def stub_run_source(name, cls, query, mps, output_dir, run_id,
                             http_client, **kw):
             # Mimer la vraie écriture de raw/ pour tester le nettoyage.
+            ran.append(name)
             raw = Path(output_dir) / "raw"
             raw.mkdir(parents=True, exist_ok=True)
-            (raw / f"{name.lower()}_{run_id}.json").write_text(
-                json.dumps(_items(name)), encoding="utf-8")
+            path = raw / f"{name.lower()}_{run_id}.json"
+            path.write_text(json.dumps(_items(name)), encoding="utf-8")
+            written.append(path)
+            # Annulation demandée pendant que la 1re source se termine
+            # (depuis OPT-07, le moteur consulte le signal plus souvent :
+            # compter les appels à is_set() déclenchait l'annulation avant
+            # la 1re source, et le nettoyage n'était plus vérifié).
+            cancel.set()
             return _items(name)
 
-        monkeypatch.setattr("main.run_source", stub_run_source)
+        monkeypatch.setattr("engine.orchestrator.run_source", stub_run_source)
 
-        # Annulation déclenchée avant la 2e source (cf. trace des appels is_set).
-        cancel = _CancelAfter(after=2)
         with pytest.raises(mcp_server.MoissonCancelled):
             mcp_server._run_moisson_sync(
                 query="q", max_per_source=5, sources=["hal", "isidore"],
                 enrich_oai=False, do_dedup=True, workers=1,
                 progress=None, cancel_event=cancel,
             )
+        # La 1re source a fini et écrit son raw/ ; la 2e n'a pas démarré.
+        assert ran == ["HAL"] and len(written) == 1
         # Aucun corpus FINAL écrit.
         assert list(tmp_path.glob("corpus_*.json")) == []
         # raw/ partiels nettoyés.
-        raw = tmp_path / "raw"
-        assert not raw.is_dir() or list(raw.glob("*.json")) == []
+        assert not written[0].exists()
+        assert list((tmp_path / "raw").glob("*.json")) == []
 
     def test_cancel_before_any_source(self, tmp_path, monkeypatch):
         monkeypatch.setattr(mcp_server, "OUTPUT_DIR", tmp_path)
-        monkeypatch.setattr("main.run_source",
+        monkeypatch.setattr("engine.orchestrator.run_source",
                             lambda name, *a, **k: _items(name))
 
         class _AlwaysSet:
@@ -156,7 +152,7 @@ class TestDeadline:
             time.sleep(0.3)            # plus long que la deadline
             return _items(name)
 
-        monkeypatch.setattr("main.run_source", slow)
+        monkeypatch.setattr("engine.orchestrator.run_source", slow)
 
         result = _run(mcp_server._tool_moisson_search(
             {"query": "x", "sources": ["hal", "isidore"]}
@@ -175,7 +171,7 @@ class TestSemaphore:
         monkeypatch.setattr(mcp_server, "OUTPUT_DIR", tmp_path)
         monkeypatch.setattr(mcp_server, "TRANSPORT_MODE", "http")
         monkeypatch.setattr(mcp_server, "MOISSON_ACQUIRE_TIMEOUT", 0.1)
-        monkeypatch.setattr("main.run_source",
+        monkeypatch.setattr("engine.orchestrator.run_source",
                             lambda name, *a, **k: _items(name))
 
         async def _go():
@@ -194,7 +190,7 @@ class TestSemaphore:
         monkeypatch.setattr(mcp_server, "OUTPUT_DIR", tmp_path)
         monkeypatch.setattr(mcp_server, "TRANSPORT_MODE", "http")
         monkeypatch.setattr(mcp_server, "_MOISSON_SEM", None)
-        monkeypatch.setattr("main.run_source",
+        monkeypatch.setattr("engine.orchestrator.run_source",
                             lambda name, *a, **k: _items(name))
 
         async def _go():

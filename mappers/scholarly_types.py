@@ -136,3 +136,58 @@ _CORE = {
 def core_type_to_zotero(t: Optional[str]) -> str:
     """Convertit un champ CORE ``documentType`` en ``itemType`` Zotero."""
     return _CORE.get((t or "").lower().strip(), "document")
+
+
+# --- Google Scholar via SerpAPI (champ 'type' + indices de notice) -----------
+# Google Scholar ne typifie pas ses résultats : SerpAPI expose seulement le
+# bandeau affiché devant le titre ([BOOK], [PDF], [CITATION], [HTML]), absent
+# pour l'immense majorité des résultats. Le type réel se déduit donc surtout de
+# la notice (présence d'un nom de revue, domaine de l'URL), d'où la signature
+# à trois arguments et le défaut prudent ``document``.
+_SCHOLAR_BANNER = {
+    "book": "book",
+    "b": "book",
+    "citation": "document",   # notice sans document accessible
+    "c": "document",
+    "pdf": "",                # le bandeau ne dit rien du genre : on infère
+    "html": "",
+    "doc": "",
+}
+
+
+def scholar_type_to_zotero(
+    banner: Optional[str] = None,
+    venue: Optional[str] = None,
+    url: Optional[str] = None,
+) -> str:
+    """
+    Déduit un ``itemType`` Zotero pour un résultat Google Scholar.
+
+    Args:
+        banner: Champ ``type`` de SerpAPI (« Book », « Citation »…), souvent absent.
+        venue: Nom de revue ou d'ouvrage extrait de ``publication_info.summary``.
+        url: Lien principal du résultat.
+
+    Returns:
+        ``itemType`` Zotero. ``journalArticle`` quand une revue est nommée,
+        ``book`` sur les liens Google Books, ``document`` à défaut.
+    """
+    mapped = _SCHOLAR_BANNER.get((banner or "").lower().strip())
+    if mapped:
+        return mapped
+
+    u = (url or "").lower()
+    if "books.google." in u:
+        return "book"
+    if "theses.fr" in u or "/tel-" in u or "tel.archives-ouvertes" in u:
+        return "thesis"
+    if "arxiv.org" in u or "/hal-" in u or "ssrn.com" in u or "osf.io" in u:
+        return "preprint"
+
+    v = (venue or "").strip()
+    if v:
+        low = v.lower()
+        if "proceeding" in low or "conference" in low or "workshop" in low:
+            return "conferencePaper"
+        return "journalArticle"
+    return "document"

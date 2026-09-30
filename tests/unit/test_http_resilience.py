@@ -11,7 +11,7 @@ Vérifie :
   inutile, était la principale source de latence) ;
 - l'exception réelle (avec code de statut pour les 5xx) est propagée.
 
-Les ``time.sleep`` sont interceptés : les tests sont instantanés.
+L'horloge de utils.http est simulée : les tests sont instantanés.
 """
 
 import sys
@@ -38,12 +38,42 @@ class _FakeResp:
             raise requests.HTTPError(f"HTTP {self.status_code}", response=self)
 
 
+class _FakeClock:
+    """
+    Horloge simulée de utils.http : ``sleep`` enregistre la durée et fait
+    avancer ``monotonic`` sans attendre réellement.
+
+    L'horloge doit avancer avec les sommeils : la politesse par hôte mesure
+    l'intervalle écoulé depuis le départ précédent, et un sommeil qui ne fait
+    pas passer le temps fabriquerait des attentes de politesse fictives.
+    """
+
+    def __init__(self):
+        self.now = 1000.0
+        self.sleeps = []
+
+    def monotonic(self):
+        return self.now
+
+    def time(self):
+        return self.now
+
+    def sleep(self, seconds):
+        self.sleeps.append(seconds)
+        if seconds > 0:
+            self.now += seconds
+
+
 @pytest.fixture
 def captured_sleeps(monkeypatch):
-    """Intercepte time.sleep dans utils.http et enregistre les durées."""
-    durations = []
-    monkeypatch.setattr(http_mod.time, "sleep", lambda s: durations.append(s))
-    return durations
+    """Horloge simulée dans utils.http ; renvoie la liste des sommeils."""
+    clock = _FakeClock()
+    monkeypatch.setattr(http_mod, "time", clock)
+    http_mod.reset_http_policy()
+    yield clock.sleeps
+    # Les créneaux réservés sur l'horloge simulée ne doivent pas survivre
+    # au test (ils seraient comparés à l'horloge réelle ensuite).
+    http_mod.reset_http_policy()
 
 
 def _max_legit_backoff():

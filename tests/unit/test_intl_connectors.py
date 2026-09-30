@@ -25,8 +25,10 @@ class _FakeHTTP:
         self.calls = []
         self.session = object()
 
-    def get(self, url, params=None, headers=None, timeout=None):
-        self.calls.append({"url": url, "params": params, "headers": headers})
+    def get(self, url, params=None, headers=None, timeout=None, **policy):
+        # **policy : options de la politique HTTP commune (min_interval…)
+        self.calls.append({"url": url, "params": params, "headers": headers,
+                           "policy": policy})
         return _Resp(self._payloads.pop(0))
 
     def close(self):
@@ -152,7 +154,7 @@ class TestOpenAlexConnector:
         assert captured["params"]["api_key"] == "K"
 
 
-# === Semantic Scholar (self.http.get + throttle) ===
+# === Semantic Scholar (self.http.get + politesse par hôte) ===
 
 class TestS2Connector:
     def test_token_pagination(self):
@@ -163,7 +165,7 @@ class TestS2Connector:
             {"data": [{"title": "B", "externalIds": {"DOI": "10.1/b"}}],
              "token": None},
         ])
-        with patch.object(semantic_scholar.time, "sleep", lambda s: None):
+        with patch("utils.http.time.sleep", lambda s: None):
             c = semantic_scholar.SemanticScholarConnector(
                 http_client=http, api_key="K"
             )
@@ -177,7 +179,7 @@ class TestS2Connector:
         http = _FakeHTTP([
             {"data": [{"title": "A", "externalIds": {}}], "token": None},
         ])
-        with patch.object(semantic_scholar.time, "sleep", lambda s: None):
+        with patch("utils.http.time.sleep", lambda s: None):
             c = semantic_scholar.SemanticScholarConnector(http_client=http)
             items = c.search("llm", max_results=100)
         assert len(items) == 1
@@ -185,7 +187,7 @@ class TestS2Connector:
         assert http.calls[0]["headers"] is None
 
 
-# === CORE (get_json patché + throttle) ===
+# === CORE (get_json patché + politesse par hôte) ===
 
 class TestCoreConnector:
     def test_offset_pagination(self):
@@ -198,7 +200,7 @@ class TestCoreConnector:
             {"results": [], "totalHits": 2},
         ]
         with patch.object(core, "get_json", side_effect=pages), \
-                patch.object(core.time, "sleep", lambda s: None):
+                patch("utils.http.time.sleep", lambda s: None):
             c = core.CoreConnector(http_client=_FakeHTTP([]), api_key="K")
             items = c.search("oa", max_results=100)
         assert len(items) == 2
@@ -211,7 +213,7 @@ class TestCoreConnector:
             raise BudgetExhausted("quota")
 
         with patch.object(core, "get_json", side_effect=fake_get_json), \
-                patch.object(core.time, "sleep", lambda s: None):
+                patch("utils.http.time.sleep", lambda s: None):
             c = core.CoreConnector(http_client=_FakeHTTP([]), api_key="K")
             items = c.search("oa", max_results=100)
         assert items == []
@@ -225,7 +227,7 @@ class TestCoreConnector:
             return {"results": [], "totalHits": 0}
 
         with patch.object(core, "get_json", side_effect=fake_get_json), \
-                patch.object(core.time, "sleep", lambda s: None):
+                patch("utils.http.time.sleep", lambda s: None):
             c = core.CoreConnector(http_client=_FakeHTTP([]), api_key="K")
             c.search("oa", max_results=10, from_date="2020", to_date="2022")
         assert "yearPublished>=2020" in captured["params"]["q"]

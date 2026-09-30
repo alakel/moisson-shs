@@ -17,19 +17,19 @@ sans démarche complémentaire (scraping, convention TDM).
 """
 
 import logging
-import time
 from typing import List, Dict, Optional
 
 from sickle import Sickle
 
 from connectors.base import Connector
 from connectors.isidore import IsidoreConnector
+from connectors.isidore_scan import annotate_proxy_source
 from mappers.oai_mapper import map_oai_dc_to_zotero
+from utils.http import OperationCancelled, polite_wait
 from config import (
     CAIRN_OAI_URL,
     CAIRN_OAI_FORMAT,
     CAIRN_URL_MARKER,
-    REQUEST_DELAY,
     USER_AGENT,
 )
 
@@ -46,17 +46,24 @@ class CairnConnector(Connector):
 
     SOURCE_NAME = "Cairn"
 
-    def __init__(self, http_client=None, enrich_oai: bool = False, **kwargs):
+    def __init__(self, http_client=None, enrich_oai: bool = False,
+                 scan_registry=None, **kwargs):
         """
         Args:
-            http_client: Client HTTP partagé
+            http_client: Client HTTP partagé (porte le registre des flux
+                Isidore de l'exécution)
             enrich_oai: Si True, enrichit chaque item via GetRecord
                 OAI sur l'entrepôt Cairn (lent, une requête par item)
+            scan_registry: Registre de flux Isidore explicite (contexte
+                d'exécution), cf. connectors/isidore_scan.py
             **kwargs: kwargs absorbés depuis la signature uniforme du
                 base.Connector (ignorés ici sauf enrich_oai).
         """
         super().__init__(http_client, **kwargs)
         self.enrich_oai = enrich_oai
+        self.scan_registry = scan_registry
+        # Statut du dernier parcours Isidore (IsidoreScanStatus)
+        self.last_scan_status = None
         self._sickle = None
 
     def _get_sickle(self) -> Sickle:
@@ -94,28 +101,27 @@ class CairnConnector(Connector):
         # Étape 1 : recherche Isidore filtrée par DOMAINE D'URL Cairn.
         # Le filtrage nominal "Cairn.info" n'opère plus depuis qu'Isidore
         # indexe par revue individuelle plutôt que par agrégateur.
-        with IsidoreConnector(http_client=self.http) as isidore:
+        # Flux de pages Isidore partagé avec les autres consommateurs de
+        # l'exécution (cf. connectors/isidore_scan.py).
+        with IsidoreConnector(http_client=self.http,
+                              scan_registry=self.scan_registry,
+                              run_context=self.run_context) as isidore:
             items = isidore.search(
                 query,
                 max_results=max_results,
                 url_marker=CAIRN_URL_MARKER,
                 from_date=from_date,
                 to_date=to_date,
+                source_label=self.SOURCE_NAME,
             )
+            self.last_scan_status = isidore.last_scan_status
+            # Compte rendu de collecte (OPT-07) : celui du parcours Isidore
+            # de cette sous-source (fenêtre, erreur partagée, plafond).
+            self.last_status = isidore.last_status
 
         # Reannotation de la source canonique
+        annotate_proxy_source(items, "Cairn")
         for item in items:
-            extra = item.get("extra", "")
-            new_extra_lines = []
-            for line in extra.split("\n"):
-                if line.startswith("Sources:"):
-                    sources = [s.strip() for s in line[len("Sources:"):].split(",")]
-                    if "Cairn" not in sources:
-                        sources.insert(0, "Cairn")
-                    new_extra_lines.append("Sources: " + ", ".join(sources))
-                else:
-                    new_extra_lines.append(line)
-            item["extra"] = "\n".join(new_extra_lines)
             # Annotation systématique : les items Cairn n'ont pas
             # de texte intégral exposé via l'API
             if "Full Text Available" not in item["extra"]:
@@ -144,34 +150,62 @@ class CairnConnector(Connector):
         logger.info(f"[Cairn] Enrichissement OAI de {len(items)} items")
 
         enriched = []
-        for i, item in enumerate(items):
-            oai_id = self._extract_oai_id(item)
-            if not oai_id:
-                enriched.append(item)
-                continue
+        report = self.last_status
+        failures = 0
+        try:
+            for i, item in enumerate(items):
+                # Annulation vérifiée entre deux enregistrements OAI.
+                self.check_cancelled()
+                oai_id = self._extract_oai_id(item)
+                if not oai_id:
+                    enriched.append(item)
+                    continue
 
-            try:
-                record = self._get_sickle().GetRecord(
-                    identifier=oai_id,
-                    metadataPrefix=CAIRN_OAI_FORMAT,
-                )
-                oai_item = map_oai_dc_to_zotero(
-                    record.metadata,
-                    oai_identifier=oai_id,
-                    source_name="Cairn",
-                )
-                merged = self._merge_records(item, oai_item)
-                enriched.append(merged)
-            except Exception as e:
-                logger.warning(
-                    f"[Cairn] Échec enrichissement OAI {oai_id}: {e}"
-                )
-                enriched.append(item)
+                try:
+                    # Politesse par hôte (utils.http) : créneau réservé avant
+                    # l'accès OAI, partagé entre threads (remplace le
+                    # sommeil fixe après chaque GetRecord).
+                    polite_wait(CAIRN_OAI_URL, cancel=self.cancel_signal())
+                    record = self._get_sickle().GetRecord(
+                        identifier=oai_id,
+                        metadataPrefix=CAIRN_OAI_FORMAT,
+                    )
+                    oai_item = map_oai_dc_to_zotero(
+                        record.metadata,
+                        oai_identifier=oai_id,
+                        source_name="Cairn",
+                    )
+                    merged = self._merge_records(item, oai_item)
+                    enriched.append(merged)
+                except Exception as e:
+                    logger.warning(
+                        f"[Cairn] Échec enrichissement OAI {oai_id}: {e}"
+                    )
+                    failures += 1
+                    enriched.append(item)
 
-            time.sleep(REQUEST_DELAY)
-            if (i + 1) % 50 == 0:
-                logger.info(f"[Cairn] Enrichi {i + 1}/{len(items)}")
+                if (i + 1) % 50 == 0:
+                    logger.info(f"[Cairn] Enrichi {i + 1}/{len(items)}")
+        except OperationCancelled as exc:
+            # Échéance souple (OPT-09 ter, RunContext.soft_stop) entre deux
+            # enregistrements OAI : les notices déjà enrichies le restent, les
+            # autres gardent leurs métadonnées Isidore ; aucune requête OAI de
+            # plus. Toute autre annulation est propagée.
+            done = len(enriched)
+            if not self.soft_stopped(
+                    exc, report, len(items),
+                    detail=(f"enrichissement OAI interrompu par l'échéance souple "
+                            f"après {done} notice(s) traitée(s) sur {len(items)} : "
+                            f"les {len(items) - done} autre(s) gardent leurs "
+                            f"métadonnées Isidore"),
+                    during_enrichment=True):
+                raise
+            enriched.extend(items[done:])
 
+        if report is not None and failures:
+            report.bump("oai_failures", failures)
+            report.warn(f"enrichissement OAI en échec pour {failures} "
+                        f"notice(s) (métadonnées Isidore conservées)")
         return enriched
 
     @staticmethod

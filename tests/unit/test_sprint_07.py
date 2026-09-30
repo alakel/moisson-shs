@@ -15,7 +15,8 @@ Couvre la DoD :
   jeton → 401 (+ WWW-Authenticate) ; handshake complet avec bon jeton → 200.
 - Redaction : en HTTP, `call_tool` ne loggue pas les valeurs d'arguments.
 
-Loopback uniquement (aucun réseau externe).
+Loopback uniquement (aucun réseau externe). Les tests e2e (uvicorn réel)
+portent le marqueur `sockets`.
 """
 
 import asyncio
@@ -34,6 +35,7 @@ PROJECT_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(PROJECT_ROOT))
 
 import mcp_server  # noqa: E402
+import mcp.types as types  # noqa: E402
 import auth  # noqa: E402
 from utils.sandbox import (  # noqa: E402
     resolve_in_output_dir, validate_suffix, PathSecurityError,
@@ -137,6 +139,13 @@ class TestSandboxPrimitive:
 
 # === Outils sandboxés en mode HTTP ===
 
+def _error_text(result) -> str:
+    """Texte d'un refus : erreur MCP (isError, OPT-07) portant le texte
+    historique « Erreur : PathSecurityError… »."""
+    assert isinstance(result, types.CallToolResult) and result.isError
+    return result.content[0].text
+
+
 def _make_items(n):
     return [{"itemType": "journalArticle", "title": f"T{i}", "date": "2024",
              "extra": "Sources: Test"} for i in range(n)]
@@ -153,27 +162,31 @@ class TestSandboxedToolsHttp:
         result = _run(mcp_server.call_tool(
             "corpus_analyze", {"corpus_path": "/etc/passwd"}
         ))
-        text = result[0].text
+        text = _error_text(result)
         assert "PathSecurityError" in text or "zone autorisée" in text
 
     def test_corpus_filter_traversal_rejected(self, http_mode):
         result = _run(mcp_server.call_tool(
             "corpus_filter", {"corpus_path": "../../../etc/passwd"}
         ))
-        text = result[0].text
+        text = _error_text(result)
         assert "PathSecurityError" in text or "Traversal" in text
 
     def test_corpus_filter_bad_suffix_rejected(self, http_mode):
         src = http_mode / "corpus_src.json"
         src.write_text(json.dumps(_make_items(3)), encoding="utf-8")
+        # Instantané préalable : d'autres tests de la session peuvent avoir
+        # laissé des fichiers « evil » dans la racine temporaire partagée
+        # (ex. test_sprint_08 : evil.py) ; seul compte ce que CET appel écrit.
+        before = set(http_mode.parent.glob("**/*evil*"))
         result = _run(mcp_server.call_tool(
             "corpus_filter",
             {"corpus_path": "corpus_src.json", "output_suffix": "/../evil"},
         ))
-        text = result[0].text
+        text = _error_text(result)
         assert "PathSecurityError" in text or "Suffixe invalide" in text
         # Aucun fichier 'evil' écrit où que ce soit.
-        assert not list(http_mode.parent.glob("**/*evil*"))
+        assert set(http_mode.parent.glob("**/*evil*")) == before
 
     def test_corpus_to_csl_output_outside_rejected(self, http_mode):
         src = http_mode / "corpus_z.json"
@@ -183,7 +196,7 @@ class TestSandboxedToolsHttp:
             {"corpus_path": "corpus_z.json",
              "output_path": "/tmp/evil_escape.json"},
         ))
-        text = result[0].text
+        text = _error_text(result)
         assert "PathSecurityError" in text or "zone autorisée" in text
         assert not Path("/tmp/evil_escape.json").exists()
 
@@ -191,7 +204,7 @@ class TestSandboxedToolsHttp:
         result = _run(mcp_server.call_tool(
             "corpus_merge", {"corpus_paths": ["/etc/hosts", "/etc/passwd"]}
         ))
-        text = result[0].text
+        text = _error_text(result)
         assert "PathSecurityError" in text or "zone autorisée" in text
 
     def test_legit_path_still_works_in_http(self, http_mode):
@@ -332,6 +345,7 @@ _MCP_HEADERS = {"Accept": "application/json, text/event-stream",
                 "Content-Type": "application/json"}
 
 
+@pytest.mark.sockets
 class TestAuthE2E:
     def test_healthz_is_public(self, auth_server):
         r = httpx.get(auth_server + "/healthz", timeout=5)
@@ -353,19 +367,33 @@ class TestAuthE2E:
         assert r.status_code == 401
 
     def test_valid_token_full_handshake(self, auth_server):
-        from mcp.client.streamable_http import streamablehttp_client
+        from mcp.client.streamable_http import streamable_http_client
         from mcp.client.session import ClientSession
 
         url = auth_server + "/mcp"
 
         async def _go():
-            async with streamablehttp_client(
-                url, headers={"Authorization": f"Bearer {_TOKEN}"}
+            # Le client non déprécié ne prend plus d'en-têtes : l'en-tête
+            # Authorization est porté par un httpx.AsyncClient fourni (délais
+            # alignés sur les défauts MCP du SDK : 30 s, lecture SSE 300 s).
+            async with httpx.AsyncClient(
+                headers={"Authorization": f"Bearer {_TOKEN}"},
+                timeout=httpx.Timeout(30.0, read=300.0),
+                follow_redirects=True,
+            ) as client, streamable_http_client(
+                url, http_client=client
             ) as (read, write, _sid):
                 async with ClientSession(read, write) as session:
                     await session.initialize()
                     tools = await session.list_tools()
-                    assert len(tools.tools) == 8
+                    # 9 outils historiques (corpus_resolve_dois inclus) et
+                    # ceux du lot D (corpus_export, OPT-18…) : présence
+                    # vérifiée, pas un nombre figé.
+                    names = {t.name for t in tools.tools}
+                    assert {"moisson_search", "corpus_analyze", "corpus_list",
+                            "fetch_by_doi", "search_by_author", "corpus_merge",
+                            "corpus_to_csl", "corpus_filter",
+                            "corpus_resolve_dois", "corpus_export"} <= names
 
         _run(_go())
 
@@ -373,6 +401,13 @@ class TestAuthE2E:
 # === Redaction des logs en HTTP ===
 
 class TestLogRedaction:
+    @pytest.fixture(autouse=True)
+    def isolated_output(self, tmp_path, monkeypatch):
+        # corpus_list lit OUTPUT_DIR et, en HTTP, l'audit y écrit
+        # (.audit/audit-*.jsonl) : jamais le output/ réel du projet.
+        monkeypatch.setattr(mcp_server, "OUTPUT_DIR", tmp_path)
+        return tmp_path
+
     def test_http_call_tool_does_not_log_arg_values(self, monkeypatch, caplog):
         monkeypatch.setattr(mcp_server, "TRANSPORT_MODE", "http")
         with caplog.at_level("INFO", logger="moisson_mcp"):

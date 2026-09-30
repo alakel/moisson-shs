@@ -243,6 +243,7 @@ def obs_server():
     srv.stop()
 
 
+@pytest.mark.sockets
 class TestHealthzAndMetricsE2E:
     def test_healthz_enriched_public(self, obs_server):
         r = httpx.get(obs_server + "/healthz", timeout=5)

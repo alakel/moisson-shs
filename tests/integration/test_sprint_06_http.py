@@ -3,7 +3,7 @@ Tests du Sprint 06 — Socle transport HTTP (Streamable HTTP) + double `serve`.
 
 Couvre la DoD du sprint :
 - `/healthz` public et minimal (`{"status": "ok"}`, rien d'autre) ;
-- handshake MCP réel via `streamablehttp_client` : initialize → list_tools (8) →
+- handshake MCP réel via `streamable_http_client` : initialize → list_tools (9) →
   call_tool('corpus_list') sur un uvicorn éphémère en localhost ;
 - anti DNS-rebinding actif : POST `/mcp` (Content-Type JSON + corps JSON-RPC
   valide) avec `Host: evil.com` → 421 ; `Origin` interdit → 403 ;
@@ -15,6 +15,9 @@ Couvre la DoD du sprint :
 Ces tests n'utilisent QUE la boucle loopback (127.0.0.1) — aucun réseau externe.
 Ils ne sont donc PAS marqués `integration` (qui désigne les tests réseau) et
 s'exécutent dans la suite par défaut, ce qui garde la DoD vérifiée en continu.
+Ceux qui ouvrent une socket (serveur uvicorn, client HTTP, réservation de port)
+portent le marqueur `sockets`, pour pouvoir être écartés dans un bac à sable
+sans sockets : `pytest -m "not integration and not sockets"`.
 """
 
 import asyncio
@@ -33,7 +36,7 @@ PROJECT_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(PROJECT_ROOT))
 
 import mcp_server  # noqa: E402
-from mcp.client.streamable_http import streamablehttp_client  # noqa: E402
+from mcp.client.streamable_http import streamable_http_client  # noqa: E402
 from mcp.client.session import ClientSession  # noqa: E402
 
 
@@ -118,6 +121,7 @@ _MCP_HEADERS = {"Accept": "application/json, text/event-stream"}
 
 # === /healthz public et minimal ===
 
+@pytest.mark.sockets
 class TestHealthz:
     def test_healthz_returns_ok(self, http_server):
         r = httpx.get(http_server + "/healthz", timeout=5)
@@ -132,24 +136,29 @@ class TestHealthz:
 
 # === Handshake MCP réel ===
 
+@pytest.mark.sockets
 class TestMcpHandshake:
     def test_initialize_list_tools_call_tool(self, http_server):
         url = http_server + "/mcp"
 
         async def _run():
-            async with streamablehttp_client(url) as (read, write, _get_sid):
+            async with streamable_http_client(url) as (read, write, _get_sid):
                 async with ClientSession(read, write) as session:
                     await session.initialize()
 
                     tools = await session.list_tools()
                     names = {t.name for t in tools.tools}
-                    # Les 8 outils existants, servis à l'identique du stdio.
-                    assert len(tools.tools) == 8, names
+                    # Les outils servis à l'identique du stdio : les 9
+                    # historiques (8 jusqu'au Sprint 05, + corpus_resolve_dois
+                    # avec Google Scholar) et ceux du lot D (corpus_export,
+                    # OPT-18…) : présence vérifiée, pas un nombre figé.
+                    assert len(tools.tools) == len(names), names
                     assert {
                         "moisson_search", "corpus_analyze", "corpus_list",
                         "fetch_by_doi", "search_by_author", "corpus_merge",
-                        "corpus_to_csl", "corpus_filter",
-                    } == names
+                        "corpus_to_csl", "corpus_filter", "corpus_resolve_dois",
+                        "corpus_export",
+                    } <= names
 
                     result = await session.call_tool("corpus_list", {})
                     assert result.isError in (False, None)
@@ -161,7 +170,7 @@ class TestMcpHandshake:
         url = http_server + "/mcp"
 
         async def _run():
-            async with streamablehttp_client(url) as (read, write, _get_sid):
+            async with streamable_http_client(url) as (read, write, _get_sid):
                 async with ClientSession(read, write) as session:
                     await session.initialize()
                     # Resources corpus:// et prompts exposés à l'identique.
@@ -177,6 +186,7 @@ class TestMcpHandshake:
 
 # === Anti DNS-rebinding ===
 
+@pytest.mark.sockets
 class TestDnsRebindingProtection:
     def test_post_with_evil_host_rejected_421(self, http_server):
         url = http_server + "/mcp"
@@ -207,6 +217,7 @@ class TestDnsRebindingProtection:
 # === Garde-fou d'exposition (serve_http) ===
 
 class TestExposureGuard:
+    @pytest.mark.sockets  # _free_port() réserve un port loopback
     def test_refuses_public_bind_without_allowlist(self, monkeypatch):
         # Pas d'allowlist (ni arg, ni env) + bind non-loopback → SystemExit.
         monkeypatch.setattr(mcp_server, "ALLOWED_HOSTS", [])

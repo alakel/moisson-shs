@@ -30,7 +30,10 @@ class TestRegistry:
         # …complétées par les 4 sources internationales (extension internationale)
         for intl in ("crossref", "openalex", "semantic_scholar", "core"):
             assert intl in sources
-        assert len(sources) == 11
+        # …et par Google Scholar via SerpAPI, source facturée à la requête,
+        # enregistrée mais volontairement absente des groupes (METERED_SOURCES).
+        assert "google_scholar" in sources
+        assert len(sources) == 12
 
     def test_get_connector_class_resolves(self):
         from connectors.registry import get_connector_class
@@ -139,9 +142,12 @@ class TestFetchByDoi:
             _build_hal_author_query("Doe", "doe-id", "0000-1234")
             == 'authIdHal_s:"doe-id"'
         )
+        # OPT-14 : champ HAL de l'ORCID corrigé (authORCIDIdExt_s, vérifié
+        # en ligne le 2026-09-29 ; authOrcidId_s n'existe pas et ne trouvait
+        # jamais rien).
         assert (
             _build_hal_author_query("Doe", None, "0000-1234")
-            == 'authOrcidId_s:"0000-1234"'
+            == 'authORCIDIdExt_s:"0000-1234"'
         )
         assert (
             _build_hal_author_query("Doe", None, None)
@@ -167,11 +173,15 @@ class TestFetchByDoi:
                 "language": "fr",
             }
         }
-        with patch("requests.get") as mock_get:
-            mock_get.return_value = MagicMock(
-                status_code=200, json=lambda: fake_payload,
-            )
-            item = _fetch_from_crossref("10.1/x")
+        # lookups passe par la politique HTTP commune (HTTPClient) : on simule
+        # le client transmis, pas requests.get (qui ne serait plus intercepté).
+        fake_client = MagicMock()
+        fake_client.get.return_value = MagicMock(
+            status_code=200, json=lambda: fake_payload,
+        )
+        item = _fetch_from_crossref("10.1/x", fake_client)
+        fake_client.get.assert_called_once()
+        assert "api.crossref.org/works/10.1/x" in fake_client.get.call_args[0][0]
         assert item["itemType"] == "journalArticle"
         assert item["title"] == "Article test"
         assert item["publicationTitle"] == "Journal X"

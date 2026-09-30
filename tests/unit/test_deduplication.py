@@ -120,12 +120,13 @@ class TestMergeItems:
         assert "HAL" in sources_line
         assert "Isidore" in sources_line
 
-    def test_preserves_first_creators(self):
+    def test_keeps_most_complete_creators(self):
+        # OPT-06 (C20) : la liste d'auteurs la plus complète est retenue,
+        # quel que soit l'ordre des items (auparavant : celle du premier).
         a = {"title": "T", "creators": [{"lastName": "A"}, {"lastName": "B"}]}
         b = {"title": "T", "creators": [{"lastName": "C"}]}
-        merged = merge_items([a, b])
-        # Conservation des creators du premier item
-        assert len(merged["creators"]) == 2
+        assert len(merge_items([a, b])["creators"]) == 2
+        assert len(merge_items([b, a])["creators"]) == 2
 
 
 class TestDeduplicate:

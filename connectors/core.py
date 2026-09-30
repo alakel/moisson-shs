@@ -17,12 +17,12 @@ Documentation : https://api.core.ac.uk/docs/v3 (vérifier annuellement)
 from __future__ import annotations
 
 import logging
-import time
 from typing import Dict, List, Optional
 
 from connectors.base import Connector
 from config import CORE_SEARCH_WORKS, ENV_CORE_KEY, REQUEST_DELAY_CORE
 from mappers.core_mapper import map_core_item
+from utils.http import OperationCancelled
 from utils.http_scholarly import BudgetExhausted, get_json
 from utils.secrets import get_api_key
 
@@ -43,14 +43,10 @@ class CoreConnector(Connector):
         # Clé requise ; absente → run_source capture et désactive la source.
         self.api_key = api_key or get_api_key(ENV_CORE_KEY, required=True)
         self.headers = {"Authorization": f"Bearer {self.api_key}"}
+        # Espacement minimal entre deux accès réseau réels à l'API, appliqué
+        # par la politesse par hôte et par compte de utils.http (partagée
+        # entre threads ; aucune attente sur une réponse servie par le cache).
         self.min_interval = min_interval
-        self._last = 0.0
-
-    def _throttle(self) -> None:
-        delta = time.monotonic() - self._last
-        if delta < self.min_interval:
-            time.sleep(self.min_interval - delta)
-        self._last = time.monotonic()
 
     def search(
         self,
@@ -70,38 +66,59 @@ class CoreConnector(Connector):
         if to_date:
             q += f" AND yearPublished<={str(to_date)[:4]}"
 
-        while len(items) < max_results and offset < OFFSET_CAP:
-            params = {"q": q, "limit": LIMIT, "offset": offset}
-            self._throttle()
-            try:
-                payload = get_json(
-                    CORE_SEARCH_WORKS, params=params, headers=self.headers,
-                    session=self.http.session, timeout=60,
-                )
-            except BudgetExhausted as e:
-                logger.error(f"[CORE] Arrêt (quota épuisé) — {e}")
-                break
-            except Exception as e:
-                logger.error(f"[CORE] Échec requête : {e}")
-                break
-
-            batch = payload.get("results") or []
-            if not batch:
-                break
-            for raw in batch:
+        report = self._start_report()   # compte rendu (OPT-07)
+        try:
+            while len(items) < max_results and offset < OFFSET_CAP:
+                self.check_cancelled()      # annulation entre deux pages
+                params = {"q": q, "limit": LIMIT, "offset": offset}
                 try:
-                    items.append(map_core_item(raw))
+                    payload = get_json(
+                        CORE_SEARCH_WORKS, params=params, headers=self.headers,
+                        session=self.http.session, timeout=60,
+                        min_interval=self.min_interval,
+                        **self._cancel_kwargs(),
+                    )
+                except BudgetExhausted as e:
+                    logger.error(f"[CORE] Arrêt (quota épuisé) — {e}")
+                    report.fail_with(e)
+                    break
                 except Exception as e:
-                    logger.warning(f"[CORE] Échec mapping : {e}")
-                if len(items) >= max_results:
-                    return items[:max_results]
+                    logger.error(f"[CORE] Échec requête : {e}")
+                    report.fail_with(e)
+                    break
 
-            offset += LIMIT
-            logger.info(
-                f"[CORE] {len(items)} items cumulés "
-                f"(total annoncé {payload.get('totalHits')})"
-            )
+                batch = payload.get("results") or []
+                if not batch:
+                    report.done()
+                    break
+                report.page(len(batch))
+                for raw in batch:
+                    try:
+                        items.append(map_core_item(raw))
+                    except Exception as e:
+                        report.bump("mapping_errors")
+                        logger.warning(f"[CORE] Échec mapping : {e}")
+                    if len(items) >= max_results:
+                        report.limit()
+                        return items[:max_results]
 
+                offset += LIMIT
+                logger.info(
+                    f"[CORE] {len(items)} items cumulés "
+                    f"(total annoncé {payload.get('totalHits')})"
+                )
+        except OperationCancelled as exc:
+            # Échéance souple (OPT-09 ter, RunContext.soft_stop) : les notices
+            # des pages déjà reçues sont rendues, aucune page de plus n'est
+            # demandée ; toute autre annulation est propagée.
+            if not self.soft_stopped(exc, report, len(items)):
+                raise
+
+        if (offset >= OFFSET_CAP and len(items) < max_results
+                and report.status is None and not report.exhausted):
+            # Plafond de pagination par offset de l'API atteint avant le
+            # plafond demandé : collecte tronquée par le fournisseur.
+            report.window(f"pagination CORE plafonnée à {OFFSET_CAP} résultats")
         logger.info(f"[CORE] Terminé : {len(items)} items collectés")
         return items[:max_results]
 

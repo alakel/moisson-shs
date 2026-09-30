@@ -12,12 +12,24 @@ Usage :
     python -m pytest tests/test_sprint_01.py -v
     ou
     python tests/test_sprint_01.py
+
+Les trois tests `test_integration_*` interrogent les vrais serveurs (Cairn,
+Isidore) : ils portent le marqueur `integration` et sont donc écartés par
+`pytest -m "not integration"`. Le mode standalone les exécute tous.
 """
 
 import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+
+try:
+    import pytest
+
+    _integration = pytest.mark.integration
+except ImportError:  # mode standalone sans pytest : marqueur neutre
+    def _integration(func):
+        return func
 
 
 def test_cairn_oai_url_uses_oai_php():
@@ -152,6 +164,7 @@ def test_dublin_core_doctoral_thesis_french_label():
 
 # === Tests d'intégration (nécessitent réseau) ===
 
+@_integration
 def test_integration_cairn_oai_responds_xml():
     """Le endpoint Cairn OAI corrigé répond bien en XML."""
     import requests
@@ -165,6 +178,7 @@ def test_integration_cairn_oai_responds_xml():
     assert "xml" in r.headers.get("content-type", "").lower()
 
 
+@_integration
 def test_integration_isidore_real_query():
     """Test e2e mini : Isidore retourne ≥1 item exploitable."""
     from connectors.isidore import IsidoreConnector
@@ -183,6 +197,7 @@ def test_integration_isidore_real_query():
         http.close()
 
 
+@_integration
 def test_integration_openedition_url_marker_filters():
     """Le filtrage url_marker openedition.org renvoie bien des items OE."""
     from connectors.isidore import IsidoreConnector

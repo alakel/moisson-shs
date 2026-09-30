@@ -199,6 +199,7 @@ API_KEY_ENV_VARS = (
     "OPENALEX_API_KEY",
     "SEMANTIC_SCHOLAR_API_KEY",
     "CORE_API_KEY",
+    "SERPAPI_API_KEY",
 )
 
 # Libellé + URL d'obtention pour la saisie interactive.
@@ -215,6 +216,11 @@ API_KEY_PROMPTS = {
         "CORE — requis pour --sources core (clé Bearer, sur inscription)",
         "https://core.ac.uk/services/api",
     ),
+    "SERPAPI_API_KEY": (
+        "SerpAPI — requis pour --sources google_scholar "
+        "(FACTURÉ À LA REQUÊTE : 1 crédit par page de 20 résultats)",
+        "https://serpapi.com/manage-api-key",
+    ),
 }
 
 
@@ -230,6 +236,7 @@ def collect_api_key_env(args) -> dict:
         "OPENALEX_API_KEY": getattr(args, "openalex_key", None),
         "SEMANTIC_SCHOLAR_API_KEY": getattr(args, "semantic_scholar_key", None),
         "CORE_API_KEY": getattr(args, "core_key", None),
+        "SERPAPI_API_KEY": getattr(args, "serpapi_key", None),
     }
     env = {}
     for var, flag_value in flag_map.items():
@@ -588,6 +595,13 @@ Exemples :
         type=str,
         default=None,
         help="Clé API CORE (CORE_API_KEY) à injecter dans le bloc env.",
+    )
+    parser.add_argument(
+        "--serpapi-key",
+        type=str,
+        default=None,
+        help="Clé API SerpAPI (SERPAPI_API_KEY) pour --sources google_scholar. "
+             "Source facturée à la requête : voir .env.example.",
     )
     parser.add_argument(
         "--no-prompt",

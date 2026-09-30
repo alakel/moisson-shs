@@ -5,8 +5,12 @@ Tous marqués ``integration`` : ignorés par ``pytest -m "not integration"`` et
 en CI sans secret. Les sources à clé sont ``skip`` quand la variable d'env est
 absente — ces tests n'échouent jamais faute de clé.
 
+``tests/conftest.py`` retire les clés du shell, sauf opt-in explicite : sans
+``MOISSON_TEST_REAL_KEYS=1``, une clé exportée est masquée et le test à clé
+est ignoré. Le ``.env`` n'est jamais lu, la clé SerpAPI jamais transmise.
+
 Lancer explicitement :
-    pytest tests/integration -m integration
+    MOISSON_TEST_REAL_KEYS=1 pytest tests/integration -m integration
 """
 
 import os
@@ -18,6 +22,11 @@ pytestmark = pytest.mark.integration
 
 def _has(env):
     return bool(os.environ.get(env))
+
+
+def _absent(env):
+    """Motif de skip : la clé peut être définie mais masquée par conftest."""
+    return f"{env} absente ou masquée par conftest (MOISSON_TEST_REAL_KEYS=1)"
 
 
 def test_crossref_live():
@@ -34,7 +43,7 @@ def test_crossref_live():
 
 
 @pytest.mark.skipif(not _has("OPENALEX_API_KEY"),
-                    reason="OPENALEX_API_KEY absente")
+                    reason=_absent("OPENALEX_API_KEY"))
 def test_openalex_live():
     from connectors.openalex import OpenAlexConnector
     with OpenAlexConnector() as c:
@@ -47,7 +56,7 @@ def test_openalex_live():
 
 
 @pytest.mark.skipif(not _has("SEMANTIC_SCHOLAR_API_KEY"),
-                    reason="SEMANTIC_SCHOLAR_API_KEY absente")
+                    reason=_absent("SEMANTIC_SCHOLAR_API_KEY"))
 def test_semantic_scholar_live():
     from connectors.semantic_scholar import SemanticScholarConnector
     with SemanticScholarConnector() as c:
@@ -56,7 +65,7 @@ def test_semantic_scholar_live():
     assert isinstance(items, list)
 
 
-@pytest.mark.skipif(not _has("CORE_API_KEY"), reason="CORE_API_KEY absente")
+@pytest.mark.skipif(not _has("CORE_API_KEY"), reason=_absent("CORE_API_KEY"))
 def test_core_live():
     from connectors.core import CoreConnector
     with CoreConnector() as c:

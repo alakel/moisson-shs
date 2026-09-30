@@ -18,7 +18,6 @@ tout en permettant la recherche par mot-clé.
 """
 
 import logging
-import time
 from typing import List, Dict, Optional
 
 from sickle import Sickle
@@ -26,13 +25,14 @@ from sickle.iterator import OAIItemIterator
 
 from connectors.base import Connector
 from connectors.isidore import IsidoreConnector
+from connectors.isidore_scan import annotate_proxy_source
 from mappers.oai_mapper import map_oai_dc_to_zotero, map_qdc_to_zotero
 from mappers.zotero_schema import append_to_extra
+from utils.http import OperationCancelled, polite_wait
 from config import (
     OPENEDITION_OAI_URL,
     OPENEDITION_OAI_FORMAT,
     OPENEDITION_URL_MARKER,
-    REQUEST_DELAY,
     USER_AGENT,
 )
 
@@ -49,18 +49,25 @@ class OpenEditionConnector(Connector):
 
     SOURCE_NAME = "OpenEdition"
 
-    def __init__(self, http_client=None, enrich_oai: bool = False, **kwargs):
+    def __init__(self, http_client=None, enrich_oai: bool = False,
+                 scan_registry=None, **kwargs):
         """
         Args:
-            http_client: Client HTTP partagé
+            http_client: Client HTTP partagé (porte le registre des flux
+                Isidore de l'exécution)
             enrich_oai: Si True, enrichit chaque item via GetRecord OAI.
                 Coûteux en temps (une requête par item). Désactivé
                 par défaut ; les métadonnées Isidore sont déjà riches.
+            scan_registry: Registre de flux Isidore explicite (contexte
+                d'exécution), cf. connectors/isidore_scan.py
             **kwargs: kwargs absorbés depuis la signature uniforme du
                 base.Connector (ignorés ici sauf enrich_oai).
         """
         super().__init__(http_client, **kwargs)
         self.enrich_oai = enrich_oai
+        self.scan_registry = scan_registry
+        # Statut du dernier parcours Isidore (IsidoreScanStatus)
+        self.last_scan_status = None
         # Client OAI-PMH (sickle gère les resumptionTokens)
         self._sickle = None
 
@@ -102,32 +109,33 @@ class OpenEditionConnector(Connector):
         # individuelle (Lidil, Semen, ...) ; le filtrage nominal historique
         # ne capture donc plus rien. Le filtrage par url_marker récupère
         # tous les items dont l'URL primaire ou un aggregate pointe vers
-        # *.openedition.org (journals, books, calenda, hypotheses).
-        with IsidoreConnector(http_client=self.http) as isidore:
+        # openedition.org ou un sous-domaine (journals, books). Les carnets
+        # Hypothèses (*.hypotheses.org) et Calenda (calenda.org), rattachés
+        # à OpenEdition dans Isidore (source.collection), ne sont PAS captés :
+        # constaté le 2026-09-28 sur « discours numérique », 59 des 200
+        # notices de la fenêtre (comportement historique conservé).
+        # Le flux de pages Isidore est partagé avec la source Isidore directe
+        # et les autres sous-sources de l'exécution (une page = un
+        # téléchargement) ; cf. connectors/isidore_scan.py.
+        with IsidoreConnector(http_client=self.http,
+                              scan_registry=self.scan_registry,
+                              run_context=self.run_context) as isidore:
             items = isidore.search(
                 query,
                 max_results=max_results,
                 url_marker=OPENEDITION_URL_MARKER,
                 from_date=from_date,
                 to_date=to_date,
+                source_label=self.SOURCE_NAME,
             )
+            self.last_scan_status = isidore.last_scan_status
+            # Compte rendu de collecte (OPT-07) : celui du parcours Isidore
+            # de cette sous-source (fenêtre, erreur partagée, plafond).
+            self.last_status = isidore.last_status
 
         # Reannotation des items : la source canonique devient OpenEdition
         # tout en conservant Isidore comme source intermédiaire
-        for item in items:
-            extra = item.get("extra", "")
-            # Substitution dans la ligne Sources
-            new_extra_lines = []
-            for line in extra.split("\n"):
-                if line.startswith("Sources:"):
-                    # Ajoute OpenEdition au début si pas déjà présent
-                    sources = [s.strip() for s in line[len("Sources:"):].split(",")]
-                    if "OpenEdition" not in sources:
-                        sources.insert(0, "OpenEdition")
-                    new_extra_lines.append("Sources: " + ", ".join(sources))
-                else:
-                    new_extra_lines.append(line)
-            item["extra"] = "\n".join(new_extra_lines)
+        annotate_proxy_source(items, "OpenEdition")
 
         logger.info(
             f"[OpenEdition] {len(items)} items via Isidore"
@@ -155,43 +163,69 @@ class OpenEditionConnector(Connector):
         )
 
         enriched = []
-        for i, item in enumerate(items):
-            oai_id = self._extract_oai_id(item)
-            if not oai_id:
-                enriched.append(item)
-                continue
+        report = self.last_status
+        failures = 0
+        try:
+            for i, item in enumerate(items):
+                # Annulation vérifiée entre deux enregistrements OAI.
+                self.check_cancelled()
+                oai_id = self._extract_oai_id(item)
+                if not oai_id:
+                    enriched.append(item)
+                    continue
 
-            try:
-                # GetRecord est l'opération OAI standard pour un item unique
-                record = self._get_sickle().GetRecord(
-                    identifier=oai_id,
-                    metadataPrefix=OPENEDITION_OAI_FORMAT,
-                )
-                # Mapping du record OAI riche (qdc / openaire)
-                # vers Zotero et fusion avec l'item Isidore existant
-                oai_item = map_qdc_to_zotero(
-                    record.metadata,
-                    oai_identifier=oai_id,
-                    source_name="OpenEdition",
-                )
-                # Fusion : conservation des champs Isidore, complétion
-                # par les champs OAI non vides
-                merged = self._merge_records(item, oai_item)
-                enriched.append(merged)
-            except Exception as e:
-                logger.warning(
-                    f"[OpenEdition] Échec enrichissement OAI {oai_id}: {e}"
-                )
-                enriched.append(item)
+                try:
+                    # Politesse par hôte (utils.http) : créneau réservé avant
+                    # l'accès OAI, partagé entre threads (remplace le
+                    # sommeil fixe après chaque GetRecord).
+                    polite_wait(OPENEDITION_OAI_URL, cancel=self.cancel_signal())
+                    # GetRecord est l'opération OAI standard pour un item unique
+                    record = self._get_sickle().GetRecord(
+                        identifier=oai_id,
+                        metadataPrefix=OPENEDITION_OAI_FORMAT,
+                    )
+                    # Mapping du record OAI riche (qdc / openaire)
+                    # vers Zotero et fusion avec l'item Isidore existant
+                    oai_item = map_qdc_to_zotero(
+                        record.metadata,
+                        oai_identifier=oai_id,
+                        source_name="OpenEdition",
+                    )
+                    # Fusion : conservation des champs Isidore, complétion
+                    # par les champs OAI non vides
+                    merged = self._merge_records(item, oai_item)
+                    enriched.append(merged)
+                except Exception as e:
+                    logger.warning(
+                        f"[OpenEdition] Échec enrichissement OAI {oai_id}: {e}"
+                    )
+                    failures += 1
+                    enriched.append(item)
 
-            # Politesse réseau sur l'entrepôt OAI
-            time.sleep(REQUEST_DELAY)
+                if (i + 1) % 50 == 0:
+                    logger.info(
+                        f"[OpenEdition] Enrichi {i + 1}/{len(items)}"
+                    )
+        except OperationCancelled as exc:
+            # Échéance souple (OPT-09 ter, RunContext.soft_stop) entre deux
+            # enregistrements OAI : les notices déjà enrichies le restent, les
+            # autres gardent leurs métadonnées Isidore ; aucune requête OAI de
+            # plus. Toute autre annulation est propagée.
+            done = len(enriched)
+            if not self.soft_stopped(
+                    exc, report, len(items),
+                    detail=(f"enrichissement OAI interrompu par l'échéance souple "
+                            f"après {done} notice(s) traitée(s) sur {len(items)} : "
+                            f"les {len(items) - done} autre(s) gardent leurs "
+                            f"métadonnées Isidore"),
+                    during_enrichment=True):
+                raise
+            enriched.extend(items[done:])
 
-            if (i + 1) % 50 == 0:
-                logger.info(
-                    f"[OpenEdition] Enrichi {i + 1}/{len(items)}"
-                )
-
+        if report is not None and failures:
+            report.bump("oai_failures", failures)
+            report.warn(f"enrichissement OAI en échec pour {failures} "
+                        f"notice(s) (métadonnées Isidore conservées)")
         return enriched
 
     @staticmethod

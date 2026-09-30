@@ -6,6 +6,27 @@ volume via l'endpoint *bulk* (``/paper/search/bulk`` : ≤ 1000 résultats par
 appel, jeton de continuation ``token``). Déduplication par ``externalIds.DOI``
 sinon ``externalIds.CorpusId``.
 
+Ordre des résultats (OPT-12, constat C26 ; vérifications live du
+2026-09-29, sans clé, requête « digital discourse ») :
+
+- sans ``sort``, bulk renvoie les résultats par ``paperId`` croissant
+  (identifiants de hachage : ordre sans rapport avec la requête), si bien que
+  la troncature à ``max_results`` retenait un sous-ensemble arbitraire ;
+- ``sort=citationCount:desc`` est accepté et se poursuit par ``token`` (page 2
+  toujours décroissante) ; ``publicationDate:desc`` aussi ;
+- ``/paper/search`` (classé par pertinence, ``offset + limit`` ≤ 1000,
+  ``limit`` ≤ 100) est impraticable sans clé : 8 réponses 429 sur 8 en
+  2 min 30, y compris après 90 s de pause, alors que bulk répondait.
+
+D'où, en mode ``bibliographie`` : bulk avec ``sort=S2_BIBLIO_SORT``
+(``citationCount:desc`` par défaut ; biais documenté : travaux anciens et
+très cités favorisés, pas un classement par pertinence) ; en mode
+``collecte`` (et sans mode) : bulk sans tri (``paperId`` croissant,
+déterministe, requêtes identiques à l'historique). Rang natif : position
+dans l'ordre servi ; score natif : aucun (le nombre de citations reste dans
+la notice). L'API n'a pas de filtre de langue : ``languages`` est ignoré (le
+filtre est fait localement par l'orchestrateur).
+
 La clé est lue via ``SEMANTIC_SCHOLAR_API_KEY`` (optionnelle).
 
 Base : https://api.semanticscholar.org/graph/v1
@@ -15,12 +36,13 @@ Documentation : https://api.semanticscholar.org (vérifier annuellement)
 from __future__ import annotations
 
 import logging
-import time
 from typing import Dict, List, Optional
 
 from connectors.base import Connector
-from config import ENV_S2_KEY, REQUEST_DELAY_S2, S2_GRAPH_API
+from config import ENV_S2_KEY, REQUEST_DELAY_S2, S2_BIBLIO_SORT, S2_GRAPH_API
+from engine.models import MODE_BIBLIOGRAPHIE
 from mappers.semantic_scholar_mapper import map_s2_item
+from utils.http import OperationCancelled
 from utils.secrets import get_api_key
 
 logger = logging.getLogger(__name__)
@@ -33,6 +55,27 @@ FIELDS = ",".join([
     "publicationTypes", "publicationVenue", "venue", "journal",
     "openAccessPdf", "s2FieldsOfStudy", "fieldsOfStudy", "url",
 ])
+
+# Tris admis par /paper/search/bulk (documentation de l'API ; citationCount
+# et publicationDate vérifiés en live le 2026-09-29).
+BULK_SORT_FIELDS = ("paperId", "publicationDate", "citationCount")
+DEFAULT_BIBLIO_SORT = "citationCount:desc"
+# Ordre de l'API sans paramètre sort (vérifié en live le 2026-09-29).
+BULK_DEFAULT_ORDER = "paperId"
+
+
+def bulk_sort(value: Optional[str]) -> str:
+    """
+    Valeur ``sort`` admise par bulk (``champ`` ou ``champ:asc|desc``) ;
+    ``citationCount:desc`` si la valeur configurée n'est pas reconnue.
+    """
+    text = (value or "").strip()
+    field_name, _, direction = text.partition(":")
+    if field_name in BULK_SORT_FIELDS and direction in ("", "asc", "desc"):
+        return text
+    if text:
+        logger.warning(f"[S2] Tri {text!r} non reconnu : {DEFAULT_BIBLIO_SORT}")
+    return DEFAULT_BIBLIO_SORT
 
 
 def _year_range(from_date, to_date) -> str:
@@ -58,14 +101,10 @@ class SemanticScholarConnector(Connector):
         # Clé optionnelle : si absente, on reste sur le pool partagé.
         self.api_key = api_key or get_api_key(ENV_S2_KEY, required=False)
         self.headers = {"x-api-key": self.api_key} if self.api_key else None
+        # Espacement minimal entre deux accès réseau réels à l'API, appliqué
+        # par la politesse par hôte et par compte de utils.http (partagée
+        # entre threads ; aucune attente sur une réponse servie par le cache).
         self.min_interval = min_interval
-        self._last = 0.0
-
-    def _throttle(self) -> None:
-        delta = time.monotonic() - self._last
-        if delta < self.min_interval:
-            time.sleep(self.min_interval - delta)
-        self._last = time.monotonic()
 
     def search(
         self,
@@ -73,47 +112,82 @@ class SemanticScholarConnector(Connector):
         max_results: int = 1000,
         from_date: Optional[str] = None,
         to_date: Optional[str] = None,
+        *,
+        mode: Optional[str] = None,
         **kwargs,
     ) -> List[Dict]:
-        """Moissonne Semantic Scholar en mode bulk. Retourne des items Zotero."""
+        """
+        Moissonne Semantic Scholar en mode bulk. Retourne des items Zotero.
+
+        Args:
+            mode: ``bibliographie`` : tri ``S2_BIBLIO_SORT`` (citations
+                décroissantes par défaut) ; sinon ordre de l'API (paperId).
+            **kwargs: options ignorées (dont ``languages`` : pas de filtre de
+                langue dans l'API).
+        """
         items: List[Dict] = []
         token = None
         year = _year_range(from_date, to_date)
+        report = self._start_report()   # compte rendu (OPT-07)
+        sort = bulk_sort(S2_BIBLIO_SORT) if mode == MODE_BIBLIOGRAPHIE else None
+        report.sorted_by(sort or BULK_DEFAULT_ORDER)
+        received = 0                    # résultats servis, dans l'ordre natif
 
-        while len(items) < max_results:
-            params = {"query": query, "fields": FIELDS}
-            if year:
-                params["year"] = year
-            if token:
-                params["token"] = token
+        try:
+            while len(items) < max_results:
+                self.check_cancelled()      # annulation entre deux pages
+                params = {"query": query, "fields": FIELDS}
+                if year:
+                    params["year"] = year
+                if sort:
+                    params["sort"] = sort
+                if token:
+                    params["token"] = token
 
-            self._throttle()
-            try:
-                response = self.http.get(
-                    S2_BULK, params=params, headers=self.headers, timeout=60
-                )
-                payload = response.json()
-            except Exception as e:
-                logger.error(f"[S2] Échec requête : {e}")
-                break
-
-            batch = payload.get("data") or []
-            if not batch:
-                break
-            for raw in batch:
                 try:
-                    items.append(map_s2_item(raw))
+                    response = self.http.get(
+                        S2_BULK, params=params, headers=self.headers, timeout=60,
+                        min_interval=self.min_interval,
+                    )
+                    payload = response.json()
                 except Exception as e:
-                    logger.warning(f"[S2] Échec mapping : {e}")
-                if len(items) >= max_results:
-                    return items[:max_results]
+                    logger.error(f"[S2] Échec requête : {e}")
+                    report.fail_with(e)
+                    break
 
-            token = payload.get("token")
-            logger.info(f"[S2] {len(items)} items cumulés")
-            if not token:
-                break
+                batch = payload.get("data") or []
+                if not batch:
+                    report.done()
+                    break
+                report.page(len(batch))
+                for index, raw in enumerate(batch):
+                    try:
+                        items.append(map_s2_item(raw))
+                    except Exception as e:
+                        report.bump("mapping_errors")
+                        logger.warning(f"[S2] Échec mapping : {e}")
+                        continue
+                    report.rank(received + index + 1)
+                    if len(items) >= max_results:
+                        report.limit()
+                        report.keep_ranks(max_results)
+                        return items[:max_results]
+                received += len(batch)
+
+                token = payload.get("token")
+                logger.info(f"[S2] {len(items)} items cumulés")
+                if not token:
+                    report.done()
+                    break
+        except OperationCancelled as exc:
+            # Échéance souple (OPT-09 ter, RunContext.soft_stop) : les notices
+            # des pages déjà reçues sont rendues, aucune page de plus n'est
+            # demandée ; toute autre annulation est propagée.
+            if not self.soft_stopped(exc, report, len(items)):
+                raise
 
         logger.info(f"[S2] Terminé : {len(items)} items collectés")
+        report.keep_ranks(max_results)
         return items[:max_results]
 
 

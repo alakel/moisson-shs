@@ -22,6 +22,7 @@ from typing import List, Dict
 
 from connectors.base import Connector
 from connectors.isidore import IsidoreConnector
+from connectors.isidore_scan import annotate_proxy_source
 from config import THESES_FR_URL_MARKER
 
 logger = logging.getLogger(__name__)
@@ -32,13 +33,19 @@ class ThesesFrConnector(Connector):
 
     SOURCE_NAME = "Theses.fr"
 
-    def __init__(self, http_client=None, **kwargs):
+    def __init__(self, http_client=None, scan_registry=None, **kwargs):
         """
         Args:
-            http_client: Client HTTP partagé
+            http_client: Client HTTP partagé (porte le registre des flux
+                Isidore de l'exécution)
+            scan_registry: Registre de flux Isidore explicite (contexte
+                d'exécution), cf. connectors/isidore_scan.py
             **kwargs: absorbés (pas d'enrichissement OAI possible ici)
         """
         super().__init__(http_client, **kwargs)
+        self.scan_registry = scan_registry
+        # Statut du dernier parcours Isidore (IsidoreScanStatus)
+        self.last_scan_status = None
 
     def search(
         self,
@@ -61,28 +68,27 @@ class ThesesFrConnector(Connector):
         """
         logger.info(f"[Theses.fr] Démarrage via proxy Isidore: {query}")
 
-        with IsidoreConnector(http_client=self.http) as isidore:
+        # Flux de pages Isidore partagé avec les autres consommateurs de
+        # l'exécution (cf. connectors/isidore_scan.py).
+        with IsidoreConnector(http_client=self.http,
+                              scan_registry=self.scan_registry,
+                              run_context=self.run_context) as isidore:
             items = isidore.search(
                 query,
                 max_results=max_results,
                 url_marker=THESES_FR_URL_MARKER,
                 from_date=from_date,
                 to_date=to_date,
+                source_label=self.SOURCE_NAME,
             )
+            self.last_scan_status = isidore.last_scan_status
+            # Compte rendu de collecte (OPT-07) : celui du parcours Isidore
+            # de cette sous-source (fenêtre, erreur partagée, plafond).
+            self.last_status = isidore.last_status
 
         # Annotation source canonique
+        annotate_proxy_source(items, "Theses.fr")
         for item in items:
-            extra = item.get("extra", "")
-            new_lines = []
-            for line in extra.split("\n"):
-                if line.startswith("Sources:"):
-                    sources = [s.strip() for s in line[len("Sources:"):].split(",")]
-                    if "Theses.fr" not in sources:
-                        sources.insert(0, "Theses.fr")
-                    new_lines.append("Sources: " + ", ".join(sources))
-                else:
-                    new_lines.append(line)
-            item["extra"] = "\n".join(new_lines)
             # Annotation systématique : limitation de la moisson
             if "Full Text Available" not in item["extra"]:
                 from mappers.zotero_schema import append_to_extra

@@ -10,12 +10,23 @@ utilisateur sous `OUTPUT_DIR` (la racine de la sandbox).
 La garde est **HTTP-only** : en stdio (process local de confiance), les chemins
 restent libres (cf. `mcp_server._safe_path`). Ici on fournit la primitive ;
 c'est l'appelant qui décide de l'activer selon le transport.
+
+Les **fichiers de service** de `OUTPUT_DIR` (`.oauth/oauth_store.json`,
+`.audit/*.jsonl`, `.index.json`…) sont hors zone eux aussi : `OUTPUT_DIR` est
+prévisible en déploiement (`/data/output`), et un chemin absolu vers le magasin
+OAuth permettait à tout porteur de jeton de l'écraser par l'`output_path` de
+`corpus_to_csl` ou `corpus_merge` (serveur qui ne redémarre plus, journal
+d'audit effacé) ou de le lire comme corpus d'entrée. Cette primitive ne sert
+qu'aux chemins fournis par le client ; le serveur écrit ses propres fichiers
+de service directement, sans passer par elle.
 """
 
 from __future__ import annotations
 
 import re
 from pathlib import Path
+
+from utils.output_files import is_service_path
 
 
 class PathSecurityError(Exception):
@@ -43,6 +54,11 @@ def resolve_in_output_dir(
     - Dans tous les cas, on **résout les symlinks** (`resolve()`) PUIS on exige
       que le chemin résolu soit relatif à `output_dir` résolu — un symlink
       pointant dehors est donc rejeté.
+    - Le chemin résolu ne doit pas être un **fichier de service** : aucun de
+      ses composants relatifs à `output_dir` ne commence par un point
+      (`utils.output_files.is_service_path`). Un symlink interne vers
+      `.oauth/` est donc rejeté aussi. Le refus précède le test d'existence
+      (pas d'oracle sur la présence d'un fichier de service).
 
     Args:
         user_path: Chemin fourni par le client (relatif, nu ou absolu).
@@ -70,6 +86,11 @@ def resolve_in_output_dir(
 
     if not candidate.is_relative_to(base):  # Python 3.9+
         raise PathSecurityError(f"Chemin hors de la zone autorisée : {user_path}")
+    # Fichiers de service (`.oauth/`, `.audit/`, `.index.json`…) : ni lus ni
+    # écrits par les outils. Seuls les composants relatifs à la racine
+    # comptent : un OUTPUT_DIR situé sous un dossier caché reste utilisable.
+    if is_service_path(candidate, base):
+        raise PathSecurityError(f"Fichier de service inaccessible : {user_path}")
     if must_exist and not candidate.exists():
         raise PathSecurityError(f"Fichier introuvable dans la zone : {user_path}")
     return candidate

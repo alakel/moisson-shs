@@ -12,19 +12,38 @@ from mappers import zotero_schema_loader as loader
 
 
 @pytest.fixture(autouse=True)
-def reset_memory_cache():
-    """Reset le cache mémoire entre chaque test."""
-    loader._MEMORY_CACHE = None
+def reset_memory_cache(tmp_path, monkeypatch):
+    """
+    Remet le chargeur à zéro entre chaque test.
+
+    Depuis OPT-04, l'état ne se réduit plus au cache mémoire : la fenêtre
+    d'échec et le précalcul des champs sont remis à zéro aussi, sinon un
+    échec simulé par un test couperait le réseau des suivants. Le cache
+    disque est redirigé vers un répertoire temporaire (les replis ne lisent
+    plus ~/.cache de la machine) et le fichier de schéma figé
+    ($MOISSON_ZOTERO_SCHEMA_FILE, posé pour toute la suite) est retiré : ces
+    tests exercent la stratégie ordinaire. La fenêtre d'échec et la durée
+    de validité du cache, lues dans l'environnement à l'import du module,
+    sont fixées à leurs valeurs par défaut (indépendance vis-à-vis du
+    shell). L'état antérieur est restauré ensuite pour ne pas perturber les
+    autres modules.
+    """
+    saved = (loader._MEMORY_CACHE, loader._UNAVAILABLE_UNTIL,
+             loader._SCHEMA_ORIGIN, loader._INDEX)
+    monkeypatch.delenv(loader.SCHEMA_FILE_ENV, raising=False)
+    monkeypatch.setattr(loader, "CACHE_PATH", tmp_path / "schema.json")
+    monkeypatch.setattr(loader, "SCHEMA_RETRY_AFTER_SECONDS", 600)
+    monkeypatch.setattr(loader, "CACHE_MAX_AGE_SECONDS", 30 * 86400)
+    loader.reset_state()
     yield
-    loader._MEMORY_CACHE = None
+    (loader._MEMORY_CACHE, loader._UNAVAILABLE_UNTIL,
+     loader._SCHEMA_ORIGIN, loader._INDEX) = saved
 
 
 @pytest.fixture
-def temp_cache(tmp_path, monkeypatch):
-    """Redirige le cache vers un répertoire temporaire."""
-    cache_path = tmp_path / "schema.json"
-    monkeypatch.setattr(loader, "CACHE_PATH", cache_path)
-    return cache_path
+def temp_cache():
+    """Cache disque temporaire (déjà redirigé par la fixture automatique)."""
+    return loader.CACHE_PATH
 
 
 def _make_fake_schema():
@@ -70,9 +89,13 @@ class TestLoadZoteroSchema:
         assert temp_cache.exists()
 
     def test_returns_none_when_all_fail(self, temp_cache):
-        with patch.object(loader, "_fetch_from_network", return_value=None):
+        with patch.object(loader, "_fetch_from_network", return_value=None) as f:
             schema = loader.load_zotero_schema()
+            # OPT-04 : l'échec est mémorisé, pas de nouvelle tentative
+            assert loader.load_zotero_schema() is None
         assert schema is None
+        assert f.call_count == 1
+        assert loader.schema_state() == loader.ETAT_INDISPONIBLE
 
     def test_force_refresh_ignores_caches(self, temp_cache):
         # Cache mémoire OBSOLÈTE

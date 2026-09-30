@@ -23,19 +23,26 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
           cache: pip
+          # Cache pip invalidé quand les versions testées changent.
+          cache-dependency-path: |
+            pyproject.toml
+            constraints.txt
 
-      - name: Install package + dev/mcp extras
+      # Versions testées figées par constraints.txt (dont mcp<2 : la série 2
+      # retire les décorateurs Server.list_tools/call_tool/list_resources).
+      - name: Install package + dev/mcp extras (versions testées)
         run: |
           python -m pip install --upgrade pip
-          pip install -e ".[dev,mcp]"
+          pip install -e ".[dev,mcp]" -c constraints.txt
 
-      - name: Run unit tests (no network)
+      # UNE seule exécution de la suite : tests unitaires ET tests `sockets`
+      # (uvicorn de test + client loopback : les runners autorisent les
+      # sockets locales), seuil de couverture appliqué dans le même passage.
+      # Seuls les tests `integration` (API réelles des fournisseurs) sont
+      # écartés ici ; ils ont leur propre job.
+      - name: Run tests (no external network) + coverage threshold
         run: |
-          pytest tests/ -m "not integration" -v --cov=mappers --cov=utils --cov=connectors --cov-report=term-missing
-
-      - name: Coverage threshold
-        run: |
-          pytest tests/ -m "not integration" --cov=mappers --cov=utils --cov-fail-under=70
+          pytest tests/ -m "not integration" -v --cov=mappers --cov=utils --cov=connectors --cov-report=term-missing --cov-fail-under=70
 
   smoke:
     # Test léger d'intégration : import du package et vérification
@@ -49,7 +56,7 @@ jobs:
         with:
           python-version: "3.12"
       - name: Install
-        run: pip install -e ".[mcp]"
+        run: pip install -e ".[mcp]" -c constraints.txt
       - name: Test CLI entry point
         run: |
           moisson-shs version
@@ -71,12 +78,20 @@ jobs:
       OPENALEX_API_KEY: ${{ secrets.OPENALEX_API_KEY }}
       SEMANTIC_SCHOLAR_API_KEY: ${{ secrets.SEMANTIC_SCHOLAR_API_KEY }}
       CORE_API_KEY: ${{ secrets.CORE_API_KEY }}
+      # tests/conftest.py retire les clés API de l'environnement des tests ;
+      # cet opt-in conserve celles des sources GRATUITES ci-dessus, pour les
+      # seuls tests marqués integration. La clé SerpAPI (source facturée) est
+      # retirée dans tous les cas.
+      MOISSON_TEST_REAL_KEYS: "1"
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
       - name: Install
-        run: pip install -e ".[dev,mcp]"
+        run: pip install -e ".[dev,mcp]" -c constraints.txt
+      # tests/test_sprint_01.py : trois vérifications légères des endpoints
+      # Cairn et Isidore, marquées `integration` (elles tournaient auparavant,
+      # non marquées, dans le job `test`).
       - name: Run integration tests (network; key-gated tests skip without secret)
-        run: pytest tests/integration -m integration -v
+        run: pytest tests/integration tests/test_sprint_01.py -m integration -v

@@ -106,6 +106,8 @@ class TestSecrets:
 
 # === utils.http_scholarly ===
 
+import utils.http as http_mod  # noqa: E402
+
 class _FakeResp:
     def __init__(self, status_code, headers=None, payload=None, text=""):
         self.status_code = status_code
@@ -135,6 +137,8 @@ class _FakeSession:
 
 
 class TestHttpScholarly:
+    # Les attentes (politesse, réessais) sont faites par utils.http, qui
+    # porte la politique commune : c'est son sommeil qui est neutralisé.
     def test_200_returns_json(self):
         from utils.http_scholarly import get_json
         sess = _FakeSession([_FakeResp(200, payload={"ok": True})])
@@ -169,7 +173,7 @@ class TestHttpScholarly:
 
     def test_429_then_200_retries(self, monkeypatch):
         from utils import http_scholarly
-        monkeypatch.setattr(http_scholarly.time, "sleep", lambda s: None)
+        monkeypatch.setattr(http_mod.time, "sleep", lambda s: None)
         sess = _FakeSession([
             _FakeResp(429, headers={"Retry-After": "1"}),
             _FakeResp(200, payload={"ok": 1}),
@@ -179,7 +183,7 @@ class TestHttpScholarly:
 
     def test_5xx_then_200_retries(self, monkeypatch):
         from utils import http_scholarly
-        monkeypatch.setattr(http_scholarly.time, "sleep", lambda s: None)
+        monkeypatch.setattr(http_mod.time, "sleep", lambda s: None)
         sess = _FakeSession([
             _FakeResp(503),
             _FakeResp(200, payload={"ok": 2}),
@@ -190,7 +194,7 @@ class TestHttpScholarly:
     def test_429_retries_exhausted_raises_http_error(self, monkeypatch):
         from utils import http_scholarly
         import requests
-        monkeypatch.setattr(http_scholarly.time, "sleep", lambda s: None)
+        monkeypatch.setattr(http_mod.time, "sleep", lambda s: None)
         sess = _FakeSession([
             _FakeResp(429, headers={"Retry-After": "1"}) for _ in range(3)
         ])

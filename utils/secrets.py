@@ -1,38 +1,91 @@
 """
-Chargement centralisé des clés API des sources internationales.
+Chargement centralisé des clés API des sources internationales et de
+Google Scholar.
 
 Les clés sont lues depuis les variables d'environnement. Si python-dotenv
-est installé, un fichier `.env` (à la racine du projet, ignoré par git) est
-chargé automatiquement au premier import. On ne committe JAMAIS de clé ;
+est installé, le fichier `.env` de la racine du projet (ignoré par git ;
+chemin calculé depuis ce module, non depuis le répertoire courant), puis un
+éventuel `.env` du répertoire courant, sont chargés au premier import,
+sauf si ``MOISSON_NO_DOTENV=1`` (garde posée par la suite de tests). Aucun
+des deux n'écrase une variable déjà définie. On ne committe JAMAIS de clé ;
 voir `.env.example` pour les variables attendues.
 
 Sources concernées :
 - OPENALEX_API_KEY      — requis (clé gratuite, openalex.org/settings/api)
 - SEMANTIC_SCHOLAR_API_KEY — optionnel (sans clé : pool partagé throttlé)
 - CORE_API_KEY          — requis (sur inscription, core.ac.uk/services/api)
+- SERPAPI_API_KEY       — requis pour Google Scholar (compte serpapi.com,
+  facturé à la requête)
 
 Le MCP transmet ces clés via le bloc `env` de `claude_desktop_config.json`
 (par utilisateur). Pour le CLI, elles viennent de `.env` ou du shell.
+
+Limite connue : ce module est importé après ``config.py``. Les réglages
+``MOISSON_*`` que ``config.py`` lit à l'import ne sont donc pas pris dans un
+`.env` local ; seules les clés (lues à l'appel) le sont à coup sûr. Passer
+ces réglages par le shell, le bloc `env` du client ou l'``env_file`` de
+Docker Compose (voir `.env.example`).
 """
 
 from __future__ import annotations
 
 import logging
 import os
+from pathlib import Path
 from typing import Optional
 
 logger = logging.getLogger(__name__)
 
-# Chargement optionnel du .env (sans dépendance dure : python-dotenv est un
-# extra). En son absence, on se rabat sur les variables d'environnement du
-# shell / du bloc `env` MCP. Le chargement n'écrase pas une variable déjà
-# définie dans l'environnement (override=False est le défaut de dotenv).
-try:  # pragma: no cover - dépend de l'environnement d'exécution
-    from dotenv import load_dotenv
+# Garde d'isolation : `MOISSON_NO_DOTENV=1` désactive tout chargement de `.env`.
+# La suite de tests la pose (tests/conftest.py) avant d'importer le code du
+# projet, pour qu'aucune clé du poste — en particulier la clé SerpAPI, seule
+# source facturée — n'entre dans l'environnement des tests.
+NO_DOTENV_ENV = "MOISSON_NO_DOTENV"
 
+
+def _load_dotenv_files() -> bool:
+    """
+    Charge les fichiers `.env` connus, sauf si ``MOISSON_NO_DOTENV=1``.
+
+    Chargement optionnel (sans dépendance dure : python-dotenv est un extra).
+    En son absence, on se rabat sur les variables d'environnement du shell /
+    du bloc `env` MCP. Le chargement n'écrase pas une variable déjà définie
+    dans l'environnement (override=False est le défaut de dotenv).
+
+    Returns:
+        True si un chargement a été tenté, False s'il a été désactivé par la
+        garde ou si python-dotenv est absent.
+    """
+    if os.environ.get(NO_DOTENV_ENV, "").strip() == "1":
+        logger.debug("%s=1 : aucun fichier .env chargé", NO_DOTENV_ENV)
+        return False
+    try:  # pragma: no cover - dépend de l'environnement d'exécution
+        from dotenv import load_dotenv
+    except ImportError:  # pragma: no cover
+        return False
+
+    # Deux chargements, dans cet ordre, aucun n'écrasant une variable déjà
+    # définie (override=False) :
+    #
+    # 1. le `.env` de la racine du projet, résolu depuis l'emplacement de CE
+    #    fichier et non depuis le répertoire courant. C'est le point important :
+    #    `load_dotenv()` seul s'appuie sur le CWD, or le serveur MCP est lancé
+    #    par Claude Desktop depuis un répertoire arbitraire — le `.env` était
+    #    alors ignoré en silence, et la source concernée désactivée sans que
+    #    rien ne l'explique ;
+    # 2. la recherche par défaut, conservée pour un `.env` local au CWD (CLI
+    #    lancée depuis un autre projet, tests, conteneur).
+    #
+    # L'environnement réel reste prioritaire sur les deux : le bloc `env` de
+    # `claude_desktop_config.json` continue de faire autorité.
+    project_env = Path(__file__).resolve().parent.parent / ".env"
+    if project_env.is_file():
+        load_dotenv(project_env)
     load_dotenv()
-except ImportError:  # pragma: no cover
-    pass
+    return True
+
+
+_load_dotenv_files()
 
 
 class MissingAPIKey(RuntimeError):

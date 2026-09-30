@@ -114,17 +114,22 @@ class TestHelperHttpBranch:
         assert u == "/download/corpus_r.json"   # repli relatif
 
     def test_moisson_search_http_branch(self, http_mode, monkeypatch):
-        # Stub réseau : main.run_source.
-        monkeypatch.setattr("main.run_source",
+        # Stub réseau : run_source du moteur (OPT-07 : l'exécution d'une
+        # source vit dans engine.orchestrator, main.run_source n'en est plus
+        # qu'un alias que le moteur n'appelle pas).
+        monkeypatch.setattr("engine.orchestrator.run_source",
                             lambda *a, **k: _make_items(2))
         blocks, structured = mcp_server._run_moisson_sync(
             query="discours", max_per_source=10, sources=["hal", "isidore"],
             enrich_oai=False, do_dedup=True, workers=1,
         )
-        # HTTP : pas d'inline, 3 URLs (json + csl + stats).
+        # HTTP : pas d'inline, 4 URLs (json + csl + stats + manifeste, fichier
+        # associé téléchargeable ajouté par OPT-16).
         assert _types(blocks, "resource") == []
         assert _types(blocks, "resource_link") == []
-        assert len(structured["download_urls"]) == 3
+        assert len(structured["download_urls"]) == 4
+        assert any(n.endswith(".manifest.json")
+                   for n in structured["download_urls"])
         # Aucun chemin disque dans le texte.
         assert str(http_mode) not in blocks[0].text
 
@@ -255,6 +260,7 @@ def download_server(tmp_path, monkeypatch):
     srv.stop()
 
 
+@pytest.mark.sockets
 class TestDownloadE2E:
     def test_download_with_token_200(self, download_server):
         base, corpus = download_server

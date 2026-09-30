@@ -1,0 +1,4428 @@
+{
+ "version": 1,
+ "description": "Jeu témoin de la déduplication (OPT-06, 2026-09-28) : 50 paires positives (deux notices du même travail) et 50 paires négatives (notices distinctes, ou tenues séparées par règle : DOI distincts, versions). Paires « réel » : notices extraites des corpus de output/ (nom du corpus dans « origin »), réduites aux champs utiles à l'identité (type, titre, auteurs, date, DOI, URL, ISBN d'un livre, lignes d'extra d'identifiants). Paires « construit » : pièges (compte rendu / article, prépublication / version finale, homonymes, rééditions, titres génériques, deux DOI, années éloignées, volumes, URL génériques). « expected_missed » marque une paire positive que les règles actuelles ne fusionnent pas (limite documentée). Revue OPT-06 (2026-09-28) : 6 négatives ajoutées (N51-N56 : chapitre/ouvrage de même titre court, versions distinctes d'un même dépôt HAL, republication, tomes, URL de page de revue) ; P34 manquée depuis la règle de frontière de mot de best_title_ratio. OPT-06 bis (2026-09-28) : 4 positives ajoutées (P51-P54 : portail DUMAS, noms inversés ou composés, dont deux paires réelles d'une moisson live) et 8 négatives pièges pour la corroboration par les jetons du nom complet (N57-N64 : homonymes partageant un nom composé, frères et sœurs, prénom pris pour nom, auteurs inversés mais titres différents). Revue OPT-06 bis (2026-09-28) : 2 négatives ajoutées (N65-N66 : composés à trait d'union contradictoires, « Martin-Paul, Jean » / « Martin, Jean-Paul »).",
+ "positives": [
+  {
+   "id": "P01",
+   "origin": "réel : corpus_author_amar_lakel_20260523_223739.json",
+   "note": "clé HAL dérivée de l'URL (Isidore) + HAL ID déclaré",
+   "a": {
+    "itemType": "journalArticle",
+    "title": "My web intelligence : un outil pour l’analyse du web et des réseaux",
+    "creators": [
+     {
+      "creatorType": "author",
+      "firstName": "Amar",
+      "lastName": "Lakel"
+     }
+    ],
+    "date": "2021-04-05",
+    "DOI": "10.3917/i2d.211.0096",
+    "url": "https://hal.science/hal-03233584v1",
+    "extra": "Sources: HAL\nHAL ID: hal-03233584"
+   },
+   "b": {
+    "itemType": "journalArticle",
+    "title": "My web intelligence : un outil pour l’analyse du web et des réseaux",
+    "creators": [
+     {
+      "creatorType": "author",
+      "firstName": "Amar",
+      "lastName": "Lakel"
+     }
+    ],
+    "date": "2021-04-05",
+    "url": "https://hal.science/hal-03233584",
+    "extra": "Sources: Isidore\nIsidore URI: https://isidore.science/resource/10670/1.65d0fb946882fb91e353f51ccafc0b152081574d\nAlternative URLs: https://hal.science/hal-03233584v1/document | https://hal.science/hal-03233584v1/file/MyWebLAKELPUBrevuOLd.docx%20%281%29.pdf"
+   }
+  },
+  {
+   "id": "P02",
+   "origin": "réel : corpus_author_sophie_moirand_20260618_105038.json",
+   "note": "clé HAL depuis un portail archives-ouvertes.fr",
+   "a": {
+    "itemType": "journalArticle",
+    "title": "Discours, mémoires et contextes : à propos du fonctionnement de l'allusion dans la presse",
+    "creators": [
+     {
+      "creatorType": "author",
+      "firstName": "Sophie",
+      "lastName": "Moirand"
+     }
+    ],
+    "date": "2007-11-01",
+    "DOI": "10.4000/corela.1567",
+    "url": "https://univ-sorbonne-nouvelle.hal.science/hal-01507295v1",
+    "extra": "Sources: HAL, Isidore, OpenAlex, Semantic Scholar\nHAL ID: hal-01507295\nIsidore URI: https://isidore.science/resource/20.500.13089/eeym\nAlternative URLs: https://hdl.handle.net/20.500.13089/eeym | https://journals.openedition.org/corela/1567\nOpenAlex ID: https://openalex.org/W2074013099\nDOI: 10.4000/corela.1567\nS2 corpus id: 144320348\nDOI: 10.4000/CORELA.1567"
+   },
+   "b": {
+    "itemType": "journalArticle",
+    "title": "Discours, mémoires et contextes : à propos du fonctionnement de l'allusion dans la presseRevue en ligne CORELA Cognition, discours, contextes",
+    "creators": [
+     {
+      "creatorType": "author",
+      "firstName": "Sophie",
+      "lastName": "Moirand"
+     }
+    ],
+    "date": "2007-11-01",
+    "url": "https://hal-univ-paris3.archives-ouvertes.fr/hal-01507295",
+    "extra": "Sources: OpenAlex\nOpenAlex ID: https://openalex.org/W2945453620"
+   }
+  },
+  {
+   "id": "P03",
+   "origin": "réel : corpus_author_alain_rabatel_20260618_095713.json",
+   "note": "clé HAL ; types divergents (chapitre HAL, article OpenAlex)",
+   "a": {
+    "itemType": "bookSection",
+    "title": "Si la didactique du français (re)croisait linguistique, littérature et politique",
+    "creators": [
+     {
+      "creatorType": "author",
+      "firstName": "Alain",
+      "lastName": "Rabatel"
+     }
+    ],
+    "date": "2016",
+    "url": "https://shs.hal.science/halshs-01338293v1",
+    "extra": "Sources: HAL\nHAL ID: halshs-01338293"
+   },
+   "b": {
+    "itemType": "journalArticle",
+    "title": "Si la didactique du français (re)croisait linguistique, littérature et politique",
+    "creators": [
+     {
+      "creatorType": "author",
+      "firstName": "Alain",
+      "lastName": "Rabatel"
+     }
+    ],
+    "date": "2016-01-01",
+    "url": "https://shs.hal.science/halshs-01338293",
+    "extra": "Sources: OpenAlex\nOpenAlex ID: https://openalex.org/W2613713897"
+   }
+  },
+  {
+   "id": "P04",
+   "origin": "réel : corpus_author_alain_rabatel_20260618_095713.json",
+   "note": "clé HAL ; communication HAL contre article OpenAlex",
+   "a": {
+    "itemType": "conferencePaper",
+    "title": "Analyse de discours, critique et engagement. L’exemple d’une analyse des émotions dans un manifeste féministe lors de l’affaire DSK/Nafissatou Diallo ?",
+    "creators": [
+     {
+      "creatorType": "author",
+      "firstName": "Alain",
+      "lastName": "Rabatel"
+     }
+    ],
+    "date": "2014-10-30",
+    "url": "https://shs.hal.science/halshs-02126072v1",
+    "extra": "Sources: HAL\nHAL ID: halshs-02126072"
+   },
+   "b": {
+    "itemType": "journalArticle",
+    "title": "Analyse de discours, critique et engagement. L’exemple d’une analyse des émotions dans un manifeste féministe lors de l’affaire DSK/Nafissatou Diallo ?",
+    "creators": [
+     {
+      "creatorType": "author",
+      "firstName": "Alain",
+      "lastName": "Rabatel"
+     }
+    ],
+    "date": "2014-10-30",
+    "url": "https://shs.hal.science/halshs-02126072",
+    "extra": "Sources: OpenAlex\nOpenAlex ID: https://openalex.org/W3041276468"
+   }
+  },
+  {
+   "id": "P05",
+   "origin": "réel : corpus_author_alain_rabatel_20260618_095713.json",
+   "note": "clé HAL ; document HAL contre livre OpenAlex",
+   "a": {
+    "itemType": "document",
+    "title": "Les défis de l’écriture inclusive",
+    "creators": [
+     {
+      "creatorType": "author",
+      "firstName": "Alain",
+      "lastName": "Rabatel"
+     },
+     {
+      "creatorType": "author",
+      "firstName": "Laurence",
+      "lastName": "Rosier"
+     }
+    ],
+    "date": "2019-11",
+    "url": "https://shs.hal.science/halshs-02470315v1",
+    "extra": "Sources: HAL\nHAL ID: halshs-02470315"
+   },
+   "b": {
+    "itemType": "book",
+    "title": "Les défis de l’écriture inclusive",
+    "creators": [
+     {
+      "creatorType": "author",
+      "firstName": "Alain",
+      "lastName": "Rabatel"
+     },
+     {
+      "creatorType": "author",
+      "firstName": "Laurence",
+      "lastName": "Rosier"
+     }
+    ],
+    "date": "2019-11-01",
+    "url": "https://shs.hal.science/halshs-02470315",
+    "extra": "Sources: OpenAlex\nOpenAlex ID: https://openalex.org/W3004689152"
+   }
+  },
+  {
+   "id": "P06",
+   "origin": "réel : corpus_author_alain_rabatel_20260618_095713.json",
+   "note": "suffixe de version HAL (v1) retiré",
+   "a": {
+    "itemType": "journalArticle",
+    "title": "La dialogisation au cœur du couple polyphonie/dialogisme chez Bakhtine",
+    "creators": [
+     {
+      "creatorType": "author",
+      "firstName": "Alain",
+      "lastName": "Rabatel"
+     }
+    ],
+    "date": "2006",
+    "url": "https://shs.hal.science/halshs-00367519v1",
+    "extra": "Sources: HAL\nHAL ID: halshs-00367519"
+   },
+   "b": {
+    "itemType": "journalArticle",
+    "title": "La dialogisation au cœur du couple polyphonie/dialogisme chez Bakhtine",
+    "creators": [
+     {
+      "creatorType": "author",
+      "firstName": "Alain",
+      "lastName": "Rabatel"
+     }
+    ],
+    "date": "2006-01-01",
+    "url": "https://shs.hal.science/halshs-00367519",
+    "extra": "Sources: Isidore\nIsidore URI: https://isidore.science/resource/10670/1.db352ca2f407027f37c4ac78e2047c0a8419e4c3\nAlternative URLs: https://shs.hal.science/halshs-00367519v1/document | https://shs.hal.science/halshs-00367519v1/file/64-2006c-Rabatel-Revue_romane.pdf"
+   }
+  },
+  {
+   "id": "P07",
+   "origin": "réel : corpus_author_amar_lakel_20260523_223739.json",
+   "note": "clé HAL ; titre anglais contre titre français",
+   "a": {
+    "itemType": "computerProgram",
+    "title": "ZOTERORAGpy: Scientific monitoring and knowledge management system for academic research",
+    "creators": [
+     {
+      "creatorType": "author",
+      "firstName": "Amar",
+      "lastName": "Lakel"
+     }
+    ],
+    "date": "2025-06-02",
+    "url": "https://hal.science/hal-05421312v1",
+    "extra": "Sources: HAL\nHAL ID: hal-05421312"
+   },
+   "b": {
+    "itemType": "document",
+    "title": "ZOTERORAGpy : Système de veille scientifique et de gestion de connaissances pour la recherche académique",
+    "creators": [
+     {
+      "creatorType": "author",
+      "firstName": "Amar",
+      "lastName": "Lakel"
+     }
+    ],
+    "date": "2025-06-02",
+    "url": "https://hal.science/hal-05421312",
+    "extra": "Sources: Isidore\nIsidore URI: https://isidore.science/resource/10670/1.8885127ad53d3cc0548986babc2ef3fa6f700191\nAlternative URLs: https://hal.science/hal-05421312v1/document"
+   }
+  },
+  {
+   "id": "P08",
+   "origin": "réel : corpus_author_amar_lakel_20260523_223739.json + corpus_author_amar_lakel_20260617_120549.json",
+   "note": "clé HAL ; titre traduit (OpenAlex anglais, HAL français)",
+   "a": {
+    "itemType": "report",
+    "title": "Information de santé sur internet : le cas de l'asthme et du diabète chez l'enfant. : Research report “Health information on the internet” Regional Project Digital Data Innovation",
+    "creators": [
+     {
+      "creatorType": "author",
+      "firstName": "Amar",
+      "lastName": "Lakel"
+     }
+    ],
+    "date": "2018-06",
+    "url": "https://hal.science/hal-04217514v1",
+    "extra": "Sources: HAL\nHAL ID: hal-04217514"
+   },
+   "b": {
+    "itemType": "report",
+    "title": "Health information on the internet: the case of asthma and diabetes in children.",
+    "creators": [
+     {
+      "creatorType": "author",
+      "firstName": "Amar",
+      "lastName": "Lakel"
+     }
+    ],
+    "date": "2018-06-01",
+    "url": "https://hal.science/hal-04217514",
+    "extra": "Sources: OpenAlex\nOpenAlex ID: https://openalex.org/W4390850621"
+   }
+  },
+  {
+   "id": "P09",
+   "origin": "réel : corpus_author_sophie_moirand_20260618_105038.json",
+   "note": "DOI Persée dérivé de l'URL persee.fr",
+   "a": {
+    "itemType": "journalArticle",
+    "title": "Des choix méthodologiques pour une linguistique de discours comparative",
+    "creators": [
+     {
+      "creatorType": "author",
+      "firstName": "Sophie",
+      "lastName": "Moirand"
+     }
+    ],
+    "date": "1992-01-01",
+    "DOI": "10.3406/lgge.1992.1622",
+    "url": "https://doi.org/10.3406/lgge.1992.1622",
+    "extra": "Sources: OpenAlex, Semantic Scholar\nOpenAlex ID: https://openalex.org/W2063544639\nDOI: 10.3406/lgge.1992.1622\nS2 corpus id: 171024580\nDOI: 10.3406/LGGE.1992.1622"
+   },
+   "b": {
+    "itemType": "journalArticle",
+    "title": "Des choix méthodologiques pour une linguistique de discours comparative",
+    "creators": [
+     {
+      "creatorType": "author",
+      "firstName": "Sophie",
+      "lastName": "Moirand"
+     }
+    ],
+    "date": "1992-01-01",
+    "url": "https://www.persee.fr/doc/lgge_0458-726x_1992_num_26_105_1622",
+    "extra": "Sources: Isidore\nIsidore URI: https://isidore.science/resource/10.3406/lgge.1992.1622\nAlternative URLs: http://oai.persee.fr/oai?verb=GetRecord&identifier=oai:persee:article/lgge_0458-726x_1992_num_26_105_1622&metadataPrefix=tei"
+   }
+  },
+  {
+   "id": "P10",
+   "origin": "réel : corpus_author_catherine_kerbrat_orecchioni_20260618_095729.json",
+   "note": "DOI Persée dérivé",
+   "a": {
+    "itemType": "journalArticle",
+    "title": "Antonymie et argumentation : la contradiction",
+    "creators": [
+     {
+      "creatorType": "author",
+      "firstName": "Catherine",
+      "lastName": "Kerbrat-Orecchioni"
+     }
+    ],
+    "date": "1984-01-01",
+    "DOI": "10.3406/prati.1984.1319",
+    "url": "https://doi.org/10.3406/prati.1984.1319",
+    "extra": "Sources: OpenAlex, Semantic Scholar\nOpenAlex ID: https://openalex.org/W2509759407\nDOI: 10.3406/prati.1984.1319\nS2 corpus id: 171213920\nDOI: 10.3406/PRATI.1984.1319"
+   },
+   "b": {
+    "itemType": "journalArticle",
+    "title": "Antonymie et argumentation : la contradiction",
+    "creators": [
+     {
+      "creatorType": "author",
+      "firstName": "Catherine",
+      "lastName": "Kerbrat-Orecchioni"
+     }
+    ],
+    "date": "1984-01-01",
+    "url": "https://www.persee.fr/doc/prati_0338-2389_1984_num_43_1_1319",
+    "extra": "Sources: Isidore\nIsidore URI: https://isidore.science/resource/10.3406/prati.1984.1319\nAlternative URLs: http://oai.persee.fr/oai?verb=GetRecord&identifier=oai:persee:article/prati_0338-2389_1984_num_43_1_1319&metadataPrefix=tei"
+   }
+  },
+  {
+   "id": "P11",
+   "origin": "réel : corpus_author_henning_nolke_20260618_095701.json",
+   "note": "DOI Persée dérivé",
+   "a": {
+    "itemType": "journalArticle",
+    "title": "Recherches sur les adverbes : bref aperçu historique des travaux de classification",
+    "creators": [
+     {
+      "creatorType": "author",
+      "firstName": "Henning",
+      "lastName": "Nølke"
+     }
+    ],
+    "date": "1990-01-01",
+    "DOI": "10.3406/lfr.1990.5757",
+    "url": "https://doi.org/10.3406/lfr.1990.5757",
+    "extra": "Sources: OpenAlex, Semantic Scholar\nOpenAlex ID: https://openalex.org/W2036447862\nDOI: 10.3406/lfr.1990.5757\nS2 corpus id: 170118068\nDOI: 10.3406/LFR.1990.5757"
+   },
+   "b": {
+    "itemType": "journalArticle",
+    "title": "Recherches sur les adverbes : bref aperçu historique des travaux de classification",
+    "creators": [
+     {
+      "creatorType": "author",
+      "firstName": "Henning",
+      "lastName": "Nølke"
+     }
+    ],
+    "date": "1990-01-01",
+    "url": "https://www.persee.fr/doc/lfr_0023-8368_1990_num_88_1_5757",
+    "extra": "Sources: Isidore\nIsidore URI: https://isidore.science/resource/10.3406/lfr.1990.5757\nAlternative URLs: http://oai.persee.fr/oai?verb=GetRecord&identifier=oai:persee:article/lfr_0023-8368_1990_num_88_1_5757&metadataPrefix=tei"
+   }
+  },
+  {
+   "id": "P12",
+   "origin": "réel : corpus_author_sophie_moirand_20260618_105038.json",
+   "note": "DOI Persée dérivé",
+   "a": {
+    "itemType": "journalArticle",
+    "title": "Le rôle anaphorique de la nominalisation dans la presse écrite",
+    "creators": [
+     {
+      "creatorType": "author",
+      "firstName": "Sophie",
+      "lastName": "Moirand"
+     }
+    ],
+    "date": "1975-01-01",
+    "DOI": "10.3406/lfr.1975.6091",
+    "url": "https://doi.org/10.3406/lfr.1975.6091",
+    "extra": "Sources: OpenAlex\nOpenAlex ID: https://openalex.org/W2064524068\nDOI: 10.3406/lfr.1975.6091"
+   },
+   "b": {
+    "itemType": "journalArticle",
+    "title": "Le rôle anaphorique de la nominalisation dans la presse écrite",
+    "creators": [
+     {
+      "creatorType": "author",
+      "firstName": "Sophie",
+      "lastName": "Moirand"
+     }
+    ],
+    "date": "1975-01-01",
+    "url": "https://www.persee.fr/doc/lfr_0023-8368_1975_num_28_1_6091",
+    "extra": "Sources: Isidore\nIsidore URI: https://isidore.science/resource/10.3406/lfr.1975.6091\nAlternative URLs: http://oai.persee.fr/oai?verb=GetRecord&identifier=oai:persee:article/lfr_0023-8368_1975_num_28_1_6091&metadataPrefix=tei"
+   }
+  },
+  {
+   "id": "P13",
+   "origin": "réel : corpus_author_catherine_kerbrat_orecchioni_20260618_095729.json",
+   "note": "DOI Persée dérivé",
+   "a": {
+    "itemType": "journalArticle",
+    "title": "Où en sont les actes de langage ?",
+    "creators": [
+     {
+      "creatorType": "author",
+      "firstName": "Catherine",
+      "lastName": "Kerbrat-Orecchioni"
+     }
+    ],
+    "date": "1995-01-01",
+    "DOI": "10.3406/igram.1995.3041",
+    "url": "https://doi.org/10.3406/igram.1995.3041",
+    "extra": "Sources: OpenAlex, Semantic Scholar\nOpenAlex ID: https://openalex.org/W2088078605\nDOI: 10.3406/igram.1995.3041\nS2 corpus id: 123105785\nDOI: 10.3406/IGRAM.1995.3041"
+   },
+   "b": {
+    "itemType": "journalArticle",
+    "title": "Où en sont les actes de langage ?",
+    "creators": [
+     {
+      "creatorType": "author",
+      "firstName": "Catherine",
+      "lastName": "Kerbrat-Orecchioni"
+     }
+    ],
+    "date": "1995-01-01",
+    "url": "https://www.persee.fr/doc/igram_0222-9838_1995_num_66_1_3041",
+    "extra": "Sources: Isidore\nIsidore URI: https://isidore.science/resource/10.3406/igram.1995.3041\nAlternative URLs: http://oai.persee.fr/oai?verb=GetRecord&identifier=oai:persee:article/igram_0222-9838_1995_num_66_1_3041&metadataPrefix=tei"
+   }
+  },
+  {
+   "id": "P14",
+   "origin": "réel : corpus_author_alain_rabatel_20260618_095713.json",
+   "note": "DOI contre dépôt HAL sans DOI, titre identique",
+   "a": {
+    "itemType": "journalArticle",
+    "title": "Le substrat énonciatif de la connaissance narrative empathique et ses enjeux philosophiques",
+    "creators": [
+     {
+      "creatorType": "author",
+      "firstName": "Alain",
+      "lastName": "Rabatel"
+     }
+    ],
+    "date": "2015-01-01",
+    "DOI": "10.4000/signata.1158",
+    "url": "https://doi.org/10.4000/signata.1158",
+    "extra": "Sources: Isidore, OpenAlex, Semantic Scholar\nIsidore URI: https://isidore.science/resource/20.500.13089/kpkn\nAlternative URLs: https://hdl.handle.net/20.500.13089/kpkn | https://journals.openedition.org/signata/1158\nOpenAlex ID: https://openalex.org/W2603473671\nDOI: 10.4000/signata.1158\nS2 corpus id: 164568049\nDOI: 10.4000/SIGNATA.1158"
+   },
+   "b": {
+    "itemType": "journalArticle",
+    "title": "Le substrat énonciatif de la connaissance narrative empathique et ses enjeux philosophiques",
+    "creators": [
+     {
+      "creatorType": "author",
+      "firstName": "Alain",
+      "lastName": "Rabatel"
+     }
+    ],
+    "date": "2015",
+    "url": "https://hal.science/hal-01312634v1",
+    "extra": "Sources: HAL\nHAL ID: hal-01312634"
+   }
+  },
+  {
+   "id": "P15",
+   "origin": "réel : corpus_author_alain_rabatel_20260618_095713.json",
+   "note": "DOI contre dépôt HAL sans DOI",
+   "a": {
+    "itemType": "journalArticle",
+    "title": "L’effacement de la figure de l’auteur dans la construction événementielle d’un \"journal\" de campagne électorale et la question de la responsabilité, en l’absence de récit primaire",
+    "creators": [
+     {
+      "creatorType": "author",
+      "firstName": "Alain",
+      "lastName": "Rabatel"
+     }
+    ],
+    "date": "2006-01-01",
+    "DOI": "10.4000/semen.2843",
+    "url": "https://doi.org/10.4000/semen.2843",
+    "extra": "Sources: Isidore\nIsidore URI: https://isidore.science/resource/20.500.13089/knwp\nAlternative URLs: https://hdl.handle.net/20.500.13089/knwp | https://journals.openedition.org/semen/2843"
+   },
+   "b": {
+    "itemType": "journalArticle",
+    "title": "L'effacement de la figure de l'auteur dans la construction événementielle d'un \"journal\" de campagne électorale et la question de la responsabilité, en l'absence de récit primaire",
+    "creators": [
+     {
+      "creatorType": "author",
+      "firstName": "Alain",
+      "lastName": "Rabatel"
+     }
+    ],
+    "date": "2006",
+    "url": "https://shs.hal.science/halshs-00367531v1",
+    "extra": "Sources: HAL\nHAL ID: halshs-00367531"
+   }
+  },
+  {
+   "id": "P16",
+   "origin": "réel : corpus_author_catherine_kerbrat_orecchioni_20260618_095729.json",
+   "note": "particule (de Chanay / Chanay)",
+   "a": {
+    "itemType": "journalArticle",
+    "title": "Les interruptions dans les débats médiatiques : une stratégie interactionnelle",
+    "creators": [
+     {
+      "creatorType": "author",
+      "firstName": "Hugues Constantin",
+      "lastName": "de Chanay"
+     },
+     {
+      "creatorType": "author",
+      "firstName": "Catherine",
+      "lastName": "Kerbrat-Orecchioni"
+     }
+    ],
+    "date": "2010-01-01",
+    "DOI": "10.4000/pratiques.1614",
+    "url": "https://doi.org/10.4000/pratiques.1614",
+    "extra": "Sources: OpenAlex, Semantic Scholar\nOpenAlex ID: https://openalex.org/W1985187650\nDOI: 10.4000/pratiques.1614\nS2 corpus id: 191616301\nDOI: 10.4000/PRATIQUES.1614"
+   },
+   "b": {
+    "itemType": "journalArticle",
+    "title": "Les interruptions dans les débats médiatiques: une stratégie interactionnelle",
+    "creators": [
+     {
+      "creatorType": "author",
+      "firstName": "Hugues Constantin de",
+      "lastName": "Chanay"
+     },
+     {
+      "creatorType": "author",
+      "firstName": "Catherine",
+      "lastName": "Kerbrat-Orecchioni"
+     }
+    ],
+    "date": "2010",
+    "url": "https://shs.hal.science/halshs-01511311v1",
+    "extra": "Sources: HAL\nHAL ID: halshs-01511311"
+   }
+  },
+  {
+   "id": "P17",
+   "origin": "réel : corpus_author_sophie_moirand_20260618_105038.json",
+   "note": "DOI contre dépôt HAL, ponctuation divergente",
+   "a": {
+    "itemType": "journalArticle",
+    "title": "Entre discours et mémoire : le dialogisme à l’épreuve de la presse ordinaire",
+    "creators": [
+     {
+      "creatorType": "author",
+      "firstName": "Sophie",
+      "lastName": "Moirand"
+     }
+    ],
+    "date": "2006-09-01",
+    "DOI": "10.26034/tranel.2006.2745",
+    "url": "https://doi.org/10.26034/tranel.2006.2745",
+    "extra": "Sources: OpenAlex, Semantic Scholar\nOpenAlex ID: https://openalex.org/W2237706738\nDOI: 10.26034/tranel.2006.2745\nS2 corpus id: 194278311"
+   },
+   "b": {
+    "itemType": "journalArticle",
+    "title": "Entre discours et mémoire: le dialogisme à l'épreuve de la presse ordinaire",
+    "creators": [
+     {
+      "creatorType": "author",
+      "firstName": "Sophie",
+      "lastName": "Moirand"
+     }
+    ],
+    "date": "2006-09",
+    "url": "https://univ-sorbonne-nouvelle.hal.science/hal-01487226v1",
+    "extra": "Sources: HAL\nHAL ID: hal-01487226"
+   }
+  },
+  {
+   "id": "P18",
+   "origin": "réel : corpus_author_sophie_moirand_20260618_105038.json",
+   "note": "DOI (HAL) contre notice Isidore Cairn sans DOI",
+   "a": {
+    "itemType": "journalArticle",
+    "title": "Itinéraires discursifs d’une nomination : la santé publique en temps de pandémie",
+    "creators": [
+     {
+      "creatorType": "author",
+      "firstName": "Sophie",
+      "lastName": "Moirand"
+     },
+     {
+      "creatorType": "author",
+      "firstName": "Sandrine",
+      "lastName": "Reboul-Touré"
+     }
+    ],
+    "date": "2023-08-25",
+    "DOI": "10.3917/lang.231.0025",
+    "url": "https://hal.science/hal-04210116v1",
+    "extra": "Sources: HAL, OpenAlex, Semantic Scholar\nHAL ID: hal-04210116\nOpenAlex ID: https://openalex.org/W4386517025\nDOI: 10.3917/lang.231.0025\nS2 corpus id: 261630747"
+   },
+   "b": {
+    "itemType": "journalArticle",
+    "title": "Itinéraires discursifs d’une nomination : la santé publique en temps de pandémie",
+    "creators": [
+     {
+      "creatorType": "author",
+      "firstName": "Sophie",
+      "lastName": "Moirand"
+     },
+     {
+      "creatorType": "author",
+      "firstName": "Sandrine",
+      "lastName": "Reboul-Touré"
+     }
+    ],
+    "date": "2023-01-01",
+    "url": "https://shs.cairn.info/revue-langages-2023-3-page-25?lang=fr",
+    "extra": "Sources: Isidore\nIsidore URI: https://isidore.science/resource/10670/1.a5c3a24d9c6f7046a7cb98b22fcb02369d2e3d5b"
+   }
+  },
+  {
+   "id": "P19",
+   "origin": "réel : corpus_discours_numerique_20260523_104808.json",
+   "note": "DOI OpenEdition contre dépôt HAL (Isidore)",
+   "a": {
+    "itemType": "journalArticle",
+    "title": "Transmission, partage et circulation des discours numériques sur le RSN Twitter : étude énonciative des positions, positionnements et postures",
+    "creators": [
+     {
+      "creatorType": "author",
+      "firstName": "Grégoire",
+      "lastName": "Lacaze"
+     }
+    ],
+    "date": "2024-01-01",
+    "DOI": "10.4000/11rfo",
+    "url": "https://doi.org/10.4000/11rfo",
+    "extra": "Sources: Isidore, OpenEdition\nIsidore URI: https://isidore.science/resource/20.500.13089/11rfo\nAlternative URLs: https://hdl.handle.net/20.500.13089/11rfo | https://journals.openedition.org/esa/5928"
+   },
+   "b": {
+    "itemType": "journalArticle",
+    "title": "Transmission, partage et circulation des discours numériques sur le RSN Twitter : étude énonciative des positions, positionnements et postures",
+    "creators": [
+     {
+      "creatorType": "author",
+      "firstName": "Grégoire",
+      "lastName": "Lacaze"
+     }
+    ],
+    "date": "2024-01-01",
+    "url": "https://hal.science/hal-04613054",
+    "extra": "Sources: Isidore\nIsidore URI: https://isidore.science/resource/10670/1.e0d7e3a7a93614e7893a8f5c9b710fd5cf5d32c8\nAlternative URLs: https://hal.science/hal-04613054v1/document | https://hal.science/hal-04613054v1/file/esa-5928.pdf"
+   }
+  },
+  {
+   "id": "P20",
+   "origin": "réel : corpus_author_alain_rabatel_20260618_095713.json",
+   "note": "DOI contre dépôt HAL (deux notices Isidore)",
+   "a": {
+    "itemType": "journalArticle",
+    "title": "Effacement énonciatif et effets argumentatifs indirects dans l’incipit du Mort qu’il faut de Semprun",
+    "creators": [
+     {
+      "creatorType": "author",
+      "firstName": "Alain",
+      "lastName": "Rabatel"
+     }
+    ],
+    "date": "2004-01-01",
+    "DOI": "10.4000/semen.2334",
+    "url": "https://doi.org/10.4000/semen.2334",
+    "extra": "Sources: Isidore\nIsidore URI: https://isidore.science/resource/20.500.13089/knv7\nAlternative URLs: https://hdl.handle.net/20.500.13089/knv7 | https://journals.openedition.org/semen/2334"
+   },
+   "b": {
+    "itemType": "journalArticle",
+    "title": "Effacement énonciatif et effets argumentatifs indirects dans l'incipit du \"Mort qu'il faut\" de Semprun",
+    "creators": [
+     {
+      "creatorType": "author",
+      "firstName": "Alain",
+      "lastName": "Rabatel"
+     }
+    ],
+    "date": "2004-01-01",
+    "url": "https://shs.hal.science/halshs-00433209",
+    "extra": "Sources: Isidore\nIsidore URI: https://isidore.science/resource/10670/1.6d9aa8e29aa46ea689476c5dbc75283e8cf2f233\nAlternative URLs: https://shs.hal.science/halshs-00433209v1/document | https://shs.hal.science/halshs-00433209v1/file/SEMEN_17-008-Rabatel.pdf"
+   }
+  },
+  {
+   "id": "P21",
+   "origin": "réel : corpus_author_sophie_moirand_20260618_105038.json",
+   "note": "DOI OpenAlex contre Redalyc (Isidore)",
+   "a": {
+    "itemType": "journalArticle",
+    "title": "La divulgación de la ciencia y la técnica: ¿Nuevos modelos para nuevos objetos de estudio?",
+    "creators": [
+     {
+      "creatorType": "author",
+      "firstName": "Sophie",
+      "lastName": "Moirand"
+     }
+    ],
+    "date": "2006-01-01",
+    "DOI": "10.4067/s0718-09342006000200005",
+    "url": "https://doi.org/10.4067/s0718-09342006000200005",
+    "extra": "Sources: OpenAlex\nOpenAlex ID: https://openalex.org/W2003218997\nDOI: 10.4067/s0718-09342006000200005"
+   },
+   "b": {
+    "itemType": "document",
+    "title": "La divulgación de la ciencia y la técnica: ¿Nuevos modelos para nuevos objetos de estudio?",
+    "creators": [
+     {
+      "creatorType": "author",
+      "firstName": "Sophie",
+      "lastName": "Moirand"
+     }
+    ],
+    "date": "2006-01-01",
+    "url": "https://www.redalyc.org/articulo.oa?id=157013766005",
+    "extra": "Sources: Isidore\nIsidore URI: https://isidore.science/resource/10670/1.460c01072eacea779204527e60c4317cf8d46f93"
+   }
+  },
+  {
+   "id": "P22",
+   "origin": "réel : corpus_author_henning_nolke_20260618_095701.json",
+   "note": "OpenAlex / Semantic Scholar, aucun identifiant commun",
+   "a": {
+    "itemType": "journalArticle",
+    "title": "La ScaPoLine 2001. Version révisée de la théorie Scandinave de la Polyphonie Linguistique",
+    "creators": [
+     {
+      "creatorType": "author",
+      "firstName": "Henning",
+      "lastName": "Nølke"
+     }
+    ],
+    "date": "2001-01-01",
+    "url": "https://ojs.ruc.dk/index.php/poly/article/view/2411",
+    "extra": "Sources: OpenAlex\nOpenAlex ID: https://openalex.org/W2727621167"
+   },
+   "b": {
+    "itemType": "document",
+    "title": "La ScaPoLine 2001. Version révisée de la théorie Scandinave de la Polyphonie Linguistique",
+    "creators": [
+     {
+      "creatorType": "author",
+      "firstName": "H.",
+      "lastName": "Nølke"
+     }
+    ],
+    "date": "2001",
+    "url": "https://www.semanticscholar.org/paper/827a40f24d4e1b445434894a0fc8fbfe74063df1",
+    "extra": "Sources: Semantic Scholar\nS2 corpus id: 149340317"
+   }
+  },
+  {
+   "id": "P23",
+   "origin": "réel : corpus_author_sophie_moirand_20260618_105038.json",
+   "note": "OpenAlex (livre) / Semantic Scholar (document)",
+   "a": {
+    "itemType": "book",
+    "title": "Situations d'écrit : compréhension/production en français langue étrangère",
+    "creators": [
+     {
+      "creatorType": "author",
+      "firstName": "Sophie",
+      "lastName": "Moirand"
+     }
+    ],
+    "date": "1979-01-01",
+    "url": "https://ci.nii.ac.jp/ncid/BA25253633",
+    "extra": "Sources: OpenAlex\nOpenAlex ID: https://openalex.org/W612749506"
+   },
+   "b": {
+    "itemType": "document",
+    "title": "Situations d'écrit : compréhension/production en français langue étrangère",
+    "creators": [
+     {
+      "creatorType": "author",
+      "firstName": "S.",
+      "lastName": "Moirand"
+     }
+    ],
+    "date": "1979",
+    "url": "https://www.semanticscholar.org/paper/cee0f242bb75565febc618eeba10d7d67f2167f7",
+    "extra": "Sources: Semantic Scholar\nS2 corpus id: 142191166"
+   }
+  },
+  {
+   "id": "P24",
+   "origin": "réel : corpus_author_henning_nolke_20260618_095701.json",
+   "note": "OpenAlex / Semantic Scholar ; URL avec &amp;",
+   "a": {
+    "itemType": "book",
+    "title": "Linguistique modulaire: de la forme au sens",
+    "creators": [
+     {
+      "creatorType": "author",
+      "firstName": "Henning",
+      "lastName": "Nølke"
+     }
+    ],
+    "date": "1994-12-31",
+    "url": "http://bvbr.bib-bvb.de:8991/F?func=service&amp;doc_library=BVB01&amp;local_base=BVB01&amp;doc_number=007253635&amp;sequence=000002&amp;line_number=0001&amp;func_code=DB_RECORDS&amp;service_type=MEDIA",
+    "extra": "Sources: OpenAlex\nOpenAlex ID: https://openalex.org/W371483427"
+   },
+   "b": {
+    "itemType": "document",
+    "title": "Linguistique modulaire: de la forme au sens",
+    "creators": [
+     {
+      "creatorType": "author",
+      "firstName": "H.",
+      "lastName": "Nølke"
+     }
+    ],
+    "date": "1994-12-31",
+    "url": "https://www.semanticscholar.org/paper/0eda85930ed7864a37c7844bf7c41d2e6d19571b",
+    "extra": "Sources: Semantic Scholar\nS2 corpus id: 142360511"
+   }
+  },
+  {
+   "id": "P25",
+   "origin": "réel : corpus_author_catherine_kerbrat_orecchioni_20260618_095729.json",
+   "note": "premier auteur Cosnier ; OpenAlex / S2",
+   "a": {
+    "itemType": "book",
+    "title": "Echanges sur la conversation",
+    "creators": [
+     {
+      "creatorType": "author",
+      "firstName": "Jacques",
+      "lastName": "Cosnier"
+     },
+     {
+      "creatorType": "author",
+      "firstName": "Nadine",
+      "lastName": "Gelas"
+     },
+     {
+      "creatorType": "author",
+      "firstName": "Catherine",
+      "lastName": "Kerbrat-Orecchioni"
+     }
+    ],
+    "date": "1988-01-01",
+    "url": "https://ci.nii.ac.jp/ncid/BA0767285X",
+    "extra": "Sources: OpenAlex\nOpenAlex ID: https://openalex.org/W601233311"
+   },
+   "b": {
+    "itemType": "document",
+    "title": "Echanges sur la conversation",
+    "creators": [
+     {
+      "creatorType": "author",
+      "firstName": "J.",
+      "lastName": "Cosnier"
+     },
+     {
+      "creatorType": "author",
+      "firstName": "Nadine",
+      "lastName": "Gelas"
+     },
+     {
+      "creatorType": "author",
+      "firstName": "C.",
+      "lastName": "Kerbrat-Orecchioni"
+     }
+    ],
+    "date": "1988",
+    "url": "https://www.semanticscholar.org/paper/605640a842afe6a52325dd87d1dfe401595727cd",
+    "extra": "Sources: Semantic Scholar\nS2 corpus id: 141631280"
+   }
+  },
+  {
+   "id": "P26",
+   "origin": "réel : corpus_author_henning_nolke_20260618_095701.json",
+   "note": "compte rendu présent des deux côtés",
+   "a": {
+    "itemType": "journalArticle",
+    "title": "Co Vet: Temps, aspects et adverbes de temps en français contemporain. Essai de sémantique formelle. Librairie Droz, Genève, 1980. 185 p.",
+    "creators": [
+     {
+      "creatorType": "author",
+      "firstName": "Henning",
+      "lastName": "Nølke"
+     }
+    ],
+    "date": "1982-01-01",
+    "url": "https://tidsskrift.dk/revue_romane/article/download/29406/26424",
+    "extra": "Sources: OpenAlex\nOpenAlex ID: https://openalex.org/W2605826029"
+   },
+   "b": {
+    "itemType": "document",
+    "title": "Co Vet: Temps, aspects et adverbes de temps en français contemporain. Essai de sémantique formelle. Librairie Droz, Genève, 1980. 185 p.",
+    "creators": [
+     {
+      "creatorType": "author",
+      "firstName": "H.",
+      "lastName": "Nølke"
+     }
+    ],
+    "date": "1982",
+    "url": "https://www.semanticscholar.org/paper/618befd6db199fbbeb9c93f50e1953e44e7a9a7a",
+    "extra": "Sources: Semantic Scholar\nS2 corpus id: 171809330"
+   }
+  },
+  {
+   "id": "P27",
+   "origin": "réel : corpus_author_catherine_kerbrat_orecchioni_20260618_095729.json",
+   "note": "DOI OpenAlex contre S2 sans DOI",
+   "a": {
+    "itemType": "journalArticle",
+    "title": "Oui et ses variantes en français: l’expression de l’accord dans les débats présidentiels",
+    "creators": [
+     {
+      "creatorType": "author",
+      "firstName": "Catherine",
+      "lastName": "Kerbrat-Orecchioni"
+     }
+    ],
+    "date": "2016-01-01",
+    "DOI": "10.14273/unisa-1664",
+    "url": "https://doi.org/10.14273/unisa-1664",
+    "extra": "Sources: OpenAlex\nOpenAlex ID: https://openalex.org/W2967283778\nDOI: 10.14273/unisa-1664"
+   },
+   "b": {
+    "itemType": "document",
+    "title": "Oui et ses variantes en français: l’expression de l’accord dans les débats présidentiels",
+    "creators": [
+     {
+      "creatorType": "author",
+      "firstName": "C.",
+      "lastName": "Kerbrat-Orecchioni"
+     }
+    ],
+    "date": "2016",
+    "url": "https://www.semanticscholar.org/paper/07afb226b2d3881e914f98bb994e5ffeba2b7882",
+    "extra": "Sources: Semantic Scholar\nS2 corpus id: 202396359"
+   }
+  },
+  {
+   "id": "P28",
+   "origin": "réel : corpus_many_analysts_or_crowdsourced_analysis_or_same_data_differen_20260922_222823_ac4cbbb2.json",
+   "note": "sous-titre tronqué par Scholar (préfixe)",
+   "a": {
+    "itemType": "journalArticle",
+    "title": "Many Labs 5: Testing pre-data-collection peer review as an intervention to increase replicability",
+    "creators": [
+     {
+      "creatorType": "author",
+      "firstName": "CR",
+      "lastName": "Ebersole"
+     },
+     {
+      "creatorType": "author",
+      "firstName": "MB",
+      "lastName": "Mathur"
+     },
+     {
+      "creatorType": "author",
+      "firstName": "E",
+      "lastName": "Baranski"
+     }
+    ],
+    "date": "2020",
+    "DOI": "10.1177/2515245920958687",
+    "url": "https://journals.sagepub.com/doi/abs/10.1177/2515245920958687",
+    "extra": "Sources: Google Scholar (SerpAPI)\nScholar result ID: Lqp7d8iw0MsJ\nScholar cluster ID: 14686432759899728430\nDOI: 10.1177/2515245920958687\nScholar truncation: auteurs et/ou revue tronqués par Google Scholar — à vérifier contre la source primaire avant citation"
+   },
+   "b": {
+    "itemType": "journalArticle",
+    "title": "Many Labs 5: Testing Pre-Data-Collection Peer Review as an Intervention to Increase",
+    "creators": [
+     {
+      "creatorType": "author",
+      "firstName": "CR",
+      "lastName": "Ebersole"
+     },
+     {
+      "creatorType": "author",
+      "firstName": "MB",
+      "lastName": "Mathur"
+     }
+    ],
+    "date": "2020",
+    "url": "https://escholarship.org/content/qt5w68b1sn/qt5w68b1sn.pdf?v=lg",
+    "extra": "Sources: Google Scholar (SerpAPI)\nScholar result ID: cYCC9ob62i8J\nScholar cluster ID: 3448343922273845361\nScholar truncation: auteurs et/ou revue tronqués par Google Scholar — à vérifier contre la source primaire avant citation"
+   }
+  },
+  {
+   "id": "P29",
+   "origin": "réel : corpus_computational_literacy_or_computational_methods_training_or__20260922_185935_2845c677.json",
+   "note": "titre tronqué (préfixe)",
+   "a": {
+    "itemType": "document",
+    "title": "Beyond numeracy, a data literacy topical scoping review (2011-2023)",
+    "creators": [
+     {
+      "creatorType": "author",
+      "firstName": "L",
+      "lastName": "Vermeire"
+     },
+     {
+      "creatorType": "author",
+      "firstName": "W",
+      "lastName": "Van den Broeck"
+     },
+     {
+      "creatorType": "author",
+      "firstName": "F",
+      "lastName": "Petersen"
+     }
+    ],
+    "date": "2025",
+    "url": "https://imec-publications.be/entities/publication/36f6bf98-c7bd-4bf5-876a-cb8bd38c040f",
+    "extra": "Sources: Google Scholar (SerpAPI)\nScholar result ID: LaC9AOJS3qgJ\nScholar cluster ID: 12168254373830172717\nScholar truncation: auteurs et/ou revue tronqués par Google Scholar — à vérifier contre la source primaire avant citation"
+   },
+   "b": {
+    "itemType": "document",
+    "title": "Beyond Numeracy, a Data Literacy Topical Scoping",
+    "creators": [
+     {
+      "creatorType": "author",
+      "firstName": "L",
+      "lastName": "Vermeire"
+     },
+     {
+      "creatorType": "author",
+      "firstName": "W",
+      "lastName": "Van den Broeck"
+     },
+     {
+      "creatorType": "author",
+      "firstName": "F",
+      "lastName": "Petersen"
+     }
+    ],
+    "date": "2025",
+    "url": "https://researchportal.vub.be/files/175392327/MaC_13_-_Beyond_Numeracy_a_Data_Literacy_Topical_Scoping_Review_2011-2023_.pdf",
+    "extra": "Sources: Google Scholar (SerpAPI)\nScholar result ID: TG7UtqC8ZfsJ\nScholar truncation: auteurs et/ou revue tronqués par Google Scholar — à vérifier contre la source primaire avant citation"
+   }
+  },
+  {
+   "id": "P30",
+   "origin": "réel : corpus_author_catherine_kerbrat_orecchioni_20260618_095729.json",
+   "note": "numéro de chapitre en tête de titre",
+   "a": {
+    "itemType": "journalArticle",
+    "title": "Chapitre 2. Quelle place pour les émotions dans la linguistique du XXe siècle ? Remarques et aperçus",
+    "creators": [
+     {
+      "creatorType": "author",
+      "firstName": "Catherine",
+      "lastName": "Kerbrat-Orecchioni"
+     }
+    ],
+    "date": "2000-01-01",
+    "url": "https://www.persee.fr/doc/epc_1243-1052_2000_ant_1_1_867",
+    "extra": "Sources: Isidore\nIsidore URI: https://isidore.science/resource/10670/1.c5bcaffccc0265e7c8d2c58917e603709c742206\nAlternative URLs: http://oai.persee.fr/oai?verb=GetRecord&identifier=oai:persee:article/epc_1243-1052_2000_ant_1_1_867&metadataPrefix=tei"
+   },
+   "b": {
+    "itemType": "journalArticle",
+    "title": "Quelle place pour les émotions dans la linguistique du XXe siècle ? Remarques et aperçus",
+    "creators": [
+     {
+      "creatorType": "author",
+      "firstName": "Catherine",
+      "lastName": "Kerbrat-Orecchioni"
+     }
+    ],
+    "date": "2000-01-01",
+    "url": "http://pascal-francis.inist.fr/vibad/index.php?action=getRecordDetail&idt=1146084",
+    "extra": "Sources: OpenAlex\nOpenAlex ID: https://openalex.org/W2277566906"
+   }
+  },
+  {
+   "id": "P31",
+   "origin": "réel : corpus_author_catherine_kerbrat_orecchioni_20260618_095729.json",
+   "note": "numéro de chapitre ; DOI contre HAL",
+   "a": {
+    "itemType": "bookSection",
+    "title": "4. Les interactions en site commercial : des interactions « polies »",
+    "creators": [
+     {
+      "creatorType": "author",
+      "firstName": "Catherine",
+      "lastName": "Kerbrat-Orecchioni"
+     }
+    ],
+    "date": "2008-01-01",
+    "DOI": "10.4000/books.enseditions.31010",
+    "url": "https://doi.org/10.4000/books.enseditions.31010",
+    "extra": "Sources: Isidore, OpenAlex\nIsidore URI: https://isidore.science/resource/20.500.13089/2xaa\nAlternative URLs: https://hdl.handle.net/20.500.13089/2xaa | https://books.openedition.org/enseditions/31010\nOpenAlex ID: https://openalex.org/W2516120264\nDOI: 10.4000/books.enseditions.31010"
+   },
+   "b": {
+    "itemType": "bookSection",
+    "title": "Les interactions en site commercial : des interactions « polies »",
+    "creators": [
+     {
+      "creatorType": "author",
+      "firstName": "Catherine",
+      "lastName": "Kerbrat-Orecchioni"
+     }
+    ],
+    "date": "2008",
+    "url": "https://shs.hal.science/halshs-00393318v1",
+    "extra": "Sources: HAL\nHAL ID: halshs-00393318"
+   }
+  },
+  {
+   "id": "P32",
+   "origin": "réel : corpus_author_henning_nolke_20260618_095701.json",
+   "note": "sous-titre de mélanges (préfixe)",
+   "a": {
+    "itemType": "book",
+    "title": "Modalité, évidentialité et autres friandises langagières",
+    "creators": [
+     {
+      "creatorType": "author",
+      "firstName": "Coco",
+      "lastName": "Norén"
+     },
+     {
+      "creatorType": "author",
+      "firstName": "Kerstin",
+      "lastName": "Jonasson"
+     },
+     {
+      "creatorType": "author",
+      "firstName": "Henning",
+      "lastName": "Nølke"
+     },
+     {
+      "creatorType": "author",
+      "firstName": "Maria",
+      "lastName": "Svensson"
+     }
+    ],
+    "date": "2013-07-03",
+    "DOI": "10.3726/978-3-0352-0186-4",
+    "url": "https://doi.org/10.3726/978-3-0352-0186-4",
+    "extra": "Sources: OpenAlex, Semantic Scholar\nOpenAlex ID: https://openalex.org/W2481521902\nDOI: 10.3726/978-3-0352-0186-4\nOpenAlex ID: https://openalex.org/W1499933247\nS2 corpus id: 184363993"
+   },
+   "b": {
+    "itemType": "document",
+    "title": "Modalité, évidentialité et autres friandises langagières. : Mélanges offerts à Hans Kronning à l’occasion de ses soixante ans",
+    "creators": [
+     {
+      "creatorType": "author",
+      "firstName": "Coco",
+      "lastName": "Norén"
+     },
+     {
+      "creatorType": "author",
+      "firstName": "K.",
+      "lastName": "Jonasson"
+     },
+     {
+      "creatorType": "author",
+      "firstName": "H.",
+      "lastName": "Nølke"
+     },
+     {
+      "creatorType": "author",
+      "firstName": "Maria",
+      "lastName": "Svensson"
+     }
+    ],
+    "date": "2013",
+    "url": "https://www.semanticscholar.org/paper/b802d92eac1009c81ce8349778ce8a9f384ae7f6",
+    "extra": "Sources: Semantic Scholar\nS2 corpus id: 170337278"
+   }
+  },
+  {
+   "id": "P33",
+   "origin": "réel : corpus_author_catherine_kerbrat_orecchioni_20260618_095729.json",
+   "note": "sous-titre absent d'un côté",
+   "a": {
+    "itemType": "journalArticle",
+    "title": "« Je voudrais un p’tit bifteck »",
+    "creators": [
+     {
+      "creatorType": "author",
+      "firstName": "Catherine",
+      "lastName": "Kerbrat-Orecchioni"
+     }
+    ],
+    "date": "2001-01-01",
+    "DOI": "10.4000/cediscor.307",
+    "url": "https://doi.org/10.4000/cediscor.307",
+    "extra": "Sources: Isidore, OpenAlex\nIsidore URI: https://isidore.science/resource/20.500.13089/do0t\nAlternative URLs: https://hdl.handle.net/20.500.13089/do0t | https://journals.openedition.org/cediscor/307\nOpenAlex ID: https://openalex.org/W318165953\nDOI: 10.4000/cediscor.307"
+   },
+   "b": {
+    "itemType": "document",
+    "title": "« Je voudrais un p’tit bifteck ». La politesse à la française en site commercial",
+    "creators": [
+     {
+      "creatorType": "author",
+      "firstName": "C.",
+      "lastName": "Kerbrat-Orecchioni"
+     }
+    ],
+    "date": "2001-04-01",
+    "url": "https://www.semanticscholar.org/paper/dd712f7478b0a41fc6a1e4078059e0cb9e5d8ce0",
+    "extra": "Sources: Semantic Scholar\nS2 corpus id: 160205513"
+   }
+  },
+  {
+   "id": "P34",
+   "origin": "réel : corpus_ideological_scaling_or_political_positioning_or_party_manife_20260922_180952_37f65fcd.json",
+   "note": "« large language models » / « LLMs » ; manquée depuis la règle doi-match/3 de best_title_ratio (OPT-10) : le préfixe « … constrained llms » s'arrête au milieu d'un mot du titre long (« larg|e »), la similarité entière (0,88) est retenue",
+   "a": {
+    "itemType": "document",
+    "title": "Measuring political concepts over time with constrained large language models",
+    "creators": [
+     {
+      "creatorType": "author",
+      "firstName": "B",
+      "lastName": "Sinno"
+     }
+    ],
+    "date": "2026",
+    "url": "https://rucore.libraries.rutgers.edu/rutgers-lib/75671/",
+    "extra": "Sources: Google Scholar (SerpAPI)\nScholar result ID: jAX5rUMa-vYJ"
+   },
+   "b": {
+    "itemType": "document",
+    "title": "Measuring Political Concepts Over Time With Constrained LLMs",
+    "creators": [
+     {
+      "creatorType": "author",
+      "firstName": "B",
+      "lastName": "Sinno"
+     }
+    ],
+    "date": "2026",
+    "url": "https://search.proquest.com/openview/fb6178bb55492dfda8f1934531d54a4c/1?pq-origsite=gscholar&cbl=18750&diss=y",
+    "extra": "Sources: Google Scholar (SerpAPI)\nScholar result ID: KWIUSjVjOeUJ"
+   },
+   "expected_missed": true
+  },
+  {
+   "id": "P35",
+   "origin": "réel : corpus_author_henning_nolke_20260618_095701.json",
+   "note": "coquille de titre, année ± 1",
+   "a": {
+    "itemType": "journalArticle",
+    "title": "La grammaire, d’est drôle: Comment enseigner la grammaire française aux apprenants danois ?",
+    "creators": [
+     {
+      "creatorType": "author",
+      "firstName": "Henning",
+      "lastName": "Nølke"
+     }
+    ],
+    "date": "2018-04-29",
+    "url": "https://pure.au.dk/portal/en/publications/85b989ce-6c80-4a1f-8153-49edda80a5fd",
+    "extra": "Sources: OpenAlex\nOpenAlex ID: https://openalex.org/W4412317397"
+   },
+   "b": {
+    "itemType": "journalArticle",
+    "title": "La grammaire, c’est drôle. Comment enseigner la grammaire française aux apprenants danois ?",
+    "creators": [
+     {
+      "creatorType": "author",
+      "firstName": "Henning",
+      "lastName": "Nølke"
+     }
+    ],
+    "date": "2017-12-01",
+    "url": "https://doaj.org/article/68e89c12ef5b463a9ee49b16e72fcf2f",
+    "extra": "Sources: OpenAlex\nOpenAlex ID: https://openalex.org/W3118204611"
+   }
+  },
+  {
+   "id": "P36",
+   "origin": "réel : corpus_author_alain_rabatel_20260618_095713.json",
+   "note": "singulier / pluriel, année ± 1",
+   "a": {
+    "itemType": "bookSection",
+    "title": "Les défis des identités individuelles et collectives dans Mes indépendances de Kamel Daoud",
+    "creators": [
+     {
+      "creatorType": "author",
+      "firstName": "Alain",
+      "lastName": "Rabatel"
+     }
+    ],
+    "date": "2024-01-01",
+    "DOI": "10.4000/books.pufc.53021",
+    "url": "https://doi.org/10.4000/books.pufc.53021",
+    "extra": "Sources: Isidore, OpenAlex\nIsidore URI: https://isidore.science/resource/20.500.13089/von6\nAlternative URLs: https://hdl.handle.net/20.500.13089/von6 | https://books.openedition.org/pufc/53021\nOpenAlex ID: https://openalex.org/W4392251010\nDOI: 10.4000/books.pufc.53021"
+   },
+   "b": {
+    "itemType": "bookSection",
+    "title": "Les défis de l’identité individuelle et collective dans Mes indépendances de Kamel Daoud",
+    "creators": [
+     {
+      "creatorType": "author",
+      "firstName": "Alain",
+      "lastName": "Rabatel"
+     }
+    ],
+    "date": "2023-01-01",
+    "url": "https://hal.science/hal-04824267",
+    "extra": "Sources: OpenAlex\nOpenAlex ID: https://openalex.org/W4405130770"
+   }
+  },
+  {
+   "id": "P37",
+   "origin": "réel : corpus_ai_scientist_or_autonomous_scientific_discovery_or_automated_20260922_135354_f37b964e.json",
+   "note": "sous-titre d'un livre (préfixe)",
+   "a": {
+    "itemType": "book",
+    "title": "A Critical Reflection on Automated Science",
+    "creators": [
+     {
+      "creatorType": "author",
+      "firstName": "M.",
+      "lastName": "Bertolaso"
+     },
+     {
+      "creatorType": "author",
+      "firstName": "F.",
+      "lastName": "Sterpetti"
+     }
+    ],
+    "date": "2020-01-01",
+    "DOI": "10.1007/978-3-030-25001-0",
+    "url": "https://doi.org/10.1007/978-3-030-25001-0",
+    "extra": "Sources: OpenAlex\nOpenAlex ID: https://openalex.org/W4239000247\nDOI: 10.1007/978-3-030-25001-0"
+   },
+   "b": {
+    "itemType": "book",
+    "title": "A Critical Reflection on Automated Science: Will Science Remain Human?",
+    "creators": [
+     {
+      "creatorType": "author",
+      "firstName": "Marta",
+      "lastName": "Bertolaso"
+     },
+     {
+      "creatorType": "author",
+      "firstName": "Fabio",
+      "lastName": "Sterpetti"
+     }
+    ],
+    "date": "2020-01-01",
+    "url": "https://philarchive.org/rec/STEWSR-4",
+    "extra": "Sources: OpenAlex\nOpenAlex ID: https://openalex.org/W3016803302"
+   }
+  },
+  {
+   "id": "P38",
+   "origin": "réel : corpus_textometrie_or_lexicometrie_or_analyse_thematique_or_annotat_20260922_181015_02677293.json",
+   "note": "auteur « De-Oliveira » / « Oliveira »",
+   "a": {
+    "itemType": "journalArticle",
+    "title": "Le Traitement Automatique des Langues: vers une possible informatisation de l'enseignement?",
+    "creators": [
+     {
+      "creatorType": "author",
+      "firstName": "AP",
+      "lastName": "De-Oliveira"
+     }
+    ],
+    "date": "2023",
+    "url": "https://www.academia.edu/download/106293236/Chapter_10.pdf",
+    "extra": "Sources: Google Scholar (SerpAPI)\nScholar result ID: kWOgfGT_eFgJ\nScholar cluster ID: 6375126079595635601"
+   },
+   "b": {
+    "itemType": "document",
+    "title": "Le Traitement Automatique des Langues (TAL): vers une possible informatisation de l'enseignement?",
+    "creators": [
+     {
+      "creatorType": "author",
+      "firstName": "AP",
+      "lastName": "Oliveira"
+     }
+    ],
+    "date": "2023",
+    "url": "https://gredos.usal.es/handle/10366/169636",
+    "extra": "Sources: Google Scholar (SerpAPI)\nScholar result ID: 42MWPiInLzcJ"
+   }
+  },
+  {
+   "id": "P39",
+   "origin": "réel : corpus_author_sophie_moirand_20260618_105038.json",
+   "note": "année ± 1, DOI contre HAL",
+   "a": {
+    "itemType": "journalArticle",
+    "title": "Des façons de nommer « les jeunes » dans la presse quotidienne nationale",
+    "creators": [
+     {
+      "creatorType": "author",
+      "firstName": "Sophie",
+      "lastName": "Moirand"
+     }
+    ],
+    "date": "2010-01-25",
+    "DOI": "10.3917/ado.070.0907",
+    "url": "https://doi.org/10.3917/ado.070.0907",
+    "extra": "Sources: OpenAlex, Semantic Scholar\nOpenAlex ID: https://openalex.org/W2026992060\nDOI: 10.3917/ado.070.0907\nS2 corpus id: 144919978\nDOI: 10.3917/ADO.070.0907"
+   },
+   "b": {
+    "itemType": "journalArticle",
+    "title": "Des façons de nommer 'les jeunes' dans la presse quotidienne nationale",
+    "creators": [
+     {
+      "creatorType": "author",
+      "firstName": "Sophie",
+      "lastName": "Moirand"
+     }
+    ],
+    "date": "2009",
+    "url": "https://univ-sorbonne-nouvelle.hal.science/hal-01504093v1",
+    "extra": "Sources: HAL\nHAL ID: hal-01504093"
+   }
+  },
+  {
+   "id": "P40",
+   "origin": "réel : corpus_author_sophie_moirand_20260618_105038.json",
+   "note": "année ± 1, HAL contre DOI",
+   "a": {
+    "itemType": "journalArticle",
+    "title": "Nommer les événements à l'épreuve des mots et de la construction du discours",
+    "creators": [
+     {
+      "creatorType": "author",
+      "firstName": "Sophie",
+      "lastName": "Moirand"
+     },
+     {
+      "creatorType": "author",
+      "firstName": "Sandrine",
+      "lastName": "Reboul-Touré"
+     }
+    ],
+    "date": "2016-12",
+    "url": "https://univ-sorbonne-nouvelle.hal.science/hal-01471268v1",
+    "extra": "Sources: HAL\nHAL ID: hal-01471268"
+   },
+   "b": {
+    "itemType": "journalArticle",
+    "title": "Nommer les événements à l’épreuve des mots et de la construction du discours",
+    "creators": [
+     {
+      "creatorType": "author",
+      "firstName": "Sophie",
+      "lastName": "Moirand"
+     },
+     {
+      "creatorType": "author",
+      "firstName": "Sandrine",
+      "lastName": "Reboul-Touré"
+     }
+    ],
+    "date": "2015-12-18",
+    "DOI": "10.3917/lf.188.0105",
+    "url": "https://doi.org/10.3917/lf.188.0105",
+    "extra": "Sources: OpenAlex, Semantic Scholar\nOpenAlex ID: https://openalex.org/W2202248217\nDOI: 10.3917/lf.188.0105\nS2 corpus id: 170188371\nDOI: 10.3917/LF.188.0105"
+   }
+  },
+  {
+   "id": "P41",
+   "origin": "réel : corpus_fabricated_citations_or_fake_cases_or_hallucinated_case_law__20260922_165249_8a3ea67a.json",
+   "note": "année ± 1, deux notices Scholar",
+   "a": {
+    "itemType": "journalArticle",
+    "title": "AI in robes: courts, judges, and artificial intelligence",
+    "creators": [
+     {
+      "creatorType": "author",
+      "firstName": "GE",
+      "lastName": "Marchant"
+     }
+    ],
+    "date": "2024",
+    "url": "https://digitalcommons.onu.edu/cgi/viewcontent.cgi?article=1367&context=onu_law_review",
+    "extra": "Sources: Google Scholar (SerpAPI)\nScholar result ID: fkkk4QJ_uz4J\nScholar cluster ID: 4520346301340338558"
+   },
+   "b": {
+    "itemType": "journalArticle",
+    "title": "AI in Robes: Courts, Judges, and Artificial Intelligence",
+    "creators": [
+     {
+      "creatorType": "author",
+      "firstName": "GE",
+      "lastName": "Marchant"
+     }
+    ],
+    "date": "2023",
+    "url": "https://access.heinonline.com/hol-cgi-bin/get_pdf.cgi?handle=hein.journals/onulr50&section=27",
+    "extra": "Sources: Google Scholar (SerpAPI)\nScholar result ID: eNODsvU6j3UJ"
+   }
+  },
+  {
+   "id": "P42",
+   "origin": "réel : corpus_author_amar_lakel_20260617_120549.json",
+   "note": "DOI arXiv contre URL arxiv.org",
+   "a": {
+    "itemType": "preprint",
+    "title": "Stop saying LLM: Large Discourse Models (LDM) and Artificial Discursive Agent (ADA)?",
+    "creators": [
+     {
+      "creatorType": "author",
+      "firstName": "Amar",
+      "lastName": "Lakel"
+     }
+    ],
+    "date": "2025-12-22",
+    "DOI": "10.48550/arxiv.2512.19117",
+    "url": "https://openalex.org/W7117161368",
+    "extra": "Sources: OpenAlex\nOpenAlex ID: https://openalex.org/W7117161368\nDOI: 10.48550/arxiv.2512.19117"
+   },
+   "b": {
+    "itemType": "journalArticle",
+    "title": "Stop saying LLM: Large Discourse Models (LDM) and Artificial Discursive Agent (ADA)?",
+    "creators": [
+     {
+      "creatorType": "author",
+      "firstName": "Amar",
+      "lastName": "Lakel"
+     }
+    ],
+    "date": "2025-12-22",
+    "url": "http://arxiv.org/abs/2512.19117",
+    "extra": "Sources: OpenAlex\nOpenAlex ID: https://openalex.org/W7117174304"
+   }
+  },
+  {
+   "id": "P43",
+   "origin": "réel : corpus_calcul_intensif_or_supercalculateur_or_mesocentre_or_infrast_20260922_142404_dce1b790.json",
+   "note": "thèse déposée deux fois dans HAL (identifiants distincts, titre identique)",
+   "a": {
+    "itemType": "thesis",
+    "title": "Mise en œuvre et apports cliniques d'un modèle Monte-Carlo d'un accélérateur linéaire de radiothérapie externe",
+    "creators": [
+     {
+      "creatorType": "author",
+      "firstName": "Jeremy",
+      "lastName": "Leste"
+     }
+    ],
+    "date": "2020-12-16",
+    "DOI": "10.70675/08fa64e8z53d2z488dz9a28z991348125039",
+    "url": "https://theses.hal.science/tel-03209752v1",
+    "extra": "Sources: HAL\nHAL ID: tel-03209752"
+   },
+   "b": {
+    "itemType": "thesis",
+    "title": "Mise en œuvre et apports cliniques d’un modèle Monte-Carlo d’un accélérateur linéaire de radiothérapie externe",
+    "creators": [
+     {
+      "creatorType": "author",
+      "firstName": "Jeremy",
+      "lastName": "Leste"
+     }
+    ],
+    "date": "2020-12-16",
+    "url": "https://hal.science/tel-03209461v1",
+    "extra": "Sources: HAL\nHAL ID: tel-03209461"
+   }
+  },
+  {
+   "id": "P44",
+   "origin": "réel : corpus_dynamique_des_systemes_or_system_dynamics_modelisation_socia_20260803_112246_0543e1ab.json",
+   "note": "article déposé deux fois dans HAL, l'un avec DOI",
+   "a": {
+    "itemType": "journalArticle",
+    "title": "Video games and urban simulation: new tools or new tricks?",
+    "creators": [
+     {
+      "creatorType": "author",
+      "firstName": "Samuel",
+      "lastName": "Rufat"
+     },
+     {
+      "creatorType": "author",
+      "firstName": "Hovig ter",
+      "lastName": "Minassian"
+     }
+    ],
+    "date": "2012-07-11",
+    "DOI": "10.4000/cybergeo.25561",
+    "url": "https://shs.hal.science/halshs-02485466v1",
+    "extra": "Sources: HAL\nHAL ID: halshs-02485466"
+   },
+   "b": {
+    "itemType": "journalArticle",
+    "title": "Video games and urban simulation: new tools or new tricks?",
+    "creators": [
+     {
+      "creatorType": "author",
+      "firstName": "Samuel",
+      "lastName": "Rufat"
+     },
+     {
+      "creatorType": "author",
+      "firstName": "Hovig ter",
+      "lastName": "Minassian"
+     }
+    ],
+    "date": "2012",
+    "url": "https://hal.science/hal-00851470v1",
+    "extra": "Sources: HAL\nHAL ID: hal-00851470"
+   }
+  },
+  {
+   "id": "P45",
+   "origin": "réel : corpus_algorithmic_monoculture_or_homogenization_or_standardization_20260922_203610_7ac43d15.json",
+   "note": "ordre des auteurs divergent (Scholar)",
+   "a": {
+    "itemType": "document",
+    "title": "Status report on the second round of the NIST post-quantum cryptography standardization process",
+    "creators": [
+     {
+      "creatorType": "author",
+      "firstName": "D",
+      "lastName": "Moody"
+     },
+     {
+      "creatorType": "author",
+      "firstName": "G",
+      "lastName": "Alagic"
+     },
+     {
+      "creatorType": "author",
+      "firstName": "DC",
+      "lastName": "Apon"
+     },
+     {
+      "creatorType": "author",
+      "lastName": "DA Cooper"
+     },
+     {
+      "creatorType": "author",
+      "firstName": "QH",
+      "lastName": "Dang"
+     }
+    ],
+    "date": "2020",
+    "url": "https://www.nist.gov/publications/status-report-second-round-nist-post-quantum-cryptography-standardization-process",
+    "extra": "Sources: Google Scholar (SerpAPI)\nScholar result ID: TWkuerjyLHIJ\nScholar cluster ID: 8227217493436819789\nScholar truncation: auteurs et/ou revue tronqués par Google Scholar — à vérifier contre la source primaire avant citation"
+   },
+   "b": {
+    "itemType": "journalArticle",
+    "title": "Status report on the second round of the NIST post-quantum cryptography standardization process",
+    "creators": [
+     {
+      "creatorType": "author",
+      "firstName": "G",
+      "lastName": "Alagic"
+     },
+     {
+      "creatorType": "author",
+      "firstName": "J",
+      "lastName": "Alperin-Sheriff"
+     },
+     {
+      "creatorType": "author",
+      "firstName": "D",
+      "lastName": "Apon"
+     }
+    ],
+    "date": "2020",
+    "url": "https://nvlpubs.nist.gov/nistpubs/ir/2020/NIST.IR.8309.pdf?ref=blog.cloudflare.com",
+    "extra": "Sources: Google Scholar (SerpAPI)\nScholar result ID: L8kk6Vl5aRAJ\nScholar cluster ID: 1182609804232018223\nScholar truncation: auteurs et/ou revue tronqués par Google Scholar — à vérifier contre la source primaire avant citation"
+   }
+  },
+  {
+   "id": "P46",
+   "origin": "réel : corpus_author_georges_elia_sarfati_20260618_105059.json",
+   "note": "compte rendu exposé deux fois par Persée (rev / compterendu)",
+   "a": {
+    "itemType": "document",
+    "title": "Roselyne Koren et Ruth Amossy (éds), Après Perelman : quelles politiques pour les nouvelles rhétoriques ?, Paris, l’Harmattan, 2002",
+    "creators": [
+     {
+      "creatorType": "author",
+      "firstName": "Marianne",
+      "lastName": "Doury"
+     }
+    ],
+    "date": "2006-01-01",
+    "url": "https://www.persee.fr/doc/igram_0222-9838_2006_num_108_1_3806_t13_0055_0000_2",
+    "extra": "Sources: Isidore\nIsidore URI: https://isidore.science/resource/10670/1.6188f04cda5a05ea923331807935680754314c9f\nAlternative URLs: http://oai.persee.fr/oai?verb=GetRecord&identifier=oai:persee:article/igram_0222-9838_2006_num_108_1_3806_t13_0055_0000_2&metadataPrefix=tei"
+   },
+   "b": {
+    "itemType": "document",
+    "title": "Roselyne Koren et Ruth Amossy (éds), Après Perelman : quelles politiques pour les nouvelles rhétoriques ?, Paris, l’Harmattan, 2002",
+    "creators": [
+     {
+      "creatorType": "author",
+      "firstName": "Marianne",
+      "lastName": "Doury"
+     }
+    ],
+    "date": "2006-01-01",
+    "url": "https://www.persee.fr/doc/igram_0222-9838_2006_num_108_1_3806_t13_0055_0000_3",
+    "extra": "Sources: Isidore\nIsidore URI: https://isidore.science/resource/10670/1.20d73bb48dd11dfc6459bf1031052b6ac498a5b7\nAlternative URLs: http://oai.persee.fr/oai?verb=GetRecord&identifier=oai:persee:article/igram_0222-9838_2006_num_108_1_3806_t13_0055_0000_3&metadataPrefix=tei"
+   }
+  },
+  {
+   "id": "P47",
+   "origin": "réel : corpus_author_sophie_moirand_20260618_105038.json",
+   "note": "URL d'accès alternative (Alternative URLs d'Isidore) = URL OpenAlex",
+   "a": {
+    "itemType": "bookSection",
+    "title": "Index des notions",
+    "creators": [],
+    "date": "2004-01-01",
+    "DOI": "10.4000/books.psn.770",
+    "url": "https://doi.org/10.4000/books.psn.770",
+    "extra": "Sources: Isidore\nIsidore URI: https://isidore.science/resource/20.500.13089/4hab\nAlternative URLs: https://hdl.handle.net/20.500.13089/4hab | https://books.openedition.org/psn/770"
+   },
+   "b": {
+    "itemType": "bookSection",
+    "title": "Index des notions",
+    "creators": [
+     {
+      "creatorType": "author",
+      "firstName": "Marianne",
+      "lastName": "Doury"
+     },
+     {
+      "creatorType": "author",
+      "firstName": "Sophie",
+      "lastName": "Moirand"
+     }
+    ],
+    "date": "2004-01-01",
+    "url": "https://books.openedition.org/psn/770",
+    "extra": "Sources: OpenAlex\nOpenAlex ID: https://openalex.org/W2765800737"
+   }
+  },
+  {
+   "id": "P48",
+   "origin": "réel : corpus_author_alain_rabatel_20260618_095713.json",
+   "note": "titre court identique, même année (Persée / HAL, même résumé)",
+   "a": {
+    "itemType": "journalArticle",
+    "title": "Perspective et point de vue",
+    "creators": [
+     {
+      "creatorType": "author",
+      "firstName": "Alain",
+      "lastName": "Rabatel"
+     }
+    ],
+    "date": "2009-01-01",
+    "url": "https://www.persee.fr/doc/comm_0588-8018_2009_num_85_1_2519",
+    "extra": "Sources: Isidore\nIsidore URI: https://isidore.science/resource/10.3406/comm.2009.2519\nAlternative URLs: http://oai.persee.fr/oai?verb=GetRecord&identifier=oai:persee:article/comm_0588-8018_2009_num_85_1_2519&metadataPrefix=tei"
+   },
+   "b": {
+    "itemType": "journalArticle",
+    "title": "Perspective et point de vue",
+    "creators": [
+     {
+      "creatorType": "author",
+      "firstName": "Alain",
+      "lastName": "Rabatel"
+     }
+    ],
+    "date": "2009-10",
+    "url": "https://shs.hal.science/halshs-00433003",
+    "extra": "Sources: Isidore\nIsidore URI: https://isidore.science/resource/10670/1.cc73d4d3c32f3f8d2b93b72abd938ba39d393c3e\nAlternative URLs: https://shs.hal.science/halshs-00433003v1/document | https://shs.hal.science/halshs-00433003v1/file/100-2009g-Communications_85-Rabatel_25-5-2007_.pdf"
+   }
+  },
+  {
+   "id": "P49",
+   "origin": "réel : corpus_text_and_data_mining_or_tdm_exception_or_research_exemption__20260922_191411_3c24dfd9.json",
+   "note": "manquée connue : premier auteur « Fiil-Flynn » / « Flynn »",
+   "a": {
+    "itemType": "journalArticle",
+    "title": "Legal reform to enhance global text and data mining research",
+    "creators": [
+     {
+      "creatorType": "author",
+      "firstName": "SM",
+      "lastName": "Fiil-Flynn"
+     },
+     {
+      "creatorType": "author",
+      "firstName": "B",
+      "lastName": "Butler"
+     },
+     {
+      "creatorType": "author",
+      "firstName": "M",
+      "lastName": "Carroll"
+     },
+     {
+      "creatorType": "author",
+      "firstName": "O",
+      "lastName": "Cohen-Sasson"
+     }
+    ],
+    "date": "2022",
+    "DOI": "10.1126/science.add6124",
+    "url": "https://www.science.org/doi/abs/10.1126/science.add6124",
+    "extra": "Sources: Google Scholar (SerpAPI)\nScholar result ID: vmnSbnqntKAJ\nScholar cluster ID: 11580064686163519934\nDOI: 10.1126/science.add6124\nScholar truncation: auteurs et/ou revue tronqués par Google Scholar — à vérifier contre la source primaire avant citation"
+   },
+   "b": {
+    "itemType": "document",
+    "title": "Legal reform to enhance global text and data mining research",
+    "creators": [
+     {
+      "creatorType": "author",
+      "firstName": "S",
+      "lastName": "Flynn"
+     }
+    ],
+    "date": "2022",
+    "url": "https://digitalcommons.wcl.american.edu/research/104/",
+    "extra": "Sources: Google Scholar (SerpAPI)\nScholar result ID: 1dO7_sNywTYJ\nScholar cluster ID: 3945560934671176661"
+   },
+   "expected_missed": true
+  },
+  {
+   "id": "P50",
+   "origin": "construit d'après corpus_discours_numerique_20260523_103449.json (URL retirée : le DOI n'est lisible que dans extra)",
+   "note": "DOI migré dans extra (type book) contre même DOI dans le champ",
+   "a": {
+    "itemType": "book",
+    "title": "Le discours hypertextualisé",
+    "creators": [
+     {
+      "creatorType": "author",
+      "firstName": "Justine",
+      "lastName": "Simon"
+     }
+    ],
+    "date": "2018-01-01",
+    "extra": "Sources: OpenEdition, Isidore\nIsidore URI: https://isidore.science/resource/20.500.13089/578b\nAlternative URLs: https://hdl.handle.net/20.500.13089/578b | https://books.openedition.org/pufc/40815\nDOI: 10.4000/books.pufc.40815"
+   },
+   "b": {
+    "itemType": "book",
+    "title": "Le discours hypertextualisé",
+    "creators": [
+     {
+      "creatorType": "author",
+      "firstName": "Justine",
+      "lastName": "Simon"
+     }
+    ],
+    "date": "2018",
+    "DOI": "10.4000/books.pufc.40815",
+    "url": "https://books.openedition.org/pufc/40815",
+    "extra": "Sources: CrossRef"
+   }
+  },
+  {
+   "id": "P51",
+   "origin": "réel : moisson live de vérification du 2026-09-28 (corpus_discours_numerique_20260928_182723_7b3dc641.json, hors output/)",
+   "note": "portail DUMAS (dumas.ccsd.cnrs.fr) : clé hal:dumas-01920660 dérivée de l'URL Isidore et HAL ID déclaré ; auteur saisi « Marques dos Santos, Clecio » / « Santos, Clecio Marques dos » (OPT-06 bis)",
+   "a": {
+    "itemType": "thesis",
+    "title": "La polyvalence des formes graphiques linguistiques dans les discours numériques : le cas des forums pour adolescents",
+    "creators": [
+     {
+      "creatorType": "author",
+      "lastName": "Marques dos Santos",
+      "firstName": "Clecio"
+     }
+    ],
+    "date": "2018-06-14",
+    "url": "https://dumas.ccsd.cnrs.fr/dumas-01920660",
+    "extra": "Sources: Isidore\nIsidore URI: https://isidore.science/resource/10670/1.7df67f3d99ded791e99362e7c6c8c1a6b494c87f\nAlternative URLs: https://dumas.ccsd.cnrs.fr/dumas-01920660v1/document"
+   },
+   "b": {
+    "itemType": "thesis",
+    "title": "La polyvalence des formes graphiques linguistiques dans les discours numériques : le cas des forums pour adolescents",
+    "creators": [
+     {
+      "creatorType": "author",
+      "lastName": "Santos",
+      "firstName": "Clecio Marques dos"
+     }
+    ],
+    "date": "2018-06-14",
+    "url": "https://dumas.ccsd.cnrs.fr/dumas-01920660v1",
+    "extra": "Sources: HAL\nHAL ID: dumas-01920660"
+   }
+  },
+  {
+   "id": "P52",
+   "origin": "réel : moisson live de vérification du 2026-09-28 (corpus_discours_numerique_20260928_182723_7b3dc641.json, hors output/)",
+   "note": "même article LIMES exposé deux fois (articles 12212 et 11649) ; premier auteur « CHOPPIN DE JANVRY, Thibaud » / « DE JANVRY, Thibaud Choppin » (OPT-06 bis)",
+   "a": {
+    "itemType": "journalArticle",
+    "title": "Dire, toucher, capter. Le langage à l’épreuve du numérique",
+    "creators": [
+     {
+      "creatorType": "author",
+      "lastName": "CHOPPIN DE JANVRY",
+      "firstName": "Thibaud"
+     }
+    ],
+    "date": "2026-06-28",
+    "url": "https://journals.imist.ma/index.php/LIMES/article/view/12212",
+    "publicationTitle": "LIMES : Langue, Interaction, Médias, Éducation et Société",
+    "extra": "Sources: Isidore\nIsidore URI: https://isidore.science/resource/10670/1.be6bee7bcb78cde49d7dca1525ff7d8fe31b1783"
+   },
+   "b": {
+    "itemType": "journalArticle",
+    "title": "Dire, toucher, capter. Le langage à l’épreuve du numérique",
+    "creators": [
+     {
+      "creatorType": "author",
+      "lastName": "DE JANVRY",
+      "firstName": "Thibaud Choppin"
+     }
+    ],
+    "date": "2026-06-28",
+    "url": "https://journals.imist.ma/index.php/LIMES/article/view/11649",
+    "publicationTitle": "LIMES : Langue, Interaction, Médias, Éducation et Société",
+    "extra": "Sources: Isidore\nIsidore URI: https://isidore.science/resource/10670/1.a1f25413a97644f209ad78e9c3d19e49b024c66d"
+   }
+  },
+  {
+   "id": "P53",
+   "origin": "construit (d'après P51)",
+   "note": "nom composé abrégé d'un côté (« Marques dos Santos, Clecio » / « Santos, Clecio »), aucun identifiant commun, sous-titre ponctué autrement (OPT-06 bis)",
+   "a": {
+    "itemType": "thesis",
+    "title": "Les écritures numériques adolescentes : variation graphique et normes orthographiques dans les messageries",
+    "creators": [
+     {
+      "creatorType": "author",
+      "lastName": "Marques dos Santos",
+      "firstName": "Clecio"
+     }
+    ],
+    "date": "2019",
+    "extra": "Sources: Isidore"
+   },
+   "b": {
+    "itemType": "thesis",
+    "title": "Les écritures numériques adolescentes. variation graphique et normes orthographiques dans les messageries",
+    "creators": [
+     {
+      "creatorType": "author",
+      "lastName": "Santos",
+      "firstName": "Clecio"
+     }
+    ],
+    "date": "2019",
+    "extra": "Sources: OpenAlex"
+   }
+  },
+  {
+   "id": "P54",
+   "origin": "construit (d'après la paire résiduelle réelle Abadli / Riad, saisie en initiales, prénoms complétés)",
+   "note": "inversion exacte nom / prénom du premier auteur (« Abadli, Riad » / « Riad, Abadli ») et du second (OPT-06 bis)",
+   "a": {
+    "itemType": "journalArticle",
+    "title": "Les éthiques de la recherche scientifique à l'ère de l'intelligence artificielle",
+    "creators": [
+     {
+      "creatorType": "author",
+      "lastName": "Abadli",
+      "firstName": "Riad"
+     },
+     {
+      "creatorType": "author",
+      "lastName": "Amrani",
+      "firstName": "Said"
+     }
+    ],
+    "date": "2024",
+    "extra": "Sources: Google Scholar (SerpAPI)\nScholar result ID: constructA1"
+   },
+   "b": {
+    "itemType": "journalArticle",
+    "title": "Les éthiques de la recherche scientifique à l'ère de l'intelligence artificielle",
+    "creators": [
+     {
+      "creatorType": "author",
+      "lastName": "Riad",
+      "firstName": "Abadli"
+     },
+     {
+      "creatorType": "author",
+      "lastName": "Said",
+      "firstName": "Amrani"
+     }
+    ],
+    "date": "2024",
+    "extra": "Sources: OpenAlex"
+   }
+  }
+ ],
+ "negatives": [
+  {
+   "id": "N01",
+   "origin": "réel : corpus_interdiscursivity_or_interdiscursive_discourse_20260618_110446.json",
+   "note": "homonymes : même titre, auteurs différents",
+   "a": {
+    "itemType": "document",
+    "title": "Critical Discourse Analysis",
+    "creators": [
+     {
+      "creatorType": "author",
+      "firstName": "Teun A.",
+      "lastName": "van Dijk"
+     }
+    ],
+    "date": "2015-04-17",
+    "DOI": "10.1002/9781118584194.ch22",
+    "url": "https://doi.org/10.1002/9781118584194.ch22",
+    "extra": "Sources: OpenAlex\nOpenAlex ID: https://openalex.org/W2161586993\nDOI: 10.1002/9781118584194.ch22"
+   },
+   "b": {
+    "itemType": "bookSection",
+    "title": "Critical discourse analysis",
+    "creators": [
+     {
+      "creatorType": "author",
+      "firstName": "Norman",
+      "lastName": "Fairclough"
+     }
+    ],
+    "date": "2015-02-17",
+    "DOI": "10.4324/9780203809068.ch1",
+    "url": "https://doi.org/10.4324/9780203809068.ch1",
+    "extra": "Sources: OpenAlex\nOpenAlex ID: https://openalex.org/W4232646626\nDOI: 10.4324/9780203809068.ch1"
+   },
+   "trap": "homonymes"
+  },
+  {
+   "id": "N02",
+   "origin": "réel : corpus_community_detection_or_stochastic_block_model_or_network_par_20260922_222804_57122a39.json",
+   "note": "homonymes : deux articles distincts de 2022",
+   "a": {
+    "itemType": "journalArticle",
+    "title": "Differentially private community detection for stochastic block models",
+    "creators": [
+     {
+      "creatorType": "author",
+      "firstName": "MS",
+      "lastName": "Mohamed"
+     },
+     {
+      "creatorType": "author",
+      "firstName": "D",
+      "lastName": "Nguyen"
+     }
+    ],
+    "date": "2022",
+    "url": "https://proceedings.mlr.press/v162/mohamed22a.html",
+    "extra": "Sources: Google Scholar (SerpAPI)\nScholar result ID: eC5qXYUbETYJ\nScholar truncation: auteurs et/ou revue tronqués par Google Scholar — à vérifier contre la source primaire avant citation"
+   },
+   "b": {
+    "itemType": "preprint",
+    "title": "Differentially private community detection for stochastic block models",
+    "creators": [
+     {
+      "creatorType": "author",
+      "firstName": "M",
+      "lastName": "Seif"
+     },
+     {
+      "creatorType": "author",
+      "firstName": "D",
+      "lastName": "Nguyen"
+     },
+     {
+      "creatorType": "author",
+      "firstName": "A",
+      "lastName": "Vullikanti"
+     },
+     {
+      "creatorType": "author",
+      "firstName": "R",
+      "lastName": "Tandon"
+     }
+    ],
+    "date": "2022",
+    "url": "https://arxiv.org/abs/2202.00636",
+    "extra": "Sources: Google Scholar (SerpAPI)\nScholar result ID: lx8agKsOX0AJ\nScholar truncation: auteurs et/ou revue tronqués par Google Scholar — à vérifier contre la source primaire avant citation"
+   },
+   "trap": "homonymes"
+  },
+  {
+   "id": "N03",
+   "origin": "réel : corpus_research_automation_autonomous_agents_scientific_discovery_w_20260922_135507_9c572bf0.json",
+   "note": "chroniques distinctes, DOI distincts",
+   "a": {
+    "itemType": "journalArticle",
+    "title": "Mathematical Games",
+    "creators": [
+     {
+      "creatorType": "author",
+      "firstName": "Martin",
+      "lastName": "Gardner"
+     }
+    ],
+    "date": "2024-08",
+    "DOI": "10.1038/scientificamerican0457-166",
+    "url": "https://doi.org/10.1038/scientificamerican0457-166",
+    "extra": "Sources: CrossRef\nDOI: 10.1038/scientificamerican0457-166"
+   },
+   "b": {
+    "itemType": "journalArticle",
+    "title": "Mathematical Games",
+    "creators": [
+     {
+      "creatorType": "author",
+      "firstName": "Martin",
+      "lastName": "Gardner"
+     }
+    ],
+    "date": "2024-08",
+    "DOI": "10.1038/scientificamerican0657-166",
+    "url": "https://doi.org/10.1038/scientificamerican0657-166",
+    "extra": "Sources: CrossRef\nDOI: 10.1038/scientificamerican0657-166"
+   },
+   "trap": "deux_doi_meme_titre"
+  },
+  {
+   "id": "N04",
+   "origin": "réel : corpus_research_automation_autonomous_agents_scientific_discovery_w_20260922_135507_9c572bf0.json",
+   "note": "courriers de deux numéros, DOI distincts",
+   "a": {
+    "itemType": "journalArticle",
+    "title": "Letters",
+    "creators": [
+     {
+      "creatorType": "author",
+      "lastName": "Scientific American Editors"
+     }
+    ],
+    "date": "2022-01",
+    "DOI": "10.1038/scientificamerican0122-6",
+    "url": "https://doi.org/10.1038/scientificamerican0122-6",
+    "extra": "Sources: CrossRef\nDOI: 10.1038/scientificamerican0122-6"
+   },
+   "b": {
+    "itemType": "journalArticle",
+    "title": "Letters",
+    "creators": [
+     {
+      "creatorType": "author",
+      "lastName": "Scientific American Editors"
+     }
+    ],
+    "date": "2022-07",
+    "DOI": "10.1038/scientificamerican0722-6",
+    "url": "https://doi.org/10.1038/scientificamerican0722-6",
+    "extra": "Sources: CrossRef\nDOI: 10.1038/scientificamerican0722-6"
+   },
+   "trap": "deux_doi_meme_titre"
+  },
+  {
+   "id": "N05",
+   "origin": "réel : corpus_author_henning_nolke_20260618_095701.json",
+   "note": "compte rendu dans deux revues",
+   "a": {
+    "itemType": "journalArticle",
+    "title": "Das XXVII. Härterei-Kolloquium 1971",
+    "creators": [
+     {
+      "creatorType": "author",
+      "firstName": "Henning",
+      "lastName": "Nølke"
+     },
+     {
+      "creatorType": "author",
+      "firstName": "H.",
+      "lastName": "Vetters"
+     }
+    ],
+    "date": "1971-09-01",
+    "DOI": "10.1515/htm-1971-260511",
+    "url": "https://doi.org/10.1515/htm-1971-260511",
+    "extra": "Sources: OpenAlex\nOpenAlex ID: https://openalex.org/W3212780211\nDOI: 10.1515/htm-1971-260511"
+   },
+   "b": {
+    "itemType": "journalArticle",
+    "title": "Das XXVII. Härterei-Kolloquium 1971",
+    "creators": [
+     {
+      "creatorType": "author",
+      "firstName": "Henning",
+      "lastName": "Nølke"
+     },
+     {
+      "creatorType": "author",
+      "firstName": "H.",
+      "lastName": "Vetters"
+     }
+    ],
+    "date": "1971-11-01",
+    "DOI": "10.1515/zwf-1971-661109",
+    "url": "https://doi.org/10.1515/zwf-1971-661109",
+    "extra": "Sources: OpenAlex\nOpenAlex ID: https://openalex.org/W4413629785\nDOI: 10.1515/zwf-1971-661109"
+   },
+   "trap": "deux_doi_meme_titre"
+  },
+  {
+   "id": "N06",
+   "origin": "réel : corpus_author_alice_krieg_planque_20260618_105050.json",
+   "note": "comptes rendus du même livre par deux recenseurs",
+   "a": {
+    "itemType": "journalArticle",
+    "title": "Alice KRIEG-PLANQUE, « Purification ethnique ». Une formule et son histoire",
+    "creators": [
+     {
+      "creatorType": "author",
+      "firstName": "Patrick",
+      "lastName": "Michels"
+     }
+    ],
+    "date": "2003-01-01",
+    "DOI": "10.4000/balkanologie.1969",
+    "url": "https://doi.org/10.4000/balkanologie.1969",
+    "extra": "Sources: Isidore\nIsidore URI: https://isidore.science/resource/20.500.13089/d6ks\nAlternative URLs: https://hdl.handle.net/20.500.13089/d6ks | https://journals.openedition.org/balkanologie/1969"
+   },
+   "b": {
+    "itemType": "journalArticle",
+    "title": "Alice Krieg-Planque : « Purification ethnique ». Une formule et son histoire",
+    "creators": [
+     {
+      "creatorType": "author",
+      "firstName": "Jacques",
+      "lastName": "Noyer"
+     }
+    ],
+    "date": "2003-01-01",
+    "DOI": "10.4000/edc.135",
+    "url": "https://doi.org/10.4000/edc.135",
+    "extra": "Sources: Isidore\nIsidore URI: https://isidore.science/resource/20.500.13089/fivm\nAlternative URLs: https://hdl.handle.net/20.500.13089/fivm | https://journals.openedition.org/edc/135"
+   },
+   "trap": "compte_rendu"
+  },
+  {
+   "id": "N07",
+   "origin": "réel : corpus_author_sophie_moirand_20260618_105038.json",
+   "note": "comptes rendus du même livre par deux recenseurs",
+   "a": {
+    "itemType": "journalArticle",
+    "title": "Danielle LONDEI, Sophie MOIRAND, Sandrine REBOUL-TOURÉ et Licia REGGIANI (dir.) (2013), Dire l’événement. Langage, mémoire, société",
+    "creators": [
+     {
+      "creatorType": "author",
+      "firstName": "Clément",
+      "lastName": "Puget"
+     }
+    ],
+    "date": "2015-01-01",
+    "DOI": "10.4000/communication.5968",
+    "url": "https://doi.org/10.4000/communication.5968",
+    "extra": "Sources: Isidore\nIsidore URI: https://isidore.science/resource/20.500.13089/e802\nAlternative URLs: https://hdl.handle.net/20.500.13089/e802 | https://journals.openedition.org/communication/5968"
+   },
+   "b": {
+    "itemType": "journalArticle",
+    "title": "Danielle LONDEI, Sophie MOIRAND, Sandrine REBOUL-TOURÉ et Licia REGGIANI (dir.) (2013), Dire l’événement. Langage, mémoire, société",
+    "creators": [
+     {
+      "creatorType": "author",
+      "firstName": "Claudia",
+      "lastName": "Torres Castillo"
+     }
+    ],
+    "date": "2015-01-01",
+    "DOI": "10.4000/communication.5974",
+    "url": "https://doi.org/10.4000/communication.5974",
+    "extra": "Sources: Isidore\nIsidore URI: https://isidore.science/resource/20.500.13089/e803\nAlternative URLs: https://hdl.handle.net/20.500.13089/e803 | https://journals.openedition.org/communication/5974"
+   },
+   "trap": "compte_rendu"
+  },
+  {
+   "id": "N08",
+   "origin": "réel : corpus_author_catherine_kerbrat_orecchioni_20260618_095729.json",
+   "note": "comptes rendus du même livre par deux recenseurs",
+   "a": {
+    "itemType": "journalArticle",
+    "title": "Catherine Kerbrat-Orecchioni. Nous et les autres animaux",
+    "creators": [
+     {
+      "creatorType": "author",
+      "firstName": "Françoise",
+      "lastName": "BESSON"
+     }
+    ],
+    "date": "2022-01-01",
+    "DOI": "10.4000/erea.14309",
+    "url": "https://doi.org/10.4000/erea.14309",
+    "extra": "Sources: Isidore\nIsidore URI: https://isidore.science/resource/20.500.13089/fvm1\nAlternative URLs: https://hdl.handle.net/20.500.13089/fvm1 | https://journals.openedition.org/erea/14309"
+   },
+   "b": {
+    "itemType": "journalArticle",
+    "title": "Catherine Kerbrat-Orecchioni, Nous et les autres animaux",
+    "creators": [
+     {
+      "creatorType": "author",
+      "firstName": "Cécile",
+      "lastName": "Jullion"
+     }
+    ],
+    "date": "2022-01-01",
+    "DOI": "10.4000/lidil.10895",
+    "url": "https://doi.org/10.4000/lidil.10895",
+    "extra": "Sources: Isidore\nIsidore URI: https://isidore.science/resource/20.500.13089/hzeh\nAlternative URLs: https://hdl.handle.net/20.500.13089/hzeh | https://journals.openedition.org/lidil/10895"
+   },
+   "trap": "compte_rendu"
+  },
+  {
+   "id": "N09",
+   "origin": "réel : corpus_author_sophie_moirand_20260618_105038.json",
+   "note": "même titre dans deux ouvrages différents",
+   "a": {
+    "itemType": "document",
+    "title": "Présentation des auteurs",
+    "creators": [
+     {
+      "creatorType": "author",
+      "firstName": "Marianne",
+      "lastName": "Doury"
+     },
+     {
+      "creatorType": "author",
+      "firstName": "S.",
+      "lastName": "Moirand"
+     }
+    ],
+    "date": "2004",
+    "DOI": "10.4000/books.pur.6509",
+    "url": "https://doi.org/10.4000/books.pur.6509",
+    "extra": "Sources: Semantic Scholar\nS2 corpus id: 265905292\nDOI: 10.4000/books.pur.6509"
+   },
+   "b": {
+    "itemType": "bookSection",
+    "title": "Présentation des auteurs",
+    "creators": [],
+    "date": "2004-01-01",
+    "DOI": "10.4000/books.psn.771",
+    "url": "https://doi.org/10.4000/books.psn.771",
+    "extra": "Sources: Isidore\nIsidore URI: https://isidore.science/resource/20.500.13089/4hbq\nAlternative URLs: https://hdl.handle.net/20.500.13089/4hbq | https://books.openedition.org/psn/771"
+   },
+   "trap": "titre_generique"
+  },
+  {
+   "id": "N10",
+   "origin": "réel : corpus_author_alice_krieg_planque_20260618_105050.json",
+   "note": "livre contre chapitre de même titre",
+   "a": {
+    "itemType": "book",
+    "title": "L’environnement dans les journaux télévisés",
+    "creators": [
+     {
+      "creatorType": "author",
+      "firstName": "Suzanne",
+      "lastName": "de Cheveigné"
+     }
+    ],
+    "date": "2000-01-01",
+    "DOI": "10.4000/books.editionscnrs.30461",
+    "url": "https://doi.org/10.4000/books.editionscnrs.30461",
+    "extra": "Sources: Isidore\nIsidore URI: https://isidore.science/resource/20.500.13089/233i\nAlternative URLs: https://hdl.handle.net/20.500.13089/233i | https://books.openedition.org/editionscnrs/30461"
+   },
+   "b": {
+    "itemType": "bookSection",
+    "title": "L’environnement dans les journaux télévisés",
+    "creators": [
+     {
+      "creatorType": "author",
+      "firstName": "Suzanne",
+      "lastName": "de Cheveigné"
+     }
+    ],
+    "date": "2000-01-01",
+    "DOI": "10.4000/books.editionscnrs.30506",
+    "url": "https://doi.org/10.4000/books.editionscnrs.30506",
+    "extra": "Sources: Isidore\nIsidore URI: https://isidore.science/resource/20.500.13089/29ua\nAlternative URLs: https://hdl.handle.net/20.500.13089/29ua | https://books.openedition.org/editionscnrs/30506"
+   },
+   "trap": "livre_chapitre"
+  },
+  {
+   "id": "N11",
+   "origin": "réel : corpus_author_amar_lakel_20260617_120549.json",
+   "note": "article contre jeu de données",
+   "a": {
+    "itemType": "journalArticle",
+    "title": "Anaerobic digestion of urban wastes: integration and benefits of a small-scale system",
+    "creators": [
+     {
+      "creatorType": "author",
+      "firstName": "Jean-Romain Bautista",
+      "lastName": "Angeli"
+     },
+     {
+      "creatorType": "author",
+      "firstName": "T.",
+      "lastName": "LeFloc’h"
+     },
+     {
+      "creatorType": "author",
+      "firstName": "Amar",
+      "lastName": "Lakel"
+     },
+     {
+      "creatorType": "author",
+      "firstName": "Bruno",
+      "lastName": "Lacarrière"
+     },
+     {
+      "creatorType": "author",
+      "firstName": "Yves",
+      "lastName": "Andrès"
+     }
+    ],
+    "date": "2021-04-23",
+    "DOI": "10.1080/09593330.2021.1921857",
+    "url": "https://doi.org/10.1080/09593330.2021.1921857",
+    "extra": "Sources: OpenAlex\nOpenAlex ID: https://openalex.org/W3153966878\nPMID: https://pubmed.ncbi.nlm.nih.gov/33890842\nDOI: 10.1080/09593330.2021.1921857"
+   },
+   "b": {
+    "itemType": "dataset",
+    "title": "Anaerobic digestion of urban wastes: integration and benefits of a small-scale system",
+    "creators": [
+     {
+      "creatorType": "author",
+      "firstName": "Jean-Romain Bautista",
+      "lastName": "Angeli"
+     },
+     {
+      "creatorType": "author",
+      "firstName": "T.",
+      "lastName": "LeFloc’h"
+     },
+     {
+      "creatorType": "author",
+      "firstName": "Amar",
+      "lastName": "Lakel"
+     },
+     {
+      "creatorType": "author",
+      "firstName": "Bruno",
+      "lastName": "Lacarrière"
+     },
+     {
+      "creatorType": "author",
+      "firstName": "Yves",
+      "lastName": "Andrès"
+     }
+    ],
+    "date": "2021-01-01",
+    "DOI": "10.6084/m9.figshare.14473867",
+    "url": "https://doi.org/10.6084/m9.figshare.14473867",
+    "extra": "Sources: OpenAlex\nOpenAlex ID: https://openalex.org/W4394300814\nDOI: 10.6084/m9.figshare.14473867"
+   },
+   "trap": "types_incompatibles"
+  },
+  {
+   "id": "N12",
+   "origin": "réel : corpus_fabricated_references_citations_hallucination_scholarly_writ_20260922_144100_be21e55d.json",
+   "note": "prépublication (DOI arXiv) contre article publié",
+   "a": {
+    "itemType": "preprint",
+    "title": "Using Generative AI for Literature Searches and Scholarly Writing: Is the Integrity of the Scientific Discourse in Jeopardy?",
+    "creators": [
+     {
+      "creatorType": "author",
+      "firstName": "Paul G.",
+      "lastName": "Schmidt"
+     },
+     {
+      "creatorType": "author",
+      "firstName": "A. J.",
+      "lastName": "Meir"
+     }
+    ],
+    "date": "2023-10-07",
+    "DOI": "10.48550/arxiv.2311.06981",
+    "url": "http://arxiv.org/abs/2311.06981",
+    "extra": "Sources: OpenAlex\nOpenAlex ID: https://openalex.org/W4388685189\nDOI: 10.48550/arxiv.2311.06981"
+   },
+   "b": {
+    "itemType": "journalArticle",
+    "title": "Using Generative AI for Literature Searches and Scholarly Writing: Is the Integrity of the Scientific Discourse in Jeopardy?",
+    "creators": [
+     {
+      "creatorType": "author",
+      "firstName": "Paul G.",
+      "lastName": "Schmidt"
+     },
+     {
+      "creatorType": "author",
+      "firstName": "A. J.",
+      "lastName": "Meir"
+     }
+    ],
+    "date": "2023-12-14",
+    "DOI": "10.1090/noti2838",
+    "url": "https://doi.org/10.1090/noti2838",
+    "extra": "Sources: OpenAlex\nOpenAlex ID: https://openalex.org/W4389748993\nDOI: 10.1090/noti2838"
+   },
+   "trap": "prepublication_version_finale"
+  },
+  {
+   "id": "N13",
+   "origin": "réel : corpus_chatbot_bullshit_confabulation_epistemology_truth_language_m_20260922_144052_8e8262d0.json",
+   "note": "prépublication sans DOI (arXiv) contre article publié",
+   "a": {
+    "itemType": "preprint",
+    "title": "Are Attributions of Consciousness to AI Chatbots Epistemically Innocent?",
+    "creators": [
+     {
+      "creatorType": "author",
+      "firstName": "Uwe",
+      "lastName": "Peters"
+     }
+    ],
+    "date": "2026-07-22",
+    "url": "https://arxiv.org/abs/2607.20001",
+    "extra": "Sources: OpenAlex\nOpenAlex ID: https://openalex.org/W7170989224"
+   },
+   "b": {
+    "itemType": "journalArticle",
+    "title": "Are Attributions of Consciousness to AI Chatbots Epistemically Innocent?",
+    "creators": [
+     {
+      "creatorType": "author",
+      "firstName": "Uwe",
+      "lastName": "Peters"
+     }
+    ],
+    "date": "2026-08-18",
+    "DOI": "10.1007/s11023-026-09795-8",
+    "url": "https://doi.org/10.1007/s11023-026-09795-8",
+    "extra": "Sources: OpenAlex\nOpenAlex ID: https://openalex.org/W7170174436\nDOI: 10.1007/s11023-026-09795-8"
+   },
+   "trap": "prepublication_version_finale"
+  },
+  {
+   "id": "N14",
+   "origin": "réel : corpus_ai_scientist_or_autonomous_scientific_discovery_or_automated_20260922_135354_f37b964e.json",
+   "note": "prépublication arXiv contre article ACM",
+   "a": {
+    "itemType": "preprint",
+    "title": "Evaluating Sakana's AI Scientist: Bold Claims, Mixed Results, and a Promising Future?",
+    "creators": [
+     {
+      "creatorType": "author",
+      "firstName": "Joeran",
+      "lastName": "Beel"
+     },
+     {
+      "creatorType": "author",
+      "firstName": "Min‐Yen",
+      "lastName": "Kan"
+     },
+     {
+      "creatorType": "author",
+      "firstName": "Baumgart,",
+      "lastName": "Moritz"
+     }
+    ],
+    "date": "2025-02-20",
+    "DOI": "10.48550/arxiv.2502.14297",
+    "url": "http://arxiv.org/abs/2502.14297",
+    "extra": "Sources: OpenAlex\nOpenAlex ID: https://openalex.org/W4407806692\nDOI: 10.48550/arxiv.2502.14297"
+   },
+   "b": {
+    "itemType": "journalArticle",
+    "title": "Evaluating Sakana's AI Scientist: Bold Claims, Mixed Results, and a Promising Future?",
+    "creators": [
+     {
+      "creatorType": "author",
+      "firstName": "Joeran",
+      "lastName": "Beel"
+     },
+     {
+      "creatorType": "author",
+      "firstName": "Min‐Yen",
+      "lastName": "Kan"
+     },
+     {
+      "creatorType": "author",
+      "firstName": "Moritz",
+      "lastName": "Baumgart"
+     }
+    ],
+    "date": "2025-06-01",
+    "DOI": "10.1145/3769733.3769747",
+    "url": "https://doi.org/10.1145/3769733.3769747",
+    "extra": "Sources: OpenAlex\nOpenAlex ID: https://openalex.org/W4415051842\nDOI: 10.1145/3769733.3769747"
+   },
+   "trap": "prepublication_version_finale"
+  },
+  {
+   "id": "N15",
+   "origin": "réel : corpus_open_weight_models_governance_proprietary_dependency_digital_20260922_141900_5786f95d.json",
+   "note": "prépublication SSRN contre article",
+   "a": {
+    "itemType": "preprint",
+    "title": "Open-Source AI made in the EU: Why it is a Good Idea",
+    "creators": [
+     {
+      "creatorType": "author",
+      "firstName": "Luciano",
+      "lastName": "Floridi"
+     },
+     {
+      "creatorType": "author",
+      "firstName": "Carlotta",
+      "lastName": "Buttaboni"
+     },
+     {
+      "creatorType": "author",
+      "firstName": "Emmie",
+      "lastName": "Hine"
+     },
+     {
+      "creatorType": "author",
+      "firstName": "Claudio",
+      "lastName": "Novelli"
+     },
+     {
+      "creatorType": "author",
+      "firstName": "T.",
+      "lastName": "Schröder"
+     },
+     {
+      "creatorType": "author",
+      "firstName": "Grant",
+      "lastName": "Shanklin"
+     }
+    ],
+    "date": "2025-01-01",
+    "DOI": "10.2139/ssrn.5191372",
+    "url": "https://doi.org/10.2139/ssrn.5191372",
+    "extra": "Sources: OpenAlex\nOpenAlex ID: https://openalex.org/W4409621723\nDOI: 10.2139/ssrn.5191372"
+   },
+   "b": {
+    "itemType": "journalArticle",
+    "title": "Open-Source AI Made in the EU: Why it is a Good Idea",
+    "creators": [
+     {
+      "creatorType": "author",
+      "firstName": "Luciano",
+      "lastName": "Floridi"
+     },
+     {
+      "creatorType": "author",
+      "firstName": "Carlotta",
+      "lastName": "Buttaboni"
+     },
+     {
+      "creatorType": "author",
+      "firstName": "Emmie",
+      "lastName": "Hine"
+     },
+     {
+      "creatorType": "author",
+      "firstName": "Claudio",
+      "lastName": "Novelli"
+     },
+     {
+      "creatorType": "author",
+      "firstName": "T.",
+      "lastName": "Schröder"
+     },
+     {
+      "creatorType": "author",
+      "firstName": "Grant",
+      "lastName": "Shanklin"
+     }
+    ],
+    "date": "2025-06-02",
+    "DOI": "10.1007/s11023-025-09728-x",
+    "url": "https://doi.org/10.1007/s11023-025-09728-x",
+    "extra": "Sources: OpenAlex\nOpenAlex ID: https://openalex.org/W4410940517\nDOI: 10.1007/s11023-025-09728-x"
+   },
+   "trap": "prepublication_version_finale"
+  },
+  {
+   "id": "N16",
+   "origin": "réel : corpus_author_alain_rabatel_20260618_095713.json",
+   "note": "communication (HAL) contre article publié (DOI)",
+   "a": {
+    "itemType": "conferencePaper",
+    "title": "Analyse de discours et inégalités sociales : de l’empathie pour les invisibles à l’engagement pour le commun",
+    "creators": [
+     {
+      "creatorType": "author",
+      "firstName": "Alain",
+      "lastName": "Rabatel"
+     }
+    ],
+    "date": "2016-09-14",
+    "url": "https://shs.hal.science/halshs-02131206v1",
+    "extra": "Sources: HAL\nHAL ID: halshs-02131206"
+   },
+   "b": {
+    "itemType": "journalArticle",
+    "title": "Analyse de discours et inégalités sociales: de l’empathie pour les invisibles à l’engagement pour le commun",
+    "creators": [
+     {
+      "creatorType": "author",
+      "firstName": "Alain",
+      "lastName": "Rabatel"
+     }
+    ],
+    "date": "2016-12-16",
+    "DOI": "10.17851/2237-2083.24.3.757-788",
+    "url": "https://doi.org/10.17851/2237-2083.24.3.757-788",
+    "extra": "Sources: OpenAlex, Semantic Scholar\nOpenAlex ID: https://openalex.org/W2575880415\nDOI: 10.17851/2237-2083.24.3.757-788\nS2 corpus id: 152270021\nS2 corpus id: 273553648"
+   },
+   "trap": "versions_distinctes"
+  },
+  {
+   "id": "N17",
+   "origin": "réel : corpus_hermeneutique_and_numerique_or_computationnelle_or_des_texte_20260616_204256.json",
+   "note": "communication contre article, dépôts HAL distincts",
+   "a": {
+    "itemType": "journalArticle",
+    "title": "Comment lire l'histoire. Notions d'herméneutique suivant les études de Paul Ricoeur",
+    "creators": [
+     {
+      "creatorType": "author",
+      "firstName": "Jessica Torres",
+      "lastName": "Quiroga"
+     }
+    ],
+    "date": "2017-10-18",
+    "url": "https://hal.science/hal-01673351v1",
+    "extra": "Sources: HAL\nHAL ID: hal-01673351"
+   },
+   "b": {
+    "itemType": "conferencePaper",
+    "title": "Comment lire l'histoire. Notions d'herméneutique suivant les études de Paul Ricoeur",
+    "creators": [
+     {
+      "creatorType": "author",
+      "firstName": "Torres",
+      "lastName": "Quiroga"
+     }
+    ],
+    "date": "2017-10-13",
+    "url": "https://univ-paris8.hal.science/hal-02530458v1",
+    "extra": "Sources: HAL\nHAL ID: hal-02530458"
+   },
+   "trap": "versions_distinctes"
+  },
+  {
+   "id": "N18",
+   "origin": "réel : corpus_author_amar_lakel_20260617_120549.json",
+   "note": "article contre billet de carnet (DOI distincts)",
+   "a": {
+    "itemType": "journalArticle",
+    "title": "Les SIC à l’épreuve du digital et des Humanités : des origines, des concepts, des méthodes et des outils",
+    "creators": [
+     {
+      "creatorType": "author",
+      "firstName": "Franck",
+      "lastName": "Cormerais"
+     },
+     {
+      "creatorType": "author",
+      "firstName": "Olivier Le",
+      "lastName": "Deuff"
+     },
+     {
+      "creatorType": "author",
+      "firstName": "Amar",
+      "lastName": "Lakel"
+     },
+     {
+      "creatorType": "author",
+      "firstName": "David",
+      "lastName": "Pucheu"
+     }
+    ],
+    "date": "2016-01-01",
+    "DOI": "10.4000/rfsic.1820",
+    "url": "https://hal.science/hal-04164780v1",
+    "extra": "Sources: HAL, OpenAlex\nHAL ID: hal-04164780\nOpenAlex ID: https://openalex.org/W2307651904\nDOI: 10.4000/rfsic.1820"
+   },
+   "b": {
+    "itemType": "document",
+    "title": "Les SIC à l’épreuve du digital et des Humanités : des origines, des concepts, des méthodes et des outils",
+    "creators": [
+     {
+      "creatorType": "author",
+      "firstName": "Digital",
+      "lastName": "library"
+     }
+    ],
+    "date": "2016-04-29",
+    "DOI": "10.58079/nn2y",
+    "url": "https://doi.org/10.58079/nn2y",
+    "extra": "Sources: Isidore\nIsidore URI: https://isidore.science/resource/10.58079/nn2y\nAlternative URLs: https://digitallibrary.hypotheses.org/897"
+   },
+   "trap": "deux_doi_meme_titre"
+  },
+  {
+   "id": "N19",
+   "origin": "réel : corpus_author_catherine_kerbrat_orecchioni_20260618_095729.json",
+   "note": "livre contre son introduction (chapitre)",
+   "a": {
+    "itemType": "book",
+    "title": "Confidence/dévoilement de soi dans l'interaction",
+    "creators": [
+     {
+      "creatorType": "author",
+      "firstName": "Catherine",
+      "lastName": "Kerbrat-Orecchioni"
+     },
+     {
+      "creatorType": "author",
+      "firstName": "Véronique",
+      "lastName": "Traverso"
+     }
+    ],
+    "date": "2007",
+    "url": "https://shs.hal.science/halshs-00357683v1",
+    "extra": "Sources: HAL\nHAL ID: halshs-00357683"
+   },
+   "b": {
+    "itemType": "bookSection",
+    "title": "Confidence/dévoilement de soi dans l'interaction : introduction",
+    "creators": [
+     {
+      "creatorType": "author",
+      "firstName": "Catherine",
+      "lastName": "Kerbrat-Orecchioni"
+     },
+     {
+      "creatorType": "author",
+      "firstName": "Véronique",
+      "lastName": "Traverso"
+     }
+    ],
+    "date": "2007",
+    "url": "https://shs.hal.science/halshs-00658833v1",
+    "extra": "Sources: HAL\nHAL ID: halshs-00658833"
+   },
+   "trap": "livre_chapitre"
+  },
+  {
+   "id": "N20",
+   "origin": "réel : corpus_author_alain_rabatel_20260618_095713.json",
+   "note": "titre préfixe, années distantes de 2",
+   "a": {
+    "itemType": "conferencePaper",
+    "title": "Analyse énonciative de la connivence représentée dans les récits en mode empathique",
+    "creators": [
+     {
+      "creatorType": "author",
+      "firstName": "Alain",
+      "lastName": "Rabatel"
+     }
+    ],
+    "date": "2014-03-18",
+    "url": "https://shs.hal.science/halshs-02123856v1",
+    "extra": "Sources: HAL\nHAL ID: halshs-02123856"
+   },
+   "b": {
+    "itemType": "journalArticle",
+    "title": "Analyse énonciative de la connivence représentée dans les récits",
+    "creators": [
+     {
+      "creatorType": "author",
+      "firstName": "Alain",
+      "lastName": "Rabatel"
+     }
+    ],
+    "date": "2016",
+    "url": "https://shs.hal.science/halshs-01351292v1",
+    "extra": "Sources: HAL\nHAL ID: halshs-01351292"
+   },
+   "trap": "meme_titre_annees_eloignees"
+  },
+  {
+   "id": "N21",
+   "origin": "réel : corpus_author_amar_lakel_20260523_223739.json",
+   "note": "republication : chapitre contre article (DOI distincts)",
+   "a": {
+    "itemType": "bookSection",
+    "title": "La construction du programme français d’administration électronique : creuset pour un nouveau modèle de management des systèmes d’information ouverts",
+    "creators": [
+     {
+      "creatorType": "author",
+      "firstName": "Amar",
+      "lastName": "Lakel"
+     }
+    ],
+    "date": "2008-01-01",
+    "DOI": "10.4000/books.pufr.694",
+    "url": "https://doi.org/10.4000/books.pufr.694",
+    "extra": "Sources: Isidore\nIsidore URI: https://isidore.science/resource/20.500.13089/59mp\nAlternative URLs: https://hdl.handle.net/20.500.13089/59mp | https://books.openedition.org/pufr/694"
+   },
+   "b": {
+    "itemType": "journalArticle",
+    "title": "La construction du programme français d’administration électronique : creuset pour un nouveau modèle de management des systèmes d’information ouverts",
+    "creators": [
+     {
+      "creatorType": "author",
+      "firstName": "Amar",
+      "lastName": "Lakel"
+     }
+    ],
+    "date": "2008-01-01",
+    "DOI": "10.4000/communicationorganisation.522",
+    "url": "https://doi.org/10.4000/communicationorganisation.522",
+    "extra": "Sources: Isidore\nIsidore URI: https://isidore.science/resource/20.500.13089/e8l9\nAlternative URLs: https://hdl.handle.net/20.500.13089/e8l9 | https://journals.openedition.org/communicationorganisation/522"
+   },
+   "trap": "deux_doi_meme_titre"
+  },
+  {
+   "id": "N22",
+   "origin": "réel : corpus_author_alain_rabatel_20260618_095713.json",
+   "note": "numéro de revue contre livre (dépôts HAL distincts)",
+   "a": {
+    "itemType": "journalArticle",
+    "title": "Questions de style",
+    "creators": [
+     {
+      "creatorType": "author",
+      "firstName": "André",
+      "lastName": "Petitjean"
+     },
+     {
+      "creatorType": "author",
+      "firstName": "Alain",
+      "lastName": "Rabatel"
+     }
+    ],
+    "date": "2007",
+    "url": "https://shs.hal.science/halshs-00366907v1",
+    "extra": "Sources: HAL\nHAL ID: halshs-00366907"
+   },
+   "b": {
+    "itemType": "book",
+    "title": "Questions de style",
+    "creators": [
+     {
+      "creatorType": "author",
+      "firstName": "Alain",
+      "lastName": "Rabatel"
+     },
+     {
+      "creatorType": "author",
+      "firstName": "André",
+      "lastName": "Petitjean"
+     }
+    ],
+    "date": "2007",
+    "url": "https://shs.hal.science/halshs-00368178v1",
+    "extra": "Sources: HAL\nHAL ID: halshs-00368178"
+   },
+   "trap": "types_incompatibles"
+  },
+  {
+   "id": "N23",
+   "origin": "construit",
+   "trap": "compte_rendu",
+   "note": "compte rendu attribué à l'auteur du livre (métadonnées Persée) contre l'article",
+   "a": {
+    "itemType": "journalArticle",
+    "title": "Compte rendu de : Les mots du pouvoir dans le discours politique contemporain",
+    "creators": [
+     {
+      "creatorType": "author",
+      "lastName": "Dupont"
+     }
+    ],
+    "date": "2010",
+    "extra": "Sources: Isidore"
+   },
+   "b": {
+    "itemType": "journalArticle",
+    "title": "Les mots du pouvoir dans le discours politique contemporain",
+    "creators": [
+     {
+      "creatorType": "author",
+      "lastName": "Dupont"
+     }
+    ],
+    "date": "2010",
+    "extra": "Sources: HAL"
+   }
+  },
+  {
+   "id": "N24",
+   "origin": "construit",
+   "trap": "compte_rendu",
+   "note": "recension (« dir., titre, Paris, éditeur, année ») contre le livre recensé",
+   "a": {
+    "itemType": "journalArticle",
+    "title": "Marie Durand (dir.), La fabrique des controverses numériques, Paris, CNRS Éditions, 2012",
+    "creators": [
+     {
+      "creatorType": "author",
+      "lastName": "Durand"
+     }
+    ],
+    "date": "2013",
+    "extra": "Sources: Isidore"
+   },
+   "b": {
+    "itemType": "book",
+    "title": "La fabrique des controverses numériques",
+    "creators": [
+     {
+      "creatorType": "author",
+      "lastName": "Durand"
+     }
+    ],
+    "date": "2012",
+    "extra": "Sources: HAL"
+   }
+  },
+  {
+   "id": "N25",
+   "origin": "construit",
+   "trap": "prepublication_version_finale",
+   "note": "prépublication HAL sans DOI contre article avec DOI",
+   "a": {
+    "itemType": "preprint",
+    "title": "Une approche énonciative des plateformes de débat en ligne",
+    "creators": [
+     {
+      "creatorType": "author",
+      "lastName": "Martin"
+     }
+    ],
+    "date": "2021",
+    "extra": "Sources: HAL"
+   },
+   "b": {
+    "itemType": "journalArticle",
+    "title": "Une approche énonciative des plateformes de débat en ligne",
+    "creators": [
+     {
+      "creatorType": "author",
+      "lastName": "Martin"
+     }
+    ],
+    "date": "2021",
+    "extra": "Sources: CrossRef",
+    "DOI": "10.9999/rev.2021.001"
+   }
+  },
+  {
+   "id": "N26",
+   "origin": "construit",
+   "trap": "prepublication_version_finale",
+   "note": "prépublication arXiv sans DOI contre article sans DOI",
+   "a": {
+    "itemType": "preprint",
+    "title": "Scaling laws for multilingual retrieval augmented generation",
+    "creators": [
+     {
+      "creatorType": "author",
+      "lastName": "Nguyen"
+     },
+     {
+      "creatorType": "author",
+      "lastName": "Smith"
+     }
+    ],
+    "date": "2024",
+    "extra": "Sources: Google Scholar (SerpAPI)",
+    "url": "https://arxiv.org/abs/2403.00001"
+   },
+   "b": {
+    "itemType": "journalArticle",
+    "title": "Scaling laws for multilingual retrieval augmented generation",
+    "creators": [
+     {
+      "creatorType": "author",
+      "lastName": "Nguyen"
+     },
+     {
+      "creatorType": "author",
+      "lastName": "Smith"
+     }
+    ],
+    "date": "2024",
+    "extra": "Sources: OpenAlex",
+    "url": "https://journal.example.org/article/42"
+   }
+  },
+  {
+   "id": "N27",
+   "origin": "construit",
+   "trap": "homonymes",
+   "note": "même titre, même année, auteurs sans recouvrement",
+   "a": {
+    "itemType": "journalArticle",
+    "title": "Les réseaux sociaux numériques et la démocratie participative",
+    "creators": [
+     {
+      "creatorType": "author",
+      "lastName": "Lefebvre"
+     }
+    ],
+    "date": "2019",
+    "extra": "Sources: HAL"
+   },
+   "b": {
+    "itemType": "journalArticle",
+    "title": "Les réseaux sociaux numériques et la démocratie participative",
+    "creators": [
+     {
+      "creatorType": "author",
+      "lastName": "Moreau"
+     },
+     {
+      "creatorType": "author",
+      "lastName": "Girard"
+     }
+    ],
+    "date": "2019",
+    "extra": "Sources: Isidore"
+   }
+  },
+  {
+   "id": "N28",
+   "origin": "construit",
+   "trap": "reeditions",
+   "note": "réédition quinze ans plus tard",
+   "a": {
+    "itemType": "book",
+    "title": "Sémantique de l'argumentation dans les médias écrits",
+    "creators": [
+     {
+      "creatorType": "author",
+      "lastName": "Bernard"
+     }
+    ],
+    "date": "1990",
+    "extra": "Sources: HAL"
+   },
+   "b": {
+    "itemType": "book",
+    "title": "Sémantique de l'argumentation dans les médias écrits",
+    "creators": [
+     {
+      "creatorType": "author",
+      "lastName": "Bernard"
+     }
+    ],
+    "date": "2005",
+    "extra": "Sources: OpenAlex"
+   }
+  },
+  {
+   "id": "N29",
+   "origin": "construit",
+   "trap": "reeditions",
+   "note": "deux éditions la même année, ISBN distincts",
+   "a": {
+    "itemType": "book",
+    "title": "Introduction à l'analyse des corpus numériques en sciences sociales",
+    "creators": [
+     {
+      "creatorType": "author",
+      "lastName": "Petit"
+     }
+    ],
+    "date": "2015",
+    "extra": "Sources: HAL",
+    "ISBN": "978-2-7535-4001-3"
+   },
+   "b": {
+    "itemType": "book",
+    "title": "Introduction à l'analyse des corpus numériques en sciences sociales",
+    "creators": [
+     {
+      "creatorType": "author",
+      "lastName": "Petit"
+     }
+    ],
+    "date": "2015",
+    "extra": "Sources: CrossRef",
+    "ISBN": "978-2-7535-4002-0"
+   }
+  },
+  {
+   "id": "N30",
+   "origin": "construit",
+   "trap": "titre_generique",
+   "note": "« Introduction » du même auteur, même année, deux ouvrages",
+   "a": {
+    "itemType": "bookSection",
+    "title": "Introduction",
+    "creators": [
+     {
+      "creatorType": "author",
+      "lastName": "Rabier"
+     }
+    ],
+    "date": "2018",
+    "extra": "Sources: HAL",
+    "bookTitle": "Discours et société"
+   },
+   "b": {
+    "itemType": "bookSection",
+    "title": "Introduction",
+    "creators": [
+     {
+      "creatorType": "author",
+      "lastName": "Rabier"
+     }
+    ],
+    "date": "2018",
+    "extra": "Sources: Isidore",
+    "bookTitle": "Les formes du récit"
+   }
+  },
+  {
+   "id": "N31",
+   "origin": "construit",
+   "trap": "titre_generique",
+   "note": "« Éditorial » du même directeur, même année, deux revues",
+   "a": {
+    "itemType": "journalArticle",
+    "title": "Éditorial",
+    "creators": [
+     {
+      "creatorType": "author",
+      "lastName": "Roux"
+     }
+    ],
+    "date": "2020",
+    "extra": "Sources: HAL",
+    "publicationTitle": "Revue A"
+   },
+   "b": {
+    "itemType": "journalArticle",
+    "title": "Editorial",
+    "creators": [
+     {
+      "creatorType": "author",
+      "lastName": "Roux"
+     }
+    ],
+    "date": "2020",
+    "extra": "Sources: OpenAlex",
+    "publicationTitle": "Revue B"
+   }
+  },
+  {
+   "id": "N32",
+   "origin": "construit",
+   "trap": "titre_generique",
+   "note": "« Conclusion » du même auteur, même année",
+   "a": {
+    "itemType": "bookSection",
+    "title": "Conclusion",
+    "creators": [
+     {
+      "creatorType": "author",
+      "lastName": "Fournier"
+     }
+    ],
+    "date": "2016",
+    "extra": "Sources: HAL"
+   },
+   "b": {
+    "itemType": "bookSection",
+    "title": "Conclusion",
+    "creators": [
+     {
+      "creatorType": "author",
+      "lastName": "Fournier"
+     }
+    ],
+    "date": "2016",
+    "extra": "Sources: Isidore"
+   }
+  },
+  {
+   "id": "N33",
+   "origin": "construit",
+   "trap": "titre_generique",
+   "note": "« Avant-propos » du même auteur, même année",
+   "a": {
+    "itemType": "bookSection",
+    "title": "Avant-propos",
+    "creators": [
+     {
+      "creatorType": "author",
+      "lastName": "Garnier"
+     }
+    ],
+    "date": "2011",
+    "extra": "Sources: HAL"
+   },
+   "b": {
+    "itemType": "bookSection",
+    "title": "Avant propos",
+    "creators": [
+     {
+      "creatorType": "author",
+      "lastName": "Garnier"
+     }
+    ],
+    "date": "2011",
+    "extra": "Sources: OpenAlex"
+   }
+  },
+  {
+   "id": "N34",
+   "origin": "construit",
+   "trap": "titre_generique",
+   "note": "« Préface » suivie d'un seul mot significatif",
+   "a": {
+    "itemType": "bookSection",
+    "title": "Préface : dialogisme",
+    "creators": [
+     {
+      "creatorType": "author",
+      "lastName": "Chevalier"
+     }
+    ],
+    "date": "2014",
+    "extra": "Sources: HAL"
+   },
+   "b": {
+    "itemType": "bookSection",
+    "title": "Préface : dialogisme",
+    "creators": [
+     {
+      "creatorType": "author",
+      "lastName": "Chevalier"
+     }
+    ],
+    "date": "2015",
+    "extra": "Sources: Isidore"
+   }
+  },
+  {
+   "id": "N35",
+   "origin": "construit",
+   "trap": "deux_doi_meme_titre",
+   "note": "même titre, même auteur, même année, DOI distincts",
+   "a": {
+    "itemType": "journalArticle",
+    "title": "La circulation des discours rapportés dans la presse régionale",
+    "creators": [
+     {
+      "creatorType": "author",
+      "lastName": "Lambert"
+     }
+    ],
+    "date": "2017",
+    "extra": "Sources: CrossRef",
+    "DOI": "10.9999/a.2017.1"
+   },
+   "b": {
+    "itemType": "journalArticle",
+    "title": "La circulation des discours rapportés dans la presse régionale",
+    "creators": [
+     {
+      "creatorType": "author",
+      "lastName": "Lambert"
+     }
+    ],
+    "date": "2017",
+    "extra": "Sources: OpenAlex",
+    "DOI": "10.9999/b.2017.7"
+   }
+  },
+  {
+   "id": "N36",
+   "origin": "construit",
+   "trap": "meme_titre_annees_eloignees",
+   "note": "même titre, même auteur, 1995 et 2012",
+   "a": {
+    "itemType": "journalArticle",
+    "title": "Pour une sémantique des formules politiques en discours",
+    "creators": [
+     {
+      "creatorType": "author",
+      "lastName": "Mercier"
+     }
+    ],
+    "date": "1995",
+    "extra": "Sources: HAL"
+   },
+   "b": {
+    "itemType": "journalArticle",
+    "title": "Pour une sémantique des formules politiques en discours",
+    "creators": [
+     {
+      "creatorType": "author",
+      "lastName": "Mercier"
+     }
+    ],
+    "date": "2012",
+    "extra": "Sources: OpenAlex"
+   }
+  },
+  {
+   "id": "N37",
+   "origin": "construit",
+   "trap": "volumes",
+   "note": "tome 1 contre tome 2",
+   "a": {
+    "itemType": "book",
+    "title": "Histoire des théories de l'énonciation en France tome 1",
+    "creators": [
+     {
+      "creatorType": "author",
+      "lastName": "Blanc"
+     }
+    ],
+    "date": "2003",
+    "extra": "Sources: HAL"
+   },
+   "b": {
+    "itemType": "book",
+    "title": "Histoire des théories de l'énonciation en France tome 2",
+    "creators": [
+     {
+      "creatorType": "author",
+      "lastName": "Blanc"
+     }
+    ],
+    "date": "2003",
+    "extra": "Sources: OpenAlex"
+   }
+  },
+  {
+   "id": "N38",
+   "origin": "construit",
+   "trap": "paratexte",
+   "note": "article contre erratum",
+   "a": {
+    "itemType": "journalArticle",
+    "title": "Measuring polarization in online political discussions across platforms",
+    "creators": [
+     {
+      "creatorType": "author",
+      "lastName": "Keller"
+     }
+    ],
+    "date": "2022",
+    "extra": "Sources: OpenAlex"
+   },
+   "b": {
+    "itemType": "journalArticle",
+    "title": "Erratum: Measuring polarization in online political discussions across platforms",
+    "creators": [
+     {
+      "creatorType": "author",
+      "lastName": "Keller"
+     }
+    ],
+    "date": "2022",
+    "extra": "Sources: CrossRef"
+   }
+  },
+  {
+   "id": "N39",
+   "origin": "construit",
+   "trap": "paratexte",
+   "note": "article contre réponse (« Reply to »)",
+   "a": {
+    "itemType": "journalArticle",
+    "title": "The limits of computational hermeneutics in literary studies",
+    "creators": [
+     {
+      "creatorType": "author",
+      "lastName": "Olsen"
+     }
+    ],
+    "date": "2021",
+    "extra": "Sources: OpenAlex"
+   },
+   "b": {
+    "itemType": "journalArticle",
+    "title": "Reply to: The limits of computational hermeneutics in literary studies",
+    "creators": [
+     {
+      "creatorType": "author",
+      "lastName": "Olsen"
+     }
+    ],
+    "date": "2021",
+    "extra": "Sources: Semantic Scholar"
+   }
+  },
+  {
+   "id": "N40",
+   "origin": "construit",
+   "trap": "livre_chapitre",
+   "note": "livre contre chapitre de même titre, sans identifiant",
+   "a": {
+    "itemType": "book",
+    "title": "Les discours de la presse quotidienne sur la science",
+    "creators": [
+     {
+      "creatorType": "author",
+      "lastName": "Leroy"
+     }
+    ],
+    "date": "2007",
+    "extra": "Sources: HAL"
+   },
+   "b": {
+    "itemType": "bookSection",
+    "title": "Les discours de la presse quotidienne sur la science",
+    "creators": [
+     {
+      "creatorType": "author",
+      "lastName": "Leroy"
+     }
+    ],
+    "date": "2007",
+    "extra": "Sources: OpenAlex"
+   }
+  },
+  {
+   "id": "N41",
+   "origin": "construit",
+   "trap": "types_incompatibles",
+   "note": "thèse contre livre tiré de la thèse",
+   "a": {
+    "itemType": "thesis",
+    "title": "Les formules et leur circulation dans l'espace public médiatique",
+    "creators": [
+     {
+      "creatorType": "author",
+      "lastName": "Faure"
+     }
+    ],
+    "date": "2010",
+    "extra": "Sources: HAL"
+   },
+   "b": {
+    "itemType": "book",
+    "title": "Les formules et leur circulation dans l'espace public médiatique",
+    "creators": [
+     {
+      "creatorType": "author",
+      "lastName": "Faure"
+     }
+    ],
+    "date": "2011",
+    "extra": "Sources: OpenAlex"
+   }
+  },
+  {
+   "id": "N42",
+   "origin": "construit",
+   "trap": "versions_distinctes",
+   "note": "communication contre article de même titre, sans identifiant",
+   "a": {
+    "itemType": "conferencePaper",
+    "title": "Points de vue en confrontation dans les récits de presse",
+    "creators": [
+     {
+      "creatorType": "author",
+      "lastName": "Robin"
+     }
+    ],
+    "date": "2015",
+    "extra": "Sources: HAL"
+   },
+   "b": {
+    "itemType": "journalArticle",
+    "title": "Points de vue en confrontation dans les récits de presse",
+    "creators": [
+     {
+      "creatorType": "author",
+      "lastName": "Robin"
+     }
+    ],
+    "date": "2015",
+    "extra": "Sources: OpenAlex"
+   }
+  },
+  {
+   "id": "N43",
+   "origin": "construit",
+   "trap": "identifiants",
+   "note": "deux chapitres du même livre : l'ISBN de l'ouvrage n'identifie pas un chapitre",
+   "a": {
+    "itemType": "bookSection",
+    "title": "Les marqueurs de l'hétérogénéité énonciative à l'oral",
+    "creators": [
+     {
+      "creatorType": "author",
+      "lastName": "Clément"
+     }
+    ],
+    "date": "2012",
+    "extra": "Sources: HAL",
+    "ISBN": "978-2-35935-001-9"
+   },
+   "b": {
+    "itemType": "bookSection",
+    "title": "La reformulation paraphrastique dans les interactions orales",
+    "creators": [
+     {
+      "creatorType": "author",
+      "lastName": "Clément"
+     }
+    ],
+    "date": "2012",
+    "extra": "Sources: Isidore",
+    "ISBN": "978-2-35935-001-9"
+   }
+  },
+  {
+   "id": "N44",
+   "origin": "construit",
+   "trap": "url_generique",
+   "note": "deux chapitres renvoyant à la même page Google Books",
+   "a": {
+    "itemType": "bookSection",
+    "title": "Dialogisme interdiscursif et presse écrite",
+    "creators": [
+     {
+      "creatorType": "author",
+      "lastName": "Gauthier"
+     }
+    ],
+    "date": "2009",
+    "extra": "Sources: Google Scholar (SerpAPI)",
+    "url": "https://books.google.com/books?id=AbCdEfG12345&pg=PA10"
+   },
+   "b": {
+    "itemType": "bookSection",
+    "title": "La nomination des événements dans les médias",
+    "creators": [
+     {
+      "creatorType": "author",
+      "lastName": "Gauthier"
+     }
+    ],
+    "date": "2009",
+    "extra": "Sources: Google Scholar (SerpAPI)",
+    "url": "https://books.google.com/books?id=AbCdEfG12345&pg=PA55"
+   }
+  },
+  {
+   "id": "N45",
+   "origin": "construit",
+   "trap": "url_generique",
+   "note": "deux chapitres renvoyant au PDF du collectif (#page=)",
+   "a": {
+    "itemType": "bookSection",
+    "title": "Les usages sociaux du numérique en milieu rural",
+    "creators": [
+     {
+      "creatorType": "author",
+      "lastName": "Perrin"
+     }
+    ],
+    "date": "2020",
+    "extra": "Sources: Google Scholar (SerpAPI)",
+    "url": "https://library.example.org/bitstream/123/collectif.pdf#page=12"
+   },
+   "b": {
+    "itemType": "bookSection",
+    "title": "Médiations numériques et action publique locale",
+    "creators": [
+     {
+      "creatorType": "author",
+      "lastName": "Perrin"
+     }
+    ],
+    "date": "2020",
+    "extra": "Sources: Google Scholar (SerpAPI)",
+    "url": "https://library.example.org/bitstream/123/collectif.pdf#page=87"
+   }
+  },
+  {
+   "id": "N46",
+   "origin": "construit",
+   "trap": "url_generique",
+   "note": "deux notices pointant vers la page d'accueil d'une revue",
+   "a": {
+    "itemType": "journalArticle",
+    "title": "Traces numériques et mémoire des controverses",
+    "creators": [
+     {
+      "creatorType": "author",
+      "lastName": "Masson"
+     }
+    ],
+    "date": "2018",
+    "extra": "Sources: HAL",
+    "url": "https://www.revue-exemple.fr/"
+   },
+   "b": {
+    "itemType": "journalArticle",
+    "title": "Archives du web et histoire des médias",
+    "creators": [
+     {
+      "creatorType": "author",
+      "lastName": "Masson"
+     }
+    ],
+    "date": "2018",
+    "extra": "Sources: Isidore",
+    "url": "https://revue-exemple.fr"
+   }
+  },
+  {
+   "id": "N47",
+   "origin": "construit",
+   "trap": "identifiants",
+   "note": "identifiants arXiv distincts, même titre",
+   "a": {
+    "itemType": "preprint",
+    "title": "A benchmark for citation hallucination in large language models",
+    "creators": [
+     {
+      "creatorType": "author",
+      "lastName": "Zhou"
+     },
+     {
+      "creatorType": "author",
+      "lastName": "Park"
+     }
+    ],
+    "date": "2025",
+    "extra": "Sources: OpenAlex",
+    "url": "https://arxiv.org/abs/2501.11111"
+   },
+   "b": {
+    "itemType": "preprint",
+    "title": "A benchmark for citation hallucination in large language models",
+    "creators": [
+     {
+      "creatorType": "author",
+      "lastName": "Zhou"
+     },
+     {
+      "creatorType": "author",
+      "lastName": "Park"
+     }
+    ],
+    "date": "2025",
+    "extra": "Sources: Semantic Scholar",
+    "url": "https://arxiv.org/abs/2502.22222"
+   }
+  },
+  {
+   "id": "N48",
+   "origin": "construit",
+   "trap": "titre_court",
+   "note": "titre court identique, années différentes",
+   "a": {
+    "itemType": "book",
+    "title": "La conversation",
+    "creators": [
+     {
+      "creatorType": "author",
+      "lastName": "Kerbrat-Orecchioni"
+     }
+    ],
+    "date": "1990",
+    "extra": "Sources: HAL"
+   },
+   "b": {
+    "itemType": "book",
+    "title": "La conversation",
+    "creators": [
+     {
+      "creatorType": "author",
+      "lastName": "Kerbrat-Orecchioni"
+     }
+    ],
+    "date": "1991",
+    "extra": "Sources: OpenAlex"
+   }
+  },
+  {
+   "id": "N49",
+   "origin": "construit",
+   "trap": "identifiants",
+   "note": "deux dépôts HAL distincts, titres proches mais non identiques",
+   "a": {
+    "itemType": "journalArticle",
+    "title": "L'argumentation indirecte dans les discours de vulgarisation scientifique",
+    "creators": [
+     {
+      "creatorType": "author",
+      "lastName": "Arnaud"
+     }
+    ],
+    "date": "2019",
+    "extra": "Sources: HAL\nHAL ID: hal-01111111",
+    "url": "https://hal.science/hal-01111111v1"
+   },
+   "b": {
+    "itemType": "journalArticle",
+    "title": "L'argumentation indirecte dans le discours de vulgarisation scientifique",
+    "creators": [
+     {
+      "creatorType": "author",
+      "lastName": "Arnaud"
+     }
+    ],
+    "date": "2019",
+    "extra": "Sources: HAL\nHAL ID: hal-02222222",
+    "url": "https://hal.science/hal-02222222v1"
+   }
+  },
+  {
+   "id": "N50",
+   "origin": "construit",
+   "trap": "url_generique",
+   "note": "deux notices pointant vers une page de résultats de recherche",
+   "a": {
+    "itemType": "journalArticle",
+    "title": "Les discours sur l'intelligence artificielle dans la presse",
+    "creators": [
+     {
+      "creatorType": "author",
+      "lastName": "Vidal"
+     }
+    ],
+    "date": "2023",
+    "extra": "Sources: Isidore",
+    "url": "https://www.cairn.info/resultats_recherche.php?searchTerm=discours"
+   },
+   "b": {
+    "itemType": "journalArticle",
+    "title": "Les controverses sur la reconnaissance faciale",
+    "creators": [
+     {
+      "creatorType": "author",
+      "lastName": "Vidal"
+     }
+    ],
+    "date": "2023",
+    "extra": "Sources: Isidore",
+    "url": "https://www.cairn.info/resultats_recherche.php?searchTerm=discours"
+   }
+  },
+  {
+   "id": "N51",
+   "origin": "réel : corpus_author_henning_nolke_20260618_095701.json",
+   "trap": "livre_chapitre",
+   "note": "chapitre (contenant « Dialogisme et polyphonie ») contre l'ouvrage collectif du même titre court, typé document par Semantic Scholar ; premier auteur différent",
+   "a": {
+    "itemType": "bookSection",
+    "title": "Dialogisme et polyphonie",
+    "creators": [
+     {
+      "creatorType": "author",
+      "firstName": "Henning",
+      "lastName": "Nølke"
+     }
+    ],
+    "date": "2005-01-01",
+    "DOI": "10.3917/dbu.bres.2005.01.0111",
+    "url": "https://doi.org/10.3917/dbu.bres.2005.01.0111",
+    "pages": "111-124",
+    "bookTitle": "Champs linguistiques. Manuels",
+    "extra": "Sources: OpenAlex, Semantic Scholar\nOpenAlex ID: https://openalex.org/W1908536689\nCited by: 10\nOpen Access: no\nDOI: 10.3917/dbu.bres.2005.01.0111\nOpenAlex concepts: Computer science\nS2 corpus id: 178016877\nCited by: 7\nInfluential citations: 0\nOpen Access: unknown\npublicationTitle: Dialogisme et polyphonie"
+   },
+   "b": {
+    "itemType": "document",
+    "title": "Dialogisme et polyphonie",
+    "creators": [
+     {
+      "creatorType": "author",
+      "firstName": "L.",
+      "lastName": "Rosier"
+     },
+     {
+      "creatorType": "author",
+      "firstName": "J.",
+      "lastName": "Bres"
+     },
+     {
+      "creatorType": "author",
+      "firstName": "P.",
+      "lastName": "Haillet"
+     },
+     {
+      "creatorType": "author",
+      "firstName": "Sophie",
+      "lastName": "Mellet"
+     },
+     {
+      "creatorType": "author",
+      "firstName": "H.",
+      "lastName": "Nølke"
+     }
+    ],
+    "date": "2005",
+    "url": "https://www.semanticscholar.org/paper/0cef7abe1ca656585b3094e65bd2b844ee9a7049",
+    "extra": "Sources: Semantic Scholar\nS2 corpus id: 170816411\nCited by: 6\nInfluential citations: 0\nOpen Access: unknown\nS2 fields: Philosophy"
+   }
+  },
+  {
+   "id": "N52",
+   "origin": "réel : corpus_author_sophie_moirand_20260618_105038.json",
+   "trap": "prepublication_version_finale",
+   "note": "même dépôt HAL (hal-01982659, version retirée de l'URL) : prépublication v1 de 2019 au titre différent contre chapitre v2 de 2021",
+   "a": {
+    "itemType": "bookSection",
+    "title": "Des exigences théoriques de la comparaison aux contingences d'un corpus particulier : \"immigrationniste\" dans un discours politique à vocation polémique dans Analyse du discours et comparaison : enjeux théoriques et méthodologiques",
+    "creators": [
+     {
+      "creatorType": "author",
+      "firstName": "Sheila Grillo Vieira de",
+      "lastName": "Camargo"
+     },
+     {
+      "creatorType": "author",
+      "firstName": "Sandrine",
+      "lastName": "Reboul-Touré"
+     },
+     {
+      "creatorType": "author",
+      "firstName": "Maria",
+      "lastName": "Glushkova,"
+     },
+     {
+      "creatorType": "author",
+      "firstName": "Sophie",
+      "lastName": "Moirand"
+     }
+    ],
+    "date": "2021",
+    "url": "https://univ-sorbonne-nouvelle.hal.science/hal-01982659v2",
+    "bookTitle": "Analyse du discours et comparaison : enjeux théoriques et méthodologiques",
+    "extra": "Sources: HAL\nHAL ID: hal-01982659\nHAL Domain: 0.shs\nHAL Laboratory: CLESTHIA\nOpen Access: yes\nPDF URL: https://univ-sorbonne-nouvelle.hal.science/hal-01982659/document\nSubmitted Date: 2023-03-15 15:42:00\nHAL Submit Type: file"
+   },
+   "b": {
+    "itemType": "preprint",
+    "title": "Des exigences théoriques de la comparaison aux contingences de la pratique : Mos associés et mots construits d'un discours politique identitaire,tel \"immigrationnisme\" dans la campagne présidentielle 2017",
+    "creators": [
+     {
+      "creatorType": "author",
+      "firstName": "Sophie",
+      "lastName": "Moirand"
+     }
+    ],
+    "date": "2019-01-15",
+    "url": "https://hal-univ-paris3.archives-ouvertes.fr/hal-01982659",
+    "extra": "Sources: OpenAlex\nOpenAlex ID: https://openalex.org/W4288632957\nCited by: 0\nOpen Access: yes\nOpenAlex concepts: Philosophy, Humanities\npublicationTitle: HAL (Le Centre pour la Communication Scientifique Directe)"
+   }
+  },
+  {
+   "id": "N53",
+   "origin": "réel : corpus_author_alain_rabatel_20260618_095713.json",
+   "trap": "republication",
+   "note": "même texte publié deux fois : chapitre HAL 2021 et article 2019 (DOI) auquel OpenAlex rattache le même dépôt HAL",
+   "a": {
+    "itemType": "bookSection",
+    "title": "Enonciateurs premiers, seconds, points de vue, modalité et intentionnalité aux défis de l’interprétation",
+    "creators": [
+     {
+      "creatorType": "author",
+      "firstName": "Alain",
+      "lastName": "Rabatel"
+     }
+    ],
+    "date": "2021",
+    "url": "https://shs.hal.science/halshs-03957795v1",
+    "pages": "25-48",
+    "bookTitle": "Polyphonie in literarischen, medizinischen und pflegewissenchaftlichen Textsorten",
+    "extra": "Sources: HAL\nHAL ID: halshs-03957795\nHAL Domain: 0.shs, 1.shs.langue\nHAL Laboratory: ICAR\nOpen Access: no\nSubmitted Date: 2023-01-26 13:37:58\nHAL Submit Type: notice"
+   },
+   "b": {
+    "itemType": "journalArticle",
+    "title": "Énonciateurs Premiers, Seconds, Points de Vue, Modalité et Intentionnalité aux Défis de l’Interprétation",
+    "creators": [
+     {
+      "creatorType": "author",
+      "firstName": "Alain",
+      "lastName": "Rabatel"
+     }
+    ],
+    "date": "2019-09-01",
+    "DOI": "10.22034/rllfut.2019.9293",
+    "url": "https://shs.hal.science/halshs-03957795",
+    "pages": "167-188",
+    "publicationTitle": "HAL (Le Centre pour la Communication Scientifique Directe)",
+    "extra": "Sources: OpenAlex, Semantic Scholar\nOpenAlex ID: https://openalex.org/W2980098841\nCited by: 3\nOpen Access: no\nDOI: 10.22034/rllfut.2019.9293\nOpenAlex concepts: Humanities, Philosophy\nS2 corpus id: 213926249\nCited by: 0\nInfluential citations: 0\nOpen Access: unknown\nDOI: 10.22034/RLLFUT.2019.9293\nvolume: 13\npages: 167-188"
+   }
+  },
+  {
+   "id": "N54",
+   "origin": "construit",
+   "trap": "tomes",
+   "note": "premier volume catalogué sans numéro contre « Tome 2 » (même auteur, même année)",
+   "a": {
+    "itemType": "book",
+    "title": "Histoire de la presse française contemporaine",
+    "date": "2019",
+    "creators": [
+     {
+      "creatorType": "author",
+      "firstName": "Jean",
+      "lastName": "Dupont"
+     }
+    ],
+    "extra": "Sources: HAL"
+   },
+   "b": {
+    "itemType": "book",
+    "title": "Histoire de la presse française contemporaine. Tome 2",
+    "date": "2019",
+    "creators": [
+     {
+      "creatorType": "author",
+      "firstName": "Jean",
+      "lastName": "Dupont"
+     }
+    ],
+    "extra": "Sources: OpenAlex"
+   }
+  },
+  {
+   "id": "N55",
+   "origin": "construit",
+   "trap": "tomes",
+   "note": "œuvre contre sa « deuxième partie » (même auteur, même année)",
+   "a": {
+    "itemType": "book",
+    "title": "Les mots du discours politique en France",
+    "date": "2019",
+    "creators": [
+     {
+      "creatorType": "author",
+      "firstName": "Anne",
+      "lastName": "Martin"
+     }
+    ],
+    "extra": "Sources: HAL"
+   },
+   "b": {
+    "itemType": "book",
+    "title": "Les mots du discours politique en France : deuxième partie",
+    "date": "2019",
+    "creators": [
+     {
+      "creatorType": "author",
+      "firstName": "Anne",
+      "lastName": "Martin"
+     }
+    ],
+    "extra": "Sources: OpenAlex"
+   }
+  },
+  {
+   "id": "N56",
+   "origin": "construit",
+   "trap": "url_generique",
+   "note": "deux articles distincts portant comme URL la page d'une revue (chemin non reconnu comme générique)",
+   "a": {
+    "itemType": "journalArticle",
+    "title": "Les marqueurs discursifs du français parlé contemporain",
+    "date": "2019",
+    "creators": [
+     {
+      "creatorType": "author",
+      "lastName": "Alpha"
+     }
+    ],
+    "url": "https://journals.openedition.org/lidil",
+    "extra": "Sources: OpenAlex"
+   },
+   "b": {
+    "itemType": "journalArticle",
+    "title": "Acquisition du lexique verbal chez l'enfant bilingue",
+    "date": "2021",
+    "creators": [
+     {
+      "creatorType": "author",
+      "lastName": "Beta"
+     }
+    ],
+    "url": "https://journals.openedition.org/lidil",
+    "extra": "Sources: OpenAlex"
+   }
+  },
+  {
+   "id": "N57",
+   "origin": "construit",
+   "trap": "homonymes_nom_compose",
+   "note": "membres d'une même famille partageant le nom composé « Marques dos Santos », prénoms différents (Clecio / Maria), même titre, même année : la règle « nom principal contenu + deux jetons communs » les fusionnerait (OPT-06 bis)",
+   "a": {
+    "itemType": "thesis",
+    "title": "Le rôle du numérique dans l'enseignement du français langue étrangère au Brésil",
+    "creators": [
+     {
+      "creatorType": "author",
+      "lastName": "Marques dos Santos",
+      "firstName": "Clecio"
+     }
+    ],
+    "date": "2018",
+    "extra": "Sources: Isidore"
+   },
+   "b": {
+    "itemType": "thesis",
+    "title": "Le rôle du numérique dans l'enseignement du français langue étrangère au Brésil",
+    "creators": [
+     {
+      "creatorType": "author",
+      "lastName": "Santos",
+      "firstName": "Maria Marques dos"
+     }
+    ],
+    "date": "2018",
+    "extra": "Sources: HAL"
+   }
+  },
+  {
+   "id": "N58",
+   "origin": "construit",
+   "trap": "freres_soeurs_meme_nom",
+   "note": "frère et sœur, l'une sous nom composé à tiret (« Boulic-Bouadjio, Anne » / « Boulic, Marc ») : un seul jeton commun (OPT-06 bis)",
+   "a": {
+    "itemType": "thesis",
+    "title": "Génération multi-agents de réseaux sociaux pour la simulation de la diffusion",
+    "creators": [
+     {
+      "creatorType": "author",
+      "lastName": "Boulic-Bouadjio",
+      "firstName": "Anne"
+     }
+    ],
+    "date": "2020",
+    "extra": "Sources: HAL"
+   },
+   "b": {
+    "itemType": "thesis",
+    "title": "Génération multi-agents de réseaux sociaux pour la simulation de la diffusion",
+    "creators": [
+     {
+      "creatorType": "author",
+      "lastName": "Boulic",
+      "firstName": "Marc"
+     }
+    ],
+    "date": "2020",
+    "extra": "Sources: Isidore"
+   }
+  },
+  {
+   "id": "N59",
+   "origin": "construit",
+   "trap": "freres_soeurs_meme_nom",
+   "note": "frère et sœur au nom composé saisi dans les deux ordres (« Dupont Martin, Jean » / « Martin, Marie Dupont ») : deux jetons de nom communs, prénoms différents (OPT-06 bis)",
+   "a": {
+    "itemType": "journalArticle",
+    "title": "Les archives municipales à l'épreuve de la numérisation patrimoniale",
+    "creators": [
+     {
+      "creatorType": "author",
+      "lastName": "Dupont Martin",
+      "firstName": "Jean"
+     }
+    ],
+    "date": "2021",
+    "extra": "Sources: HAL"
+   },
+   "b": {
+    "itemType": "journalArticle",
+    "title": "Les archives municipales à l'épreuve de la numérisation patrimoniale",
+    "creators": [
+     {
+      "creatorType": "author",
+      "lastName": "Martin",
+      "firstName": "Marie Dupont"
+     }
+    ],
+    "date": "2021",
+    "extra": "Sources: OpenAlex"
+   }
+  },
+  {
+   "id": "N60",
+   "origin": "construit (d'après P52)",
+   "trap": "auteurs_inverses_titres_differents",
+   "note": "même auteur saisi « CHOPPIN DE JANVRY, Thibaud » / « DE JANVRY, Thibaud Choppin », même revue, même année, deux articles différents (OPT-06 bis)",
+   "a": {
+    "itemType": "journalArticle",
+    "title": "Dire, toucher, capter. Le langage à l’épreuve du numérique",
+    "creators": [
+     {
+      "creatorType": "author",
+      "lastName": "CHOPPIN DE JANVRY",
+      "firstName": "Thibaud"
+     }
+    ],
+    "date": "2026",
+    "publicationTitle": "LIMES : Langue, Interaction, Médias, Éducation et Société",
+    "extra": "Sources: Isidore"
+   },
+   "b": {
+    "itemType": "journalArticle",
+    "title": "Le toucher à l'écran : gestes et langage dans les interfaces numériques",
+    "creators": [
+     {
+      "creatorType": "author",
+      "lastName": "DE JANVRY",
+      "firstName": "Thibaud Choppin"
+     }
+    ],
+    "date": "2026",
+    "publicationTitle": "LIMES : Langue, Interaction, Médias, Éducation et Société",
+    "extra": "Sources: Isidore"
+   }
+  },
+  {
+   "id": "N61",
+   "origin": "construit",
+   "trap": "homonymes_nom_compose",
+   "note": "cousins partageant deux noms (« Da Silva Costa, João » / « Costa, Joana Silva ») : deux jetons communs, prénoms différents (OPT-06 bis)",
+   "a": {
+    "itemType": "journalArticle",
+    "title": "Politiques linguistiques et enseignement bilingue dans les écoles lusophones",
+    "creators": [
+     {
+      "creatorType": "author",
+      "lastName": "Da Silva Costa",
+      "firstName": "João"
+     }
+    ],
+    "date": "2019",
+    "extra": "Sources: Érudit"
+   },
+   "b": {
+    "itemType": "journalArticle",
+    "title": "Politiques linguistiques et enseignement bilingue dans les écoles lusophones",
+    "creators": [
+     {
+      "creatorType": "author",
+      "lastName": "Costa",
+      "firstName": "Joana Silva"
+     }
+    ],
+    "date": "2019",
+    "extra": "Sources: OpenAlex"
+   }
+  },
+  {
+   "id": "N62",
+   "origin": "construit",
+   "trap": "prenom_pris_pour_nom",
+   "note": "prénom de l'un pris pour le nom de l'autre (« Martin, Paul » / « Paul, Jacques Martin ») : jetons inclus, deux communs, mais aucun prénom commun ni inversion exacte (OPT-06 bis)",
+   "a": {
+    "itemType": "journalArticle",
+    "title": "La presse régionale et la construction des identités territoriales",
+    "creators": [
+     {
+      "creatorType": "author",
+      "lastName": "Martin",
+      "firstName": "Paul"
+     }
+    ],
+    "date": "2017",
+    "extra": "Sources: HAL"
+   },
+   "b": {
+    "itemType": "journalArticle",
+    "title": "La presse régionale et la construction des identités territoriales",
+    "creators": [
+     {
+      "creatorType": "author",
+      "lastName": "Paul",
+      "firstName": "Jacques Martin"
+     }
+    ],
+    "date": "2017",
+    "extra": "Sources: Isidore"
+   }
+  },
+  {
+   "id": "N63",
+   "origin": "construit (d'après P51)",
+   "trap": "homonymes_nom_compose",
+   "note": "homonyme partageant un seul élément du nom composé (« Santos, Carlos » / « Marques dos Santos, Clecio »), même titre, même année (OPT-06 bis)",
+   "a": {
+    "itemType": "thesis",
+    "title": "L'enseignement du portugais langue étrangère dans les universités françaises",
+    "creators": [
+     {
+      "creatorType": "author",
+      "lastName": "Santos",
+      "firstName": "Carlos"
+     }
+    ],
+    "date": "2022",
+    "extra": "Sources: OpenAlex"
+   },
+   "b": {
+    "itemType": "thesis",
+    "title": "L'enseignement du portugais langue étrangère dans les universités françaises",
+    "creators": [
+     {
+      "creatorType": "author",
+      "lastName": "Marques dos Santos",
+      "firstName": "Clecio"
+     }
+    ],
+    "date": "2022",
+    "extra": "Sources: Isidore"
+   }
+  },
+  {
+   "id": "N64",
+   "origin": "construit (d'après P54)",
+   "trap": "auteurs_inverses_titres_differents",
+   "note": "inversion exacte nom / prénom (« Abadli, Riad » / « Riad, Abadli »), même année, deux articles différents (OPT-06 bis)",
+   "a": {
+    "itemType": "journalArticle",
+    "title": "Les éthiques de la recherche scientifique à l'ère de l'intelligence artificielle",
+    "creators": [
+     {
+      "creatorType": "author",
+      "lastName": "Abadli",
+      "firstName": "Riad"
+     }
+    ],
+    "date": "2024",
+    "extra": "Sources: OpenAlex"
+   },
+   "b": {
+    "itemType": "journalArticle",
+    "title": "L'intégrité scientifique face aux outils d'écriture automatique",
+    "creators": [
+     {
+      "creatorType": "author",
+      "lastName": "Riad",
+      "firstName": "Abadli"
+     }
+    ],
+    "date": "2024",
+    "extra": "Sources: Google Scholar (SerpAPI)\nScholar result ID: constructA2"
+   }
+  },
+  {
+   "id": "N65",
+   "origin": "construit (revue OPT-06 bis)",
+   "trap": "composes_trait_union_contradictoires",
+   "note": "Jean Martin-Paul et Jean-Paul Martin (« Martin-Paul, Jean » / « Martin, Jean-Paul ») : mêmes jetons, un nom et un prénom communs, mais « Paul » lié par un trait d'union au nom d'un côté et au prénom de l'autre ; même titre, même année (revue OPT-06 bis)",
+   "a": {
+    "itemType": "journalArticle",
+    "title": "Les usages politiques de la mémoire ouvrière dans les anciens bassins miniers",
+    "creators": [
+     {
+      "creatorType": "author",
+      "lastName": "Martin-Paul",
+      "firstName": "Jean"
+     }
+    ],
+    "date": "2019",
+    "extra": "Sources: HAL"
+   },
+   "b": {
+    "itemType": "journalArticle",
+    "title": "Les usages politiques de la mémoire ouvrière dans les anciens bassins miniers",
+    "creators": [
+     {
+      "creatorType": "author",
+      "lastName": "Martin",
+      "firstName": "Jean-Paul"
+     }
+    ],
+    "date": "2019",
+    "extra": "Sources: OpenAlex"
+   }
+  },
+  {
+   "id": "N66",
+   "origin": "construit (revue OPT-06 bis)",
+   "trap": "composes_trait_union_contradictoires",
+   "note": "Jean Pierre-Martin et Jean-Pierre Martin (« Pierre-Martin, Jean » / « Martin, Jean-Pierre ») : composés à trait d'union contradictoires, même titre, même année (revue OPT-06 bis)",
+   "a": {
+    "itemType": "journalArticle",
+    "title": "Écritures numériques et pratiques de lecture chez les étudiants de licence",
+    "creators": [
+     {
+      "creatorType": "author",
+      "lastName": "Pierre-Martin",
+      "firstName": "Jean"
+     }
+    ],
+    "date": "2021",
+    "extra": "Sources: Isidore"
+   },
+   "b": {
+    "itemType": "journalArticle",
+    "title": "Écritures numériques et pratiques de lecture chez les étudiants de licence",
+    "creators": [
+     {
+      "creatorType": "author",
+      "lastName": "Martin",
+      "firstName": "Jean-Pierre"
+     }
+    ],
+    "date": "2021",
+    "extra": "Sources: CrossRef"
+   }
+  }
+ ]
+}

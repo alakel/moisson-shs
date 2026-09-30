@@ -6,7 +6,8 @@ DCR → métadonnées → /authorize → consentement (mot de passe) → /token 
 usage du jeton sur /mcp. Plus : unitaires du provider, coexistence Bearer+OAuth,
 mauvais mot de passe, mauvais code_verifier (PKCE), persistance du store.
 
-Loopback uniquement.
+Loopback uniquement. Les tests e2e (uvicorn réel) portent le marqueur
+`sockets` ; les unitaires du provider n'ouvrent aucune socket.
 """
 
 import asyncio
@@ -138,6 +139,20 @@ _PW = "consent-pw-12"
 _STATIC = "static-tok-12"
 
 
+def _bearer_client(token):
+    """Client httpx asynchrone porteur du jeton, pour `streamable_http_client`.
+
+    Le client non déprécié du SDK ne prend plus d'en-têtes : ils passent par un
+    httpx.AsyncClient fourni (délais alignés sur les défauts MCP du SDK : 30 s,
+    lecture SSE 300 s). L'appelant en gère le cycle de vie (`async with`).
+    """
+    return httpx.AsyncClient(
+        headers={"Authorization": f"Bearer {token}"},
+        timeout=httpx.Timeout(30.0, read=300.0),
+        follow_redirects=True,
+    )
+
+
 @pytest.fixture(scope="module")
 def oauth_server(tmp_path_factory):
     tmp = tmp_path_factory.mktemp("oauth")
@@ -173,6 +188,7 @@ def oauth_server(tmp_path_factory):
     srv.stop()
 
 
+@pytest.mark.sockets
 class TestOAuthDiscovery:
     def test_unauth_advertises_resource_metadata(self, oauth_server):
         r = httpx.post(oauth_server + "/mcp",
@@ -199,6 +215,7 @@ class TestOAuthDiscovery:
         assert r.json().get("authorization_servers")
 
 
+@pytest.mark.sockets
 class TestOAuthFullFlow:
     def _register(self, base):
         r = httpx.post(base + "/register", json={
@@ -259,16 +276,23 @@ class TestOAuthFullFlow:
 
         # 5) jeton OAuth utilisable sur /mcp (handshake complet)
         async def _use():
-            from mcp.client.streamable_http import streamablehttp_client
+            from mcp.client.streamable_http import streamable_http_client
             from mcp.client.session import ClientSession
-            async with streamablehttp_client(
-                base + "/mcp", headers={"Authorization": f"Bearer {access}"}
+            async with _bearer_client(access) as client, streamable_http_client(
+                base + "/mcp", http_client=client
             ) as (r_, w_, _):
                 async with ClientSession(r_, w_) as s:
                     await s.initialize()
                     tools = await s.list_tools()
-                    return len(tools.tools)
-        assert _run(_use()) == 8
+                    return {t.name for t in tools.tools}
+        # Les outils exposés suivent le serveur : 8 jusqu'au Sprint 05, 9
+        # avec corpus_resolve_dois (Google Scholar), puis ceux du lot D
+        # (corpus_export, OPT-18…) : présence vérifiée, pas un nombre figé.
+        names = _run(_use())
+        assert {"moisson_search", "corpus_analyze", "corpus_list",
+                "fetch_by_doi", "search_by_author", "corpus_merge",
+                "corpus_to_csl", "corpus_filter", "corpus_resolve_dois",
+                "corpus_export"} <= names
 
     def test_wrong_pkce_verifier_rejected(self, oauth_server):
         base = oauth_server
@@ -294,15 +318,15 @@ class TestOAuthFullFlow:
         assert tok.status_code == 400
 
 
+@pytest.mark.sockets
 class TestCoexistence:
     def test_static_bearer_still_works(self, oauth_server):
         # Le Bearer statique (Claude Desktop/Code) fonctionne EN MÊME TEMPS qu'OAuth.
         async def _use():
-            from mcp.client.streamable_http import streamablehttp_client
+            from mcp.client.streamable_http import streamable_http_client
             from mcp.client.session import ClientSession
-            async with streamablehttp_client(
-                oauth_server + "/mcp",
-                headers={"Authorization": f"Bearer {_STATIC}"}
+            async with _bearer_client(_STATIC) as client, streamable_http_client(
+                oauth_server + "/mcp", http_client=client
             ) as (r_, w_, _):
                 async with ClientSession(r_, w_) as s:
                     await s.initialize()

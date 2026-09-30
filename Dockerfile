@@ -17,9 +17,14 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 WORKDIR /build
 COPY . /build
 
-# Construit les wheels du projet + de toutes ses dépendances (extra [mcp]).
+# Construit les wheels du projet + de toutes ses dépendances (extra [mcp]),
+# aux versions TESTÉES de constraints.txt. Sans ces contraintes, une
+# reconstruction pouvait tirer une série majeure incompatible (mcp 2.x retire
+# les décorateurs Server.list_tools/call_tool/list_resources : le conteneur
+# refusait de démarrer). Le stage runtime n'installe que ces wheels
+# (--no-index), il hérite donc des mêmes versions.
 RUN pip install --upgrade pip wheel \
-    && pip wheel --wheel-dir /wheels ".[mcp]"
+    && pip wheel --wheel-dir /wheels -c constraints.txt ".[mcp]"
 
 
 # === Stage runtime : image mince, non-root ===
@@ -39,7 +44,11 @@ RUN pip install --no-cache-dir --no-index --find-links=/wheels "moisson-shs[mcp]
     && rm -rf /wheels
 
 # Répertoire de données persistant (corpus + cache), monté en volume.
+# MOISSON_CACHE_DIR : cache HTTP dans le volume /data/cache (le serveur écrit
+# /data/cache/http_mcp.sqlite), et non dans la couche inscriptible du
+# conteneur, perdue à chaque reconstruction.
 ENV MOISSON_OUTPUT_DIR=/data/output \
+    MOISSON_CACHE_DIR=/data/cache/http \
     MOISSON_HTTP_HOST=0.0.0.0 \
     MOISSON_HTTP_PORT=8000 \
     PYTHONUNBUFFERED=1

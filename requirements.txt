@@ -3,8 +3,12 @@ sickle>=0.7.0
 lxml>=4.9.0
 unidecode>=1.3.0
 requests-cache>=1.2.0
-# SDK MCP officiel pour le serveur Claude Desktop (Sprint 04 #7)
-mcp>=1.0.0
+# SDK MCP officiel pour le serveur Claude Desktop (Sprint 04 #7).
+# Borne haute <2 obligatoire : mcp 2.x retire les décorateurs
+# Server.list_tools / call_tool / list_resources utilisés par mcp_server.py.
+# Versions exactes testées : constraints.txt
+#   pip install -r requirements.txt -c constraints.txt
+mcp>=1.27,<2
 # Socle du serveur MCP distant HTTP (Streamable HTTP). Transitifs de mcp, mais
 # déclarés explicitement car le mode `serve --http` en dépend directement.
 starlette>=0.46

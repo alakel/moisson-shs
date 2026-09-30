@@ -1,0 +1,712 @@
+{
+  "format": "moisson-shs/eval-queries",
+  "version": 1,
+  "etabli_le": "2026-09-29",
+  "description": "Requêtes du protocole d'évaluation SHS (OPT-15). Deux jeux disjoints : « reglage » (mise au point du classement local, OPT-13 ; jamais utilisé pour la décision) et « decision » (tenu à part : seul jeu sur lequel s'applique le gate d'activation). Chaque requête porte un besoin d'information rédigé pour le juge (ce qui est central, utile, périphérique, hors sujet) et, quand elle a pu être établie de façon sûre, une petite liste de références connues attendues (DOI ou identifiant HAL), choisies d'après la connaissance du domaine puis vérifiées une à une par consultation directe (CrossRef /works/{doi}, API HAL par identifiant ou par auteur et titre connus), jamais tirées des résultats d'une recherche équivalente à la requête : le rappel sur références connues mesure l'acquisition sans circularité. Une liste vide est signalée par « references_note ».",
+  "defaults": {
+    "mode": "bibliographie",
+    "max_per_source": 100,
+    "groupe_francophone": "francophone",
+    "groupe_international": "all"
+  },
+  "echelle": {
+    "0": "hors sujet",
+    "1": "périphérique",
+    "2": "utile",
+    "3": "central"
+  },
+  "categories": {
+    "theme_large": "thème large, très documenté",
+    "theme_rare": "thème rare ou émergent, peu de travaux",
+    "expression_exacte": "expression entre guillemets (phrase exacte)",
+    "auteur_homonyme": "nom d'auteur partagé par plusieurs chercheurs",
+    "concept_fr_en": "concept circulant en français et en anglais, variante anglaise explicite (query_variants)",
+    "livre": "références attendues surtout sous forme d'ouvrages",
+    "chapitre": "références attendues surtout sous forme de chapitres",
+    "article": "références attendues surtout sous forme d'articles",
+    "these": "références attendues surtout sous forme de thèses",
+    "periode_restrictive": "fenêtre de dates de publication étroite (from_date / to_date)"
+  },
+  "queries": [
+    {
+      "id": "R01",
+      "set": "reglage",
+      "query": "humanités numériques",
+      "sources": "francophone",
+      "categories": [
+        "theme_large",
+        "livre"
+      ],
+      "besoin": "Travaux qui définissent, historicisent ou discutent les humanités numériques comme champ : épistémologie, institutions, méthodes, controverses. Central : synthèses et réflexions sur le champ. Utile : études de cas qui réfléchissent explicitement à la démarche des humanités numériques. Périphérique : simple application d'un outil numérique à un corpus, sans réflexion sur le champ. Hors sujet : informatique sans objet SHS, usages du numérique sans lien avec la recherche.",
+      "references_connues": [
+        {
+          "doi": "10.4000/books.editionsmsh.12006",
+          "titre": "Les humanités numériques. Une histoire critique",
+          "auteurs": "Pierre Mounier",
+          "annee": 2018,
+          "type": "livre",
+          "verification": "CrossRef /works, 2026-09-29"
+        },
+        {
+          "hal": "hal-01228945",
+          "titre": "Humanités numériques. État des lieux et positionnement de la recherche française dans le contexte international",
+          "auteurs": "Marin Dacos, Pierre Mounier",
+          "annee": 2015,
+          "type": "rapport",
+          "verification": "API HAL (titre connu), 2026-09-29"
+        },
+        {
+          "doi": "10.4000/books.oep.226",
+          "titre": "Read/Write Book 2. Une introduction aux humanités numériques",
+          "auteurs": "Pierre Mounier (dir.)",
+          "annee": 2012,
+          "type": "livre",
+          "verification": "CrossRef /works, 2026-09-29"
+        }
+      ]
+    },
+    {
+      "id": "R02",
+      "set": "reglage",
+      "query": "capitalisme de surveillance",
+      "query_variants": {
+        "en": "surveillance capitalism"
+      },
+      "sources": "all",
+      "categories": [
+        "concept_fr_en",
+        "article"
+      ],
+      "besoin": "Travaux sur le capitalisme de surveillance au sens de S. Zuboff : extraction et marchandisation des données comportementales, modèles économiques des plateformes, critiques et discussions du concept. Central : travaux qui mobilisent ou discutent le concept. Utile : économie politique des données personnelles et des plateformes. Périphérique : vidéosurveillance, surveillance d'État sans dimension économique. Hors sujet : surveillance épidémiologique, surveillance médicale ou environnementale.",
+      "references_connues": [
+        {
+          "doi": "10.1057/jit.2015.5",
+          "titre": "Big other: Surveillance Capitalism and the Prospects of an Information Civilization",
+          "auteurs": "Shoshana Zuboff",
+          "annee": 2015,
+          "type": "article",
+          "verification": "CrossRef /works, 2026-09-29"
+        }
+      ]
+    },
+    {
+      "id": "R03",
+      "set": "reglage",
+      "query": "\"sociologie de la traduction\"",
+      "sources": "francophone",
+      "categories": [
+        "expression_exacte",
+        "livre"
+      ],
+      "besoin": "Sociologie de la traduction au sens de Callon, Latour et Akrich (théorie de l'acteur-réseau) : textes fondateurs, discussions, applications explicites. Central : textes fondateurs et présentations critiques. Utile : enquêtes qui mobilisent explicitement la sociologie de la traduction. Périphérique : sociologie des sciences et techniques sans référence à la traduction. Hors sujet : sociologie de la traduction littéraire ou des traducteurs (métier de la traduction).",
+      "references_connues": [
+        {
+          "doi": "10.4000/books.pressesmines.1181",
+          "titre": "Sociologie de la traduction. Textes fondateurs",
+          "auteurs": "Madeleine Akrich, Michel Callon, Bruno Latour (dir.)",
+          "annee": 2006,
+          "type": "livre",
+          "verification": "CrossRef /works, 2026-09-29 ; dépôt HAL : API HAL (auteur et titre connus, titre, auteurs, année et type identiques), 2026-09-29",
+          "ids": [
+            "hal:hal-03597436",
+            "hal:hal-00397086"
+          ],
+          "note": "deux dépôts HAL du même ouvrage (OUV, 2006) ; un seul identifiant suffit"
+        }
+      ]
+    },
+    {
+      "id": "R04",
+      "set": "reglage",
+      "query": "Olivier Martin sociologie de la quantification",
+      "sources": "francophone",
+      "categories": [
+        "auteur_homonyme",
+        "livre"
+      ],
+      "besoin": "Travaux d'Olivier Martin, sociologue de la quantification (Université Paris Cité, Cerlis) : statistique, chiffres, mesure, quantification de soi. Central : ses travaux sur la quantification. Utile : ses autres travaux de sociologie, ou des travaux d'autres auteurs qui discutent directement les siens. Périphérique : sociologie de la quantification par d'autres auteurs. Hors sujet : travaux d'homonymes (autres Olivier Martin), quel que soit leur sujet.",
+      "references_connues": [
+        {
+          "hal": "hal-02913215",
+          "doi": "10.3917/arco.marti.2020.01",
+          "titre": "L'empire des chiffres. Une sociologie de la quantification",
+          "auteurs": "Olivier Martin",
+          "annee": 2020,
+          "type": "livre",
+          "verification": "API HAL (auteur et titre connus), 2026-09-29 ; DOI déclaré par HAL et résolu par CrossRef (titre identique ; la liste d'auteurs de la notice CrossRef est erronée)"
+        }
+      ]
+    },
+    {
+      "id": "R05",
+      "set": "reglage",
+      "query": "cartographie des controverses",
+      "query_variants": {
+        "en": "controversy mapping"
+      },
+      "sources": "all",
+      "categories": [
+        "concept_fr_en",
+        "article"
+      ],
+      "besoin": "Cartographie des controverses (méthode issue de la théorie de l'acteur-réseau, enseignée et outillée notamment au médialab de Sciences Po) : principes, outils, méthodes numériques, études de controverses cartographiées. Central : textes de méthode et études qui se réclament de la cartographie des controverses. Utile : analyse des controverses sociotechniques sans l'appareil cartographique. Périphérique : cartographie ou visualisation de données sans controverse. Hors sujet : cartographie géographique, controverses sans dimension méthodologique.",
+      "references_connues": [
+        {
+          "doi": "10.1177/0963662509102694",
+          "titre": "Diving in magma: how to explore controversies with actor-network theory",
+          "auteurs": "Tommaso Venturini",
+          "annee": 2010,
+          "type": "article",
+          "verification": "CrossRef /works, 2026-09-29 (année CrossRef 2009, mise en ligne) ; dépôt HAL : API HAL (auteur et titre connus, titre, auteurs, année et type identiques), 2026-09-29",
+          "ids": [
+            "hal:hal-01064257"
+          ],
+          "note": "dépôt HAL portant le même DOI ; un seul identifiant suffit"
+        },
+        {
+          "doi": "10.1177/0963662510387558",
+          "titre": "Building on faults: How to represent controversies with digital methods",
+          "auteurs": "Tommaso Venturini",
+          "annee": 2012,
+          "type": "article",
+          "verification": "CrossRef /works, 2026-09-29 (année CrossRef 2010, mise en ligne) ; dépôt HAL : API HAL (auteur et titre connus, titre, auteurs, année et type identiques), 2026-09-29",
+          "ids": [
+            "hal:hal-01064260"
+          ],
+          "note": "dépôt HAL portant le même DOI ; un seul identifiant suffit"
+        }
+      ]
+    },
+    {
+      "id": "R06",
+      "set": "reglage",
+      "query": "réseaux sociaux numériques",
+      "sources": "francophone",
+      "from_date": "2005",
+      "to_date": "2010",
+      "categories": [
+        "periode_restrictive",
+        "article"
+      ],
+      "besoin": "Travaux publiés entre 2005 et 2010 sur les réseaux sociaux numériques et le web 2.0 (sites de réseaux sociaux, visibilité, sociabilité en ligne, blogs). Central : analyses des plateformes de réseaux sociaux et de leurs usages. Utile : sociabilités en ligne, web participatif. Périphérique : internet en général. Hors sujet : réseaux sociaux au sens de l'analyse de réseaux hors ligne, réseaux de télécommunication.",
+      "references_connues": [
+        {
+          "doi": "10.3917/res.152.0093",
+          "titre": "Le design de la visibilité. Un essai de cartographie du web 2.0",
+          "auteurs": "Dominique Cardon",
+          "annee": 2008,
+          "type": "article",
+          "verification": "CrossRef /works, 2026-09-29"
+        }
+      ]
+    },
+    {
+      "id": "R07",
+      "set": "reglage",
+      "query": "laïcité",
+      "sources": "francophone",
+      "categories": [
+        "theme_large",
+        "livre"
+      ],
+      "besoin": "Laïcité : histoire, droit, sociologie et philosophie politique de la laïcité, en France et ailleurs. Central : travaux dont la laïcité est l'objet principal. Utile : religion et espace public, rapports entre Églises et État. Périphérique : faits religieux sans question de laïcité. Hors sujet : travaux où le mot n'apparaît qu'incidemment.",
+      "references_connues": [
+        {
+          "ids": [
+            "doi:10.3917/puf.baube.2017.01",
+            "doi:10.3917/puf.baube.2013.01",
+            "doi:10.3917/puf.baube.2010.01",
+            "hal:halshs-00107302"
+          ],
+          "titre": "Histoire de la laïcité en France",
+          "auteurs": "Jean Baubérot",
+          "annee": 2017,
+          "type": "livre",
+          "note": "trois éditions ; une seule suffit ; dépôt HAL de l'édition 2005 (OUV) ; un seul identifiant suffit",
+          "verification": "CrossRef (auteur et titre connus), 2026-09-29 ; dépôt HAL : API HAL (auteur et titre connus, titre, auteurs, année et type identiques), 2026-09-29"
+        }
+      ]
+    },
+    {
+      "id": "R08",
+      "set": "reglage",
+      "query": "écopoétique",
+      "sources": "francophone",
+      "categories": [
+        "theme_rare",
+        "article"
+      ],
+      "besoin": "Écopoétique : études littéraires attentives aux rapports entre littérature, milieux et vivants (écocritique francophone). Central : travaux qui définissent ou pratiquent l'écopoétique. Utile : écocritique, littérature et écologie. Périphérique : représentation de la nature en littérature sans perspective écologique. Hors sujet : écologie scientifique sans littérature.",
+      "references_connues": [
+        {
+          "doi": "10.3917/ecopo.036.0015",
+          "titre": "Littérature & écologie : vers une écopoétique",
+          "auteurs": "Nathalie Blanc, Denis Chartier, Thomas Pughe",
+          "annee": 2008,
+          "type": "article",
+          "verification": "CrossRef (auteur et titre connus), 2026-09-29",
+          "note": "un dépôt HAL de même titre (halshs-00738347) est typé ouvrage : dossier ou introduction ? identité non établie, non ajouté"
+        }
+      ]
+    },
+    {
+      "id": "D01",
+      "set": "decision",
+      "query": "\"discours numérique\"",
+      "sources": "francophone",
+      "categories": [
+        "expression_exacte",
+        "livre"
+      ],
+      "besoin": "Analyse du discours numérique (discours natifs d'internet, technodiscursivités, au sens de M.-A. Paveau et de la linguistique des discours en ligne). Central : travaux théoriques et analyses de discours produits en ligne. Utile : communication numérique étudiée sous l'angle du discours. Périphérique : discours SUR le numérique (discours politiques ou médiatiques à propos du numérique). Hors sujet : traitement automatique des langues sans objet discursif.",
+      "references_connues": [
+        {
+          "hal": "hal-01672269",
+          "titre": "L'analyse du discours numérique. Dictionnaire des formes et des pratiques",
+          "auteurs": "Marie-Anne Paveau",
+          "annee": 2017,
+          "type": "livre",
+          "verification": "API HAL (auteur et titre connus), 2026-09-29"
+        },
+        {
+          "hal": "hal-00859064",
+          "titre": "Technodiscursivités natives sur Twitter. Une écologie du discours numérique",
+          "auteurs": "Marie-Anne Paveau",
+          "annee": 2013,
+          "type": "article",
+          "verification": "API HAL (auteur et titre connus), 2026-09-29"
+        }
+      ]
+    },
+    {
+      "id": "D02",
+      "set": "decision",
+      "query": "micro-travail",
+      "query_variants": {
+        "en": "microwork"
+      },
+      "sources": "all",
+      "categories": [
+        "concept_fr_en",
+        "article"
+      ],
+      "besoin": "Micro-travail de plateforme (tâches fractionnées rémunérées à la pièce, annotation de données pour l'intelligence artificielle, Amazon Mechanical Turk). Central : études du micro-travail et des micro-travailleurs. Utile : travail de plateforme et digital labor au sens large. Périphérique : automatisation et emploi sans plateforme de micro-tâches. Hors sujet : micro-entreprise, microfinance.",
+      "references_connues": [
+        {
+          "ids": [
+            "hal:hal-03579349",
+            "hal:hal-02139528"
+          ],
+          "titre": "Le Micro-travail en France. Derrière l'automatisation, de nouvelles précarités au travail ?",
+          "auteurs": "Antonio A. Casilli, Paola Tubaro, Clément Le Ludec et al.",
+          "annee": 2019,
+          "type": "rapport",
+          "note": "deux dépôts HAL du même rapport ; un seul suffit",
+          "verification": "API HAL (titre connu), 2026-09-29"
+        },
+        {
+          "doi": "10.1177/2053951720919776",
+          "titre": "The trainer, the verifier, the imitator: Three ways in which human platform workers support artificial intelligence",
+          "auteurs": "Paola Tubaro, Antonio A. Casilli, Marion Coville",
+          "annee": 2020,
+          "type": "article",
+          "verification": "CrossRef /works, 2026-09-29 ; dépôt HAL : API HAL (auteur et titre connus, titre, auteurs, année et type identiques), 2026-09-29",
+          "ids": [
+            "hal:hal-02554196"
+          ],
+          "note": "dépôt HAL portant le même DOI ; un seul identifiant suffit"
+        }
+      ]
+    },
+    {
+      "id": "D03",
+      "set": "decision",
+      "query": "\"économie de l'attention\"",
+      "sources": "francophone",
+      "categories": [
+        "expression_exacte",
+        "livre"
+      ],
+      "besoin": "Économie de l'attention : l'attention comme ressource rare et captée (médias, plateformes, publicité), écologie de l'attention. Central : travaux qui théorisent ou discutent l'économie de l'attention. Utile : captation de l'attention par les médias et plateformes. Périphérique : attention en psychologie cognitive sans dimension économique ou médiatique. Hors sujet : troubles de l'attention (TDAH).",
+      "references_connues": [
+        {
+          "doi": "10.3917/dec.citto.2014.01",
+          "titre": "L'économie de l'attention. Nouvel horizon du capitalisme ?",
+          "auteurs": "Yves Citton (dir.)",
+          "annee": 2014,
+          "type": "livre",
+          "verification": "CrossRef /works, 2026-09-29"
+        },
+        {
+          "ids": [
+            "doi:10.1016/j.soctra.2010.06.009",
+            "doi:10.4000/sdt.14802",
+            "hal:hal-00520512",
+            "hal:hal-03460174"
+          ],
+          "titre": "L'économie de l'attention : entre protection des ressources cognitives et extraction de la valeur",
+          "auteurs": "Emmanuel Kessous, Kevin Mellet, Moustafa Zouinar",
+          "annee": 2010,
+          "type": "article",
+          "note": "deux DOI (Elsevier et OpenEdition) ; un seul suffit ; dépôts HAL portant chacun l'un des deux DOI ; un seul identifiant suffit",
+          "verification": "CrossRef (auteurs et titre connus), 2026-09-29 ; dépôt HAL : API HAL (auteur et titre connus, titre, auteurs, année et type identiques), 2026-09-29"
+        }
+      ]
+    },
+    {
+      "id": "D04",
+      "set": "decision",
+      "query": "Pierre Lévy intelligence collective",
+      "sources": "francophone",
+      "categories": [
+        "auteur_homonyme",
+        "livre"
+      ],
+      "besoin": "Travaux de Pierre Lévy, philosophe de la cyberculture (intelligence collective, virtuel, IEML), et discussions directes de ses thèses. Central : ses travaux sur l'intelligence collective et le cyberespace. Utile : discussions et usages explicites de sa notion d'intelligence collective. Périphérique : intelligence collective chez d'autres auteurs sans référence à Lévy. Hors sujet : travaux d'homonymes (autres Pierre Lévy), quel que soit leur sujet.",
+      "references_connues": [],
+      "references_note": "Aucune référence établie de façon sûre : l'ouvrage de référence (L'intelligence collective, La Découverte, 1994) n'a ni DOI ni dépôt HAL retrouvé ; les dépôts HAL de Pierre Lévy retrouvés portent sur IEML et ne sont pas des références centrales établies."
+    },
+    {
+      "id": "D05",
+      "set": "decision",
+      "query": "recherche d'information sur internet des collégiens",
+      "sources": "francophone",
+      "categories": [
+        "these",
+        "theme_rare"
+      ],
+      "besoin": "Pratiques de recherche d'information sur internet des élèves (collège, lycée), imaginaires et apprentissages informationnels, rôle des professeurs documentalistes. Central : études des pratiques informationnelles des élèves. Utile : culture informationnelle et éducation aux médias et à l'information. Périphérique : usages du numérique des jeunes sans recherche d'information. Hors sujet : recherche d'information automatique (moteurs, algorithmes) sans usagers.",
+      "references_connues": [
+        {
+          "hal": "tel-00737637",
+          "titre": "Imaginaires, représentations, pratiques formelles et non formelles de la recherche d'information sur Internet : le cas d'élèves de 6ème et de professeurs documentalistes",
+          "auteurs": "Anne Cordier",
+          "annee": 2011,
+          "type": "thèse",
+          "verification": "API HAL (auteur connu, thèse), 2026-09-29"
+        }
+      ]
+    },
+    {
+      "id": "D06",
+      "set": "decision",
+      "query": "gentrification",
+      "query_variants": {
+        "en": "gentrification"
+      },
+      "sources": "all",
+      "to_date": "2015",
+      "categories": [
+        "periode_restrictive",
+        "concept_fr_en",
+        "article"
+      ],
+      "besoin": "Travaux publiés jusqu'en 2015 sur la gentrification urbaine : théories, mesures, études de quartiers, politiques de mixité. Central : travaux dont la gentrification est l'objet. Utile : transformations sociales des quartiers centraux, ségrégation, rénovation urbaine. Périphérique : urbanisme ou marché du logement sans question de peuplement. Hors sujet : emplois métaphoriques du mot hors de la ville.",
+      "references_connues": [
+        {
+          "doi": "10.1080/01944367908977002",
+          "titre": "Toward a Theory of Gentrification: A Back to the City Movement by Capital, not People",
+          "auteurs": "Neil Smith",
+          "annee": 1979,
+          "type": "article",
+          "verification": "CrossRef /works, 2026-09-29"
+        },
+        {
+          "doi": "10.1177/0042098008097099",
+          "titre": "Gentrification and Social Mixing: Towards an Inclusive Urban Renaissance?",
+          "auteurs": "Loretta Lees",
+          "annee": 2008,
+          "type": "article",
+          "verification": "CrossRef /works, 2026-09-29"
+        },
+        {
+          "doi": "10.4000/cybergeo.23231",
+          "titre": "Les dynamiques spatiales de la gentrification à Paris",
+          "auteurs": "Anne Clerval",
+          "annee": 2011,
+          "type": "article",
+          "verification": "CrossRef (auteur connu), 2026-09-29 ; dépôt HAL : API HAL (auteur et titre connus, titre, auteurs, année et type identiques), 2026-09-29",
+          "ids": [
+            "hal:halshs-00768772"
+          ],
+          "note": "dépôt HAL portant le même DOI ; un seul identifiant suffit"
+        }
+      ]
+    },
+    {
+      "id": "D07",
+      "set": "decision",
+      "query": "désinformation",
+      "query_variants": {
+        "en": "disinformation"
+      },
+      "sources": "all",
+      "from_date": "2016",
+      "categories": [
+        "concept_fr_en",
+        "theme_large",
+        "periode_restrictive"
+      ],
+      "besoin": "Travaux publiés depuis 2016 sur la désinformation et les « fake news » : production, circulation en ligne, réception, régulation, vérification des faits. Central : études de la désinformation. Utile : complotisme, propagande en ligne, vérification des faits. Périphérique : qualité de l'information et journalisme en général. Hors sujet : erreurs d'information techniques (théorie de l'information, bruit).",
+      "references_connues": [
+        {
+          "doi": "10.1126/science.aao2998",
+          "titre": "The science of fake news",
+          "auteurs": "David Lazer et al.",
+          "annee": 2018,
+          "type": "article",
+          "verification": "CrossRef /works, 2026-09-29"
+        },
+        {
+          "doi": "10.1126/science.aap9559",
+          "titre": "The spread of true and false news online",
+          "auteurs": "Soroush Vosoughi, Deb Roy, Sinan Aral",
+          "annee": 2018,
+          "type": "article",
+          "verification": "CrossRef /works, 2026-09-29"
+        },
+        {
+          "doi": "10.1257/jep.31.2.211",
+          "titre": "Social Media and Fake News in the 2016 Election",
+          "auteurs": "Hunt Allcott, Matthew Gentzkow",
+          "annee": 2017,
+          "type": "article",
+          "verification": "CrossRef /works, 2026-09-29"
+        }
+      ]
+    },
+    {
+      "id": "D08",
+      "set": "decision",
+      "query": "sociologie de la quantification",
+      "query_variants": {
+        "en": "sociology of quantification"
+      },
+      "sources": "all",
+      "categories": [
+        "concept_fr_en",
+        "livre"
+      ],
+      "besoin": "Sociologie de la quantification : production et usages sociaux des chiffres, statistiques publiques, classements, commensuration, gouvernement par les nombres. Central : travaux de sociologie (ou d'histoire) de la quantification. Utile : études de cas sur indicateurs, classements, évaluation chiffrée. Périphérique : méthodes quantitatives en sociologie (usage des chiffres sans les prendre pour objet). Hors sujet : quantification en physique, chimie ou biologie.",
+      "references_connues": [
+        {
+          "doi": "10.1146/annurev.soc.24.1.313",
+          "titre": "Commensuration as a Social Process",
+          "auteurs": "Wendy Nelson Espeland, Mitchell L. Stevens",
+          "annee": 1998,
+          "type": "article",
+          "verification": "CrossRef /works, 2026-09-29"
+        },
+        {
+          "doi": "10.1146/annurev-soc-073117-041343",
+          "titre": "What's New with Numbers? Sociological Approaches to the Study of Quantification",
+          "auteurs": "Andrea Mennicken, Wendy Nelson Espeland",
+          "annee": 2019,
+          "type": "article",
+          "verification": "CrossRef /works, 2026-09-29"
+        },
+        {
+          "doi": "10.3917/dec.desro.2010.01",
+          "titre": "La politique des grands nombres. Histoire de la raison statistique",
+          "auteurs": "Alain Desrosières",
+          "annee": 2010,
+          "type": "livre",
+          "verification": "CrossRef /works, 2026-09-29"
+        }
+      ]
+    },
+    {
+      "id": "D09",
+      "set": "decision",
+      "query": "digital labor",
+      "sources": "francophone",
+      "categories": [
+        "chapitre"
+      ],
+      "besoin": "Digital labor : travail numérique gratuit ou sous-payé des usagers et des travailleurs de plateforme, production de valeur par les données, critiques du concept. Central : travaux qui définissent ou discutent le digital labor. Utile : travail de plateforme, micro-travail, économie politique des plateformes. Périphérique : télétravail, numérisation des métiers. Hors sujet : compétences numériques des salariés.",
+      "references_connues": [
+        {
+          "ids": [
+            "hal:halshs-01145718"
+          ],
+          "titre": "Digital labor : travail, technologies et conflictualités (in D. Cardon, A. A. Casilli, Qu'est-ce que le digital labor ?)",
+          "auteurs": "Antonio A. Casilli",
+          "annee": 2015,
+          "type": "chapitre",
+          "note": "Seul le dépôt HAL est retenu : titre, auteur, année, type et ouvrage identiques (COUV, « Qu'est-ce que le digital labor ? », INA, p. 10-42). Le DOI Cairn 10.3917/ina.cardo.2015.01.0009 (chapitre de Casilli, INA 2015) n'est pas retenu : CrossRef lui donne le titre du livre (« Qu'est-ce que le Digital Labor ? ») et les pages 8-40, identité non établie par titre identique.",
+          "verification": "API HAL, recherche sur auteur et titre connus (title_t:\"travail technologies et conflictualités\" AND authLastName_t:casilli), 2026-09-29T03:30:18 : un seul résultat, halshs-01145718 ; CrossRef /works/10.3917/ina.cardo.2015.01.0009, 2026-09-29T03:30:20 : titre « Qu'est-ce que le Digital Labor ? », book-chapter, p. 8-40, Casilli (DOI écarté)"
+        },
+        {
+          "doi": "10.1093/oso/9780198843498.003.0018",
+          "titre": "The Platformization of Labor and Society",
+          "auteurs": "Antonio A. Casilli, Julián Posada",
+          "annee": 2019,
+          "type": "chapitre",
+          "verification": "CrossRef (auteurs et titre connus), 2026-09-29 ; dépôt HAL : API HAL (auteur et titre connus, titre, auteurs, année et type identiques), 2026-09-29",
+          "ids": [
+            "hal:halshs-01895137"
+          ],
+          "note": "dépôt HAL du même chapitre (COUV, 2019) ; un seul identifiant suffit"
+        }
+      ]
+    },
+    {
+      "id": "D10",
+      "set": "decision",
+      "query": "écriture inclusive",
+      "sources": "francophone",
+      "categories": [
+        "article",
+        "theme_large"
+      ],
+      "besoin": "Écriture inclusive et langage non sexiste en français : pratiques, normes, débats, politiques linguistiques, réception. Central : travaux dont l'écriture inclusive est l'objet. Utile : genre et langue (féminisation des noms, accord), débats sur la norme linguistique. Périphérique : genre et discours sans question de graphie ou de grammaire. Hors sujet : inclusion scolaire ou numérique (sens différent du mot).",
+      "references_connues": [],
+      "references_note": "Aucune référence établie de façon sûre sans recours à une recherche équivalente à la requête (les ouvrages de référence connus n'ont ni DOI ni dépôt HAL vérifié) : rappel non mesuré pour cette requête."
+    },
+    {
+      "id": "D11",
+      "set": "decision",
+      "query": "intelligence artificielle générative éducation",
+      "query_variants": {
+        "en": "generative artificial intelligence education"
+      },
+      "sources": "all",
+      "from_date": "2023",
+      "categories": [
+        "periode_restrictive",
+        "concept_fr_en",
+        "article"
+      ],
+      "besoin": "Travaux publiés depuis 2023 sur l'intelligence artificielle générative (ChatGPT, grands modèles de langage) dans l'éducation et l'enseignement supérieur : usages, apprentissages, évaluation, intégrité académique, formation. Central : études de l'IA générative en contexte éducatif. Utile : IA générative et travail intellectuel, écriture académique. Périphérique : IA en éducation sans dimension générative (tutoriels intelligents classiques). Hors sujet : IA générative hors éducation (médecine, industrie).",
+      "references_connues": [
+        {
+          "doi": "10.1016/j.lindif.2023.102274",
+          "titre": "ChatGPT for good? On opportunities and challenges of large language models for education",
+          "auteurs": "Enkelejda Kasneci et al.",
+          "annee": 2023,
+          "type": "article",
+          "verification": "CrossRef /works, 2026-09-29"
+        }
+      ]
+    },
+    {
+      "id": "D12",
+      "set": "decision",
+      "query": "zoopoétique",
+      "sources": "francophone",
+      "categories": [
+        "theme_rare",
+        "article"
+      ],
+      "besoin": "Zoopoétique : études littéraires des animaux et de leurs manières d'être dans les textes (au sens d'Anne Simon et du programme Animots). Central : travaux qui définissent ou pratiquent la zoopoétique. Utile : animaux en littérature, études animales littéraires. Périphérique : animaux dans les arts ou la philosophie hors littérature. Hors sujet : zoologie.",
+      "references_connues": [],
+      "references_note": "Aucune référence établie de façon sûre : l'ouvrage de référence (Anne Simon, Une bête entre les lignes. Essai de zoopoétique, 2021) n'a ni DOI ni dépôt HAL vérifié ; les dépôts HAL retrouvés l'ont été par une recherche équivalente à la requête (circulaire)."
+    },
+    {
+      "id": "D13",
+      "set": "decision",
+      "query": "e-réputation veille des organisations",
+      "sources": "francophone",
+      "categories": [
+        "these",
+        "theme_rare"
+      ],
+      "besoin": "E-réputation des organisations et veille informationnelle sur le web social (infomédiation, veilleurs, gestion de la réputation en ligne). Central : travaux sur l'e-réputation et sa veille. Utile : veille stratégique et intelligence économique sur le web, communication des organisations en ligne. Périphérique : marketing numérique sans réputation ni veille. Hors sujet : réputation hors ligne sans dimension numérique.",
+      "references_connues": [
+        {
+          "hal": "tel-00915004",
+          "titre": "Processus de veille par infomédiation sociale pour construire l'e-réputation d'une organisation. Approche par agents-facilitateurs appliquée à la DSIC de La Poste",
+          "auteurs": "Camille Alloing",
+          "annee": 2013,
+          "type": "thèse",
+          "verification": "API HAL (auteur connu, thèse), 2026-09-29"
+        }
+      ]
+    },
+    {
+      "id": "D14",
+      "set": "decision",
+      "query": "imaginaire d'internet",
+      "sources": "francophone",
+      "categories": [
+        "livre",
+        "theme_large"
+      ],
+      "besoin": "Imaginaires sociaux et utopies d'internet et des technologies numériques : discours d'accompagnement, mythes fondateurs, cyberculture. Central : travaux sur les imaginaires, utopies et discours d'internet. Utile : histoire sociale d'internet, représentations des techniques. Périphérique : usages d'internet sans dimension d'imaginaire. Hors sujet : imaginaire au sens littéraire ou psychanalytique sans lien avec le numérique.",
+      "references_connues": [
+        {
+          "doi": "10.3917/dec.flich.2001.01",
+          "titre": "L'imaginaire d'Internet",
+          "auteurs": "Patrice Flichy",
+          "annee": 2001,
+          "type": "livre",
+          "verification": "CrossRef /works, 2026-09-29 ; dépôt HAL : API HAL (auteur et titre connus, titre, auteurs, année et type identiques), 2026-09-29",
+          "ids": [
+            "hal:halshs-00438994"
+          ],
+          "note": "dépôt HAL du même ouvrage (OUV, 2001) ; un seul identifiant suffit"
+        }
+      ]
+    },
+    {
+      "id": "D15",
+      "set": "decision",
+      "query": "théorie de l'acteur-réseau",
+      "query_variants": {
+        "en": "actor-network theory"
+      },
+      "sources": "all",
+      "categories": [
+        "concept_fr_en",
+        "article",
+        "chapitre"
+      ],
+      "besoin": "Théorie de l'acteur-réseau (ANT : Callon, Latour, Law, Akrich) : textes fondateurs, discussions, critiques, applications explicites. Central : textes fondateurs et discussions de la théorie. Utile : enquêtes qui mobilisent explicitement l'ANT. Périphérique : études des sciences et techniques sans ANT. Hors sujet : réseaux informatiques ou analyse de réseaux sociaux sans rapport.",
+      "references_connues": [
+        {
+          "doi": "10.1111/j.1467-954X.1984.tb00113.x",
+          "titre": "Some Elements of a Sociology of Translation: Domestication of the Scallops and the Fishermen of St Brieuc Bay",
+          "auteurs": "Michel Callon",
+          "annee": 1984,
+          "type": "article",
+          "verification": "CrossRef /works, 2026-09-29"
+        },
+        {
+          "doi": "10.1007/BF01059830",
+          "titre": "Notes on the theory of the actor-network: Ordering, strategy, and heterogeneity",
+          "auteurs": "John Law",
+          "annee": 1992,
+          "type": "article",
+          "verification": "CrossRef /works, 2026-09-29"
+        }
+      ]
+    },
+    {
+      "id": "D16",
+      "set": "decision",
+      "query": "sociologie du journalisme",
+      "sources": "francophone",
+      "categories": [
+        "theme_large",
+        "livre"
+      ],
+      "besoin": "Sociologie du journalisme : métier, professionnalisation, rédactions, sources, économie des médias d'information, rapports au politique. Central : travaux de sociologie du journalisme et des journalistes. Utile : sociologie des médias d'information, économie de la presse. Périphérique : analyse de contenus médiatiques sans les producteurs. Hors sujet : journaux intimes, journalisme scientifique au sens de vulgarisation sans enquête sociologique.",
+      "references_connues": [
+        {
+          "ids": [
+            "doi:10.3917/dec.neveu.2019.01",
+            "doi:10.3917/dec.neveu.2013.01",
+            "doi:10.3917/dec.neveu.2009.01",
+            "hal:halshs-03234456"
+          ],
+          "titre": "Sociologie du journalisme",
+          "auteurs": "Érik Neveu",
+          "annee": 2019,
+          "type": "livre",
+          "note": "trois éditions ; une seule suffit ; dépôt HAL de l'édition 2019 (même DOI) ; un seul identifiant suffit",
+          "verification": "CrossRef (auteur et titre connus), 2026-09-29 ; dépôt HAL : API HAL (auteur et titre connus, titre, auteurs, année et type identiques), 2026-09-29"
+        }
+      ]
+    }
+  ]
+}

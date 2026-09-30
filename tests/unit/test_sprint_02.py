@@ -174,17 +174,29 @@ class TestZoteroSchemaIntegration:
         assert cleaned.get("exoticField") == "should be kept"
         loader._MEMORY_CACHE = None
 
-    def test_validate_fallback_when_no_schema(self):
+    def test_validate_fallback_when_no_schema(self, monkeypatch, tmp_path):
         from mappers import zotero_schema_loader as loader
         from mappers.zotero_schema import validate_and_clean
         from unittest.mock import patch
 
-        loader._MEMORY_CACHE = None
-        # Pas de schéma téléchargé, pas de cache disque
-        with patch.object(loader, "_fetch_from_network", return_value=None):
-            with patch.object(loader, "_is_cache_valid", return_value=False):
+        # Ni schéma figé (posé par conftest), ni cache disque (frais ou
+        # périmé), ni réseau : seul le repli embarqué peut répondre. Sans
+        # cela, le schéma figé de conftest servirait et le repli ne serait
+        # jamais atteint.
+        monkeypatch.delenv(loader.SCHEMA_FILE_ENV, raising=False)
+        monkeypatch.setattr(loader, "CACHE_PATH", tmp_path / "absent.json")
+        monkeypatch.setattr(loader, "SCHEMA_RETRY_AFTER_SECONDS", 600)
+        loader.reset_state()
+        try:
+            with patch.object(loader, "_fetch_from_network",
+                              return_value=None) as fetch:
                 item = {"itemType": "journalArticle", "title": "T", "DOI": "10.1/x"}
                 cleaned = validate_and_clean(item)
+            # C'est bien le repli qui a servi, après une seule tentative
+            assert loader.schema_state() == loader.ETAT_INDISPONIBLE
+            assert fetch.call_count == 1
+        finally:
+            loader.reset_state()
         # Le fallback embarqué doit autoriser DOI
         assert cleaned.get("DOI") == "10.1/x"
 

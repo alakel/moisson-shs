@@ -213,11 +213,12 @@ class TestBuildCorpusToolResult:
 
 class TestDispatcherNormalization:
     def test_unknown_tool_returns_textcontent_list(self):
+        # OPT-07 (C30) : un échec est une erreur MCP (isError), même texte.
         result = _run(mcp_server.call_tool("outil_inexistant", {}))
-        assert isinstance(result, list)
-        assert len(result) == 1
-        assert result[0].type == "text"
-        assert "Outil inconnu" in result[0].text
+        assert isinstance(result, types.CallToolResult) and result.isError
+        assert len(result.content) == 1
+        assert result.content[0].type == "text"
+        assert "Outil inconnu" in result.content[0].text
 
     def test_str_tool_wrapped_in_textcontent(self, tmp_path, monkeypatch):
         # corpus_list renvoie une str (outil non-producteur)
@@ -255,10 +256,11 @@ class TestDispatcherNormalization:
 
         monkeypatch.setattr(mcp_server, "_tool_corpus_list", boom)
         result = _run(mcp_server.call_tool("corpus_list", {}))
-        assert isinstance(result, list)
-        assert result[0].type == "text"
-        assert "Erreur" in result[0].text
-        assert "boom interne" in result[0].text
+        # OPT-07 (C30) : exception → erreur MCP (isError), même texte.
+        assert isinstance(result, types.CallToolResult) and result.isError
+        assert result.content[0].type == "text"
+        assert "Erreur" in result.content[0].text
+        assert "boom interne" in result.content[0].text
 
 
 # === #30 — Outils producteurs bout-en-bout (sans réseau) ===
@@ -270,7 +272,8 @@ class TestCorpusFilterEnriched:
         src = _write_corpus(tmp_path / "corpus_src.json", _make_items(10))
 
         result = _run(mcp_server.call_tool(
-            "corpus_filter", {"corpus_path": str(src), "year_min": 2000}
+            "corpus_filter", {"corpus_path": str(src), "year_min": 2000,
+                              "inline": "full"}
         ))
         assert isinstance(result, tuple)
         blocks, structured = result
@@ -289,7 +292,7 @@ class TestCorpusFilterEnriched:
         src = _write_corpus(tmp_path / "corpus_lg.json", _make_items(10))
 
         result = _run(mcp_server.call_tool(
-            "corpus_filter", {"corpus_path": str(src)}
+            "corpus_filter", {"corpus_path": str(src), "inline": "full"}
         ))
         assert isinstance(result, tuple)
         blocks, structured = result
@@ -303,9 +306,9 @@ class TestCorpusFilterEnriched:
         result = _run(mcp_server.call_tool(
             "corpus_filter", {"corpus_path": str(tmp_path / "nope.json")}
         ))
-        # str legacy → enveloppée par le dispatcher
-        assert isinstance(result, list)
-        assert "introuvable" in result[0].text.lower()
+        # OPT-07 (C30) : texte historique, désormais en erreur MCP (isError).
+        assert isinstance(result, types.CallToolResult) and result.isError
+        assert "introuvable" in result.content[0].text.lower()
 
 
 class TestCorpusToCslEnriched:
@@ -314,7 +317,7 @@ class TestCorpusToCslEnriched:
         src = _write_corpus(tmp_path / "corpus_z.json", _make_items(4))
 
         result = _run(mcp_server.call_tool(
-            "corpus_to_csl", {"corpus_path": str(src)}
+            "corpus_to_csl", {"corpus_path": str(src), "inline": "full"}
         ))
         assert isinstance(result, tuple)
         blocks, structured = result
@@ -441,13 +444,13 @@ class TestMoissonSearchStructured:
         monkeypatch.setattr(mcp_server, "OUTPUT_DIR", tmp_path)
         monkeypatch.setattr(mcp_server, "INLINE_MAX_ITEMS", 300)
 
-        # Stub réseau : main.run_source importé à l'exécution dans
-        # _run_moisson_sync → patcher main.run_source suffit.
+        # Stub réseau : le moteur (OPT-07) résout run_source dans son module
+        # à chaque source → patcher engine.orchestrator.run_source suffit.
         def fake_run_source(name, cls, query, max_per_source, output_dir,
                             timestamp, http_client, **kwargs):
             return _make_items(2)
 
-        monkeypatch.setattr("main.run_source", fake_run_source)
+        monkeypatch.setattr("engine.orchestrator.run_source", fake_run_source)
 
         blocks, structured = mcp_server._run_moisson_sync(
             query="discours numérique",
@@ -456,6 +459,7 @@ class TestMoissonSearchStructured:
             enrich_oai=False,
             do_dedup=True,
             workers=1,
+            inline="full",
         )
         # DoD : clés structuredContent de moisson_search
         for key in ("query", "by_source", "total_unique", "duplicates_removed",
@@ -505,8 +509,9 @@ class TestLegacyErrorPaths:
         result = _run(mcp_server.call_tool(
             "corpus_filter", {"corpus_path": str(bad)}
         ))
-        assert isinstance(result, list)
-        assert "parsing JSON" in result[0].text
+        # OPT-07 (C30) : même texte, en erreur MCP (isError).
+        assert isinstance(result, types.CallToolResult) and result.isError
+        assert "parsing JSON" in result.content[0].text
 
     def test_to_csl_non_list_returns_str(self, tmp_path, monkeypatch):
         monkeypatch.setattr(mcp_server, "OUTPUT_DIR", tmp_path)
@@ -515,8 +520,9 @@ class TestLegacyErrorPaths:
         result = _run(mcp_server.call_tool(
             "corpus_to_csl", {"corpus_path": str(obj)}
         ))
-        assert isinstance(result, list)
-        assert "tableau" in result[0].text.lower()
+        # OPT-07 (C30) : même texte, en erreur MCP (isError).
+        assert isinstance(result, types.CallToolResult) and result.isError
+        assert "tableau" in result.content[0].text.lower()
 
 
 # === #31 — Override d'environnement MOISSON_INLINE_MAX_ITEMS ===

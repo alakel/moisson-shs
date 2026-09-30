@@ -4,7 +4,10 @@ Point d'entrée unifié de la commande `moisson-shs`.
 Sous-commandes :
     moisson-shs setup ...      → configure le MCP dans Claude Desktop
     moisson-shs serve          → lance le serveur MCP en mode stdio
+    moisson-shs serve --http   → lance le serveur MCP distant (Streamable HTTP)
     moisson-shs search Q ...   → moisson sur la requête Q (alias : moisson-shs Q)
+    moisson-shs export C ...   → exporte le corpus C en BibTeX, BibLaTeX ou RIS
+    moisson-shs token ...      → gère le jeton Bearer du serveur distant
     moisson-shs version        → affiche la version
 
 Le dispatcher est rétro-compatible : si le premier argument n'est pas
@@ -17,12 +20,14 @@ from __future__ import annotations
 import sys
 
 
-SUBCOMMANDS = {"setup", "serve", "search", "token", "version", "--version", "-V", "help", "--help", "-h"}
+SUBCOMMANDS = {"setup", "serve", "search", "export", "token", "version", "--version", "-V", "help", "--help", "-h"}
 
 
 def _print_top_level_help() -> None:
-    print("""moisson-shs — Moissonneur SHS multi-sources (HAL, Isidore, OpenEdition,
-                 Cairn, Persée, Theses.fr, Érudit) → Zotero JSON + CSL-JSON
+    print("""moisson-shs — Moissonneur SHS multi-sources → Zotero JSON + CSL-JSON
+  Douze sources : HAL, Isidore, OpenEdition, Cairn, Persée, Theses.fr, Érudit
+  (groupe francophone, défaut) ; CrossRef, OpenAlex, Semantic Scholar, CORE
+  (groupe international) ; Google Scholar (SerpAPI, facturé : à nommer)
 
 Usage :
   moisson-shs setup [options]      Configure le serveur MCP dans Claude Desktop
@@ -30,6 +35,9 @@ Usage :
   moisson-shs serve --http         Lance le serveur MCP distant (Streamable HTTP)
   moisson-shs search QUERY ...     Moisson sur la requête QUERY
   moisson-shs QUERY ...            Alias rétro-compatible (search implicite)
+  moisson-shs export CORPUS ...    Exporte un corpus en BibTeX, BibLaTeX ou RIS
+  moisson-shs token ACTION         Jeton Bearer du serveur distant
+                                   (generate, rotate, status, revoke)
   moisson-shs version              Affiche la version
 
 Exemples :
@@ -37,13 +45,16 @@ Exemples :
   moisson-shs setup --output-dir ~/Documents/corpus_shs
   moisson-shs setup --status
   moisson-shs serve --http --host 127.0.0.1 --port 8000
-  moisson-shs search "discours numérique" --max 500 --workers 2 --cache
+  moisson-shs search "discours numérique" --max 500 --workers 4 --cache
   moisson-shs "Foucault" --from-date 2020 --to-date 2024
+  moisson-shs export output/corpus_x.json --format ris
 
 Aide détaillée par sous-commande :
   moisson-shs setup --help
   moisson-shs serve --help
   moisson-shs search --help
+  moisson-shs export --help
+  moisson-shs token --help
 """)
 
 
@@ -102,6 +113,81 @@ def _dispatch_token(token_argv: list[str]) -> int:
         print(f"{n} jeton(s) révoqué(s) ({cible}).")
         return 0
 
+    return 0
+
+
+def _dispatch_export(export_argv: list[str]) -> int:
+    """
+    Sous-commande ``export`` (OPT-18) : corpus Zotero interne → fichier
+    BibTeX, BibLaTeX ou RIS, par le même service que l'outil MCP
+    ``corpus_export`` (``mappers.bibtex_exporter.export_corpus_file``).
+
+    Codes de sortie : 0 succès, 2 entrée ou sortie refusée (CSL-JSON,
+    fichier associé, JSON invalide, extension réservée…).
+    """
+    import argparse
+    from pathlib import Path
+    from mappers.bibtex_exporter import (
+        EXPORT_FORMATS, EXPORT_LABELS, ExportInputError, export_corpus_file,
+    )
+
+    p = argparse.ArgumentParser(
+        prog="moisson-shs export",
+        description=(
+            "Exporte un corpus Zotero JSON interne en BibTeX, BibLaTeX ou "
+            "RIS (import Zotero Desktop, JabRef, EndNote ; LaTeX). Aucune "
+            "métadonnée de moisson n'est exportée sans --include-provenance."
+        ),
+    )
+    p.add_argument("corpus", help="Corpus Zotero interne (corpus_*.json).")
+    p.add_argument(
+        "-f", "--format", choices=list(EXPORT_FORMATS), default="bibtex",
+        help="Format produit (défaut : bibtex).",
+    )
+    p.add_argument(
+        "-o", "--output", metavar="FICHIER",
+        help="Fichier produit (défaut : <corpus>_<identifiant>.bib ou .ris, "
+             "à côté du corpus).",
+    )
+    p.add_argument(
+        "--ascii", action="store_true",
+        help="BibTeX/BibLaTeX : accents en commandes LaTeX (défaut : UTF-8).",
+    )
+    p.add_argument(
+        "--include-provenance", action="store_true",
+        help="Exporter aussi la provenance de moisson (lignes du champ extra) "
+             "en note ; ni rang ni score (manifeste).",
+    )
+    a = p.parse_args(export_argv)
+
+    try:
+        res = export_corpus_file(
+            Path(a.corpus), a.format,
+            Path(a.output) if a.output else None,
+            ascii=a.ascii and a.format != "ris",
+            include_provenance=a.include_provenance,
+        )
+    except ExportInputError as e:
+        print(f"Erreur : {e}", file=sys.stderr)
+        return 2
+    print(f"Export {EXPORT_LABELS[a.format]} : {res.entries} entrée(s), "
+          f"{res.size_bytes / 1024:.1f} ko")
+    print(f"Fichier : {res.path}")
+    if res.manifest_path is not None:
+        print(f"Manifeste : {res.manifest_path.name}")
+    skipped = res.stats.get("snippet_abstracts_skipped", 0)
+    if skipped:
+        print(f"Extraits Google Scholar non exportés comme résumés : {skipped}")
+    warned = res.stats.get("scholar_truncation_warnings", 0)
+    if warned:
+        # Invariant 6 : avertissement de fiabilité écrit par défaut.
+        line = (f"Notices tronquées par Google Scholar (auteurs et/ou revue), "
+                f"avertissement en {'N1' if a.format == 'ris' else 'note'} : "
+                f"{warned}")
+        incomplete = res.stats.get("incomplete_author_lists", 0)
+        if incomplete:
+            line += f" ; listes d'auteurs closes par « and others » : {incomplete}"
+        print(line)
     return 0
 
 
@@ -257,6 +343,9 @@ def main(argv: list[str] | None = None) -> int:
 
     if first == "token":
         return _dispatch_token(argv[1:])
+
+    if first == "export":
+        return _dispatch_export(argv[1:])
 
     if first == "search":
         # Décale les args pour qu'argparse de main.py les reçoive

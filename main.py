@@ -1,16 +1,31 @@
 """
-Orchestrateur principal du moissonneur SHS multi-sources.
+Point d'entrée CLI du moissonneur SHS multi-sources.
 
 Usage en ligne de commande :
 
     python main.py "discours numérique" --max 500 --output ./output
 
 Le script effectue :
-1. Lancement parallèle des quatre connecteurs sur la requête
-2. Sauvegarde des réponses brutes par source dans output/raw/
+1. Moisson des sources demandées par le moteur commun (``engine``) : même
+   orchestration, mêmes statuts par source que le serveur MCP
+2. Sauvegarde des notices par source dans output/raw/ (notices déjà
+   normalisées ; les réponses natives des API ne sont capturées qu'en mode
+   audit, MOISSON_AUDIT_NATIVE=1, dans output/.native_audit/)
 3. Déduplication multi-stratégie du corpus consolidé
-4. Export Zotero JSON unifié dans output/corpus_<query>_<ts>.json
+4. Export Zotero JSON unifié dans output/corpus_<query>_<ts>_<uuid>.json
+   (et CSL-JSON)
 5. Génération d'un fichier de statistiques
+6. Manifeste output/corpus_<query>_<ts>_<uuid>.manifest.json, publié en
+   dernier (publication atomique, OPT-16)
+
+Chaque source reçoit un statut (complète, vide, partielle, non exécutée, en
+échec, annulée) affiché en fin de moisson : une panne n'est jamais présentée
+comme une absence de résultat. Si aucune source n'a répondu sans panne
+(toutes en échec, non exécutées, annulées ou partielles sur erreur) et
+qu'aucune notice n'a été obtenue, aucun corpus n'est écrit et le code de
+sortie vaut 3 (``EXIT_ALL_SOURCES_FAILED``). Une sous-source d'Isidore
+absente de la fenêtre de 200 résultats n'est pas une panne : corpus vide,
+code 0, limite nommée dans son statut.
 
 L'import dans Zotero se fait ensuite via
 Fichier > Importer > Un fichier, en sélectionnant le JSON produit.
@@ -27,13 +42,29 @@ from typing import List, Dict
 from collections import Counter
 
 from utils.http import HTTPClient
-from utils.deduplication import deduplicate
 from connectors.registry import (
-    CONNECTORS, get_connector_class, list_sources, split_by_group,
-    resolve_sources, list_source_tokens, FRANCOPHONE_SOURCES,
+    CONNECTORS, resolve_sources, list_source_tokens, FRANCOPHONE_SOURCES,
 )
-from mappers.csl_exporter import export_corpus_to_csl
 from config import DEFAULT_MAX_PER_SOURCE
+# Moteur commun (OPT-07) : main.py n'est plus qu'un adaptateur CLI.
+# ``run_source`` (exécution isolée d'une source) vit désormais dans le moteur ;
+# le nom reste exporté ici pour compatibilité (il renvoie un SourceResult,
+# dont ``items`` porte les notices).
+from engine.models import (
+    MODE_COLLECTE, MODES, RunContext, SearchRequest, new_run_id,
+)
+from engine.orchestrator import harvest, run_source  # noqa: F401
+from engine.outputs import corpus_stem, write_outputs
+# Manifeste et audit des réponses natives (OPT-16).
+from utils.http import attach_native_audit
+from utils.manifest import harvest_manifest_fields, native_audit_for_run, now_iso
+# Classement des notices (OPT-13) : option --ranking.
+from utils.ranking import RANKING_MODES, ranking_text_lines
+
+# Code de sortie quand aucune source n'a répondu sans panne et qu'aucune
+# notice n'a été obtenue (pannes, clés absentes ; voir
+# ``HarvestResult.all_failed``) : rien n'est écrit.
+EXIT_ALL_SOURCES_FAILED = 3
 
 
 def setup_logging(verbose: bool = False) -> None:
@@ -70,78 +101,26 @@ def slugify(text: str) -> str:
     return slug.strip("_").lower()[:60]
 
 
-def run_source(
-    name: str,
-    connector_cls,
-    query: str,
-    max_per_source: int,
-    output_dir: Path,
-    timestamp: str,
-    http_client: HTTPClient,
-    from_date: str = None,
-    to_date: str = None,
-    **kwargs,
-) -> List[Dict]:
-    """
-    Exécute une source en isolant les erreurs.
-
-    Args:
-        name: Nom canonique de la source
-        connector_cls: Classe Connector à instancier
-        query: Requête
-        max_per_source: Plafond par source
-        output_dir: Répertoire de sortie
-        timestamp: Horodatage pour les noms de fichier
-        http_client: Client HTTP partagé
-        **kwargs: Arguments supplémentaires pour le connecteur
-
-    Returns:
-        Liste d'items Zotero issus de cette source (vide si échec)
-    """
-    logger = logging.getLogger("main")
-    logger.info(f"=== Démarrage source: {name} ===")
-    start = time.time()
-
-    try:
-        # Tous les connecteurs ont désormais une signature uniforme
-        # (http_client, **kwargs) ; les kwargs non pertinents sont
-        # ignorés par le connecteur cible.
-        connector = connector_cls(http_client=http_client, **kwargs)
-        # from_date/to_date sont propagés aux connecteurs qui les supportent
-        # (HAL natif, Isidore post-pagination, OpenEdition/Cairn via proxy).
-        # Les connecteurs qui ignorent ces kwargs n'en seront pas affectés.
-        search_kwargs = {}
-        if from_date:
-            search_kwargs["from_date"] = from_date
-        if to_date:
-            search_kwargs["to_date"] = to_date
-        items = connector.search(
-            query, max_results=max_per_source, **search_kwargs
-        )
-        connector.close()
-
-        # Sauvegarde du résultat brut par source pour audit
-        raw_dir = output_dir / "raw"
-        raw_dir.mkdir(parents=True, exist_ok=True)
-        raw_file = raw_dir / f"{name.lower()}_{timestamp}.json"
-        raw_file.write_text(
-            json.dumps(items, ensure_ascii=False, indent=2),
-            encoding="utf-8",
-        )
-
-        elapsed = time.time() - start
-        logger.info(
-            f"=== {name} terminé : {len(items)} items en {elapsed:.1f}s ==="
-        )
-        return items
-    except Exception as e:
-        logger.error(f"=== Échec source {name}: {e} ===", exc_info=True)
-        return []
-
-
 def compute_stats(items: List[Dict]) -> Dict:
     """
     Calcule des statistiques descriptives sur le corpus consolidé.
+
+    Les comptes s'appuient sur l'extracteur commun d'identifiants et sur la
+    provenance tracée par les mappers :
+
+    - DOI : champ ``DOI`` **ou** ligne ``DOI:`` de ``extra`` (DOI migré par
+      ``validate_and_clean`` pour les types sans champ DOI) ;
+    - résumé : un ``abstractNote`` qui n'est pas l'extrait Google Scholar
+      (ligne ``Scholar snippet`` et résumé venu de Scholar) ; les extraits
+      sont comptés à part ;
+    - auteurs tronqués : ligne ``Scholar truncation`` et auteurs venus de
+      Scholar (la marque couvre « auteurs et/ou revue » : majorant) ;
+    - sources : libellés ramenés à la table unique ``utils.source_labels``
+      (« Crossref » et « CrossRef » comptent pour une seule source).
+
+    Toutes les clés historiques sont conservées ; ``with_abstract`` compte
+    désormais les seuls vrais résumés (``with_abstract_field`` garde le
+    compte brut des champs ``abstractNote`` non vides).
 
     Args:
         items: Items Zotero
@@ -149,56 +128,106 @@ def compute_stats(items: List[Dict]) -> Dict:
     Returns:
         Dict de statistiques
     """
+    import re
+
+    from utils.deduplication import (
+        abstract_is_scholar_snippet, authors_truncated, parse_evidence,
+        source_overlap_matrix,
+    )
+    from utils.identity import extract_doi, normalize_doi
+    from utils.source_labels import canonical_source_key, display_name
+
+    total = len(items)
+
     # Type d'item
     types = Counter(item.get("itemType", "unknown") for item in items)
 
-    # Sources
+    # Sources (libellés normalisés, une source comptée une fois par item)
     sources = Counter()
+    source_keys = Counter()
     for item in items:
-        extra = item.get("extra", "")
+        extra = item.get("extra", "") or ""
         for line in extra.split("\n"):
             if line.startswith("Sources:"):
+                seen = set()
                 for s in line[len("Sources:"):].split(","):
-                    sources[s.strip()] += 1
+                    key = canonical_source_key(s)
+                    if key and key not in seen:
+                        seen.add(key)
+                        source_keys[key] += 1
+                        sources[display_name(s)] += 1
                 break
 
     # Années
     years = Counter()
     for item in items:
-        date = item.get("date", "")
+        date = item.get("date", "") or ""
         # Extraction d'une année à 4 chiffres
-        import re
         match = re.search(r"\b(1[5-9]\d{2}|20\d{2})\b", date)
         if match:
             years[match.group(1)] += 1
 
     # Langues
     languages = Counter(
-        item.get("language", "?")[:3] or "?" for item in items
+        (item.get("language") or "?")[:3] or "?" for item in items
     )
 
-    # Items avec DOI
-    with_doi = sum(1 for item in items if item.get("DOI"))
+    # DOI : champ ou extra
+    with_doi_field = sum(1 for item in items if normalize_doi(item.get("DOI")))
+    with_doi = sum(1 for item in items if extract_doi(item))
 
-    # Items avec résumé non vide
-    with_abstract = sum(1 for item in items if item.get("abstractNote"))
+    # Résumés : vrai résumé contre extrait Google Scholar
+    with_abstract_field = 0
+    with_snippet = 0
+    for item in items:
+        if (item.get("abstractNote") or "").strip():
+            with_abstract_field += 1
+            if abstract_is_scholar_snippet(item):
+                with_snippet += 1
+    with_abstract = with_abstract_field - with_snippet
+
+    # Auteurs possiblement tronqués par Google Scholar
+    truncated = sum(1 for item in items if authors_truncated(item))
+
+    # Traces de déduplication
+    merged_items = ambiguous_items = 0
+    for item in items:
+        ev = parse_evidence(item)
+        if ev:
+            if ev["count"] > 1:
+                merged_items += 1
+            if ev["ambiguous"]:
+                ambiguous_items += 1
 
     # Recouvrements par paire de sources (mesure la valeur ajoutée de chaque
     # source par rapport aux autres après déduplication).
-    from utils.deduplication import source_overlap_matrix
     overlap = source_overlap_matrix(items)
 
+    def pct(n: int) -> float:
+        return round(100 * n / max(total, 1), 1)
+
     return {
-        "total_items": len(items),
+        "total_items": total,
         "by_type": dict(types.most_common()),
         "by_source": dict(sources.most_common()),
         "by_year": dict(sorted(years.items())),
         "by_language": dict(languages.most_common()),
         "with_doi": with_doi,
         "with_abstract": with_abstract,
-        "doi_coverage_pct": round(100 * with_doi / max(len(items), 1), 1),
-        "abstract_coverage_pct": round(100 * with_abstract / max(len(items), 1), 1),
+        "doi_coverage_pct": pct(with_doi),
+        "abstract_coverage_pct": pct(with_abstract),
         "source_overlap": overlap,
+        # Ajouts OPT-06 (C19, C24)
+        "by_source_key": dict(source_keys.most_common()),
+        "with_doi_field": with_doi_field,
+        "with_doi_extra_only": with_doi - with_doi_field,
+        "with_abstract_field": with_abstract_field,
+        "with_scholar_snippet": with_snippet,
+        "scholar_snippet_pct": pct(with_snippet),
+        "truncated_authors": truncated,
+        "truncated_authors_pct": pct(truncated),
+        "merged_items": merged_items,
+        "ambiguous_items": ambiguous_items,
     }
 
 
@@ -211,6 +240,18 @@ def write_stats_file(stats: Dict, output_path: Path, query: str) -> None:
         output_path: Chemin du fichier de stats
         query: Requête d'origine
     """
+    output_path.write_text(stats_text(stats, query), encoding="utf-8")
+
+
+def stats_text(stats: Dict, query: str) -> str:
+    """
+    Texte du fichier de statistiques (format historique), publié tel quel
+    par ``engine.outputs.write_outputs`` (écriture atomique, OPT-16).
+
+    Args:
+        stats: Dict de stats
+        query: Requête d'origine
+    """
     lines = [
         f"=== Statistiques du corpus ===",
         f"Requête : {query}",
@@ -218,7 +259,36 @@ def write_stats_file(stats: Dict, output_path: Path, query: str) -> None:
         f"",
         f"Total items : {stats['total_items']}",
         f"Items avec DOI : {stats['with_doi']} ({stats['doi_coverage_pct']}%)",
-        f"Items avec résumé : {stats['with_abstract']} ({stats['abstract_coverage_pct']}%)",
+    ]
+    # Détails ajoutés par OPT-06 : lus avec .get() pour accepter un dict de
+    # statistiques plus ancien.
+    if stats.get("with_doi_extra_only"):
+        lines.append(
+            f"  dont DOI lu dans 'extra' seulement : "
+            f"{stats['with_doi_extra_only']}"
+        )
+    lines.append(
+        f"Items avec résumé : {stats['with_abstract']} "
+        f"({stats['abstract_coverage_pct']}%)"
+    )
+    if stats.get("with_scholar_snippet"):
+        lines.append(
+            f"Items avec extrait Google Scholar (pas un résumé) : "
+            f"{stats['with_scholar_snippet']} ({stats['scholar_snippet_pct']}%)"
+        )
+    if stats.get("truncated_authors"):
+        lines.append(
+            f"Items à auteurs et/ou revue tronqués par Google Scholar : "
+            f"{stats['truncated_authors']} ({stats['truncated_authors_pct']}%)"
+        )
+    if stats.get("merged_items") or stats.get("ambiguous_items"):
+        lines.append(
+            f"Notices fusionnées par la déduplication : "
+            f"{stats.get('merged_items', 0)} ; laissées à part (DOI "
+            f"contradictoires ou versions distinctes d'un même dépôt) : "
+            f"{stats.get('ambiguous_items', 0)}"
+        )
+    lines += [
         f"",
         f"--- Répartition par source ---",
     ]
@@ -244,7 +314,7 @@ def write_stats_file(stats: Dict, output_path: Path, query: str) -> None:
         for pair, count in overlap.items():
             lines.append(f"  {pair} : {count}")
 
-    output_path.write_text("\n".join(lines), encoding="utf-8")
+    return "\n".join(lines)
 
 
 def main():
@@ -253,21 +323,33 @@ def main():
         description="Moissonneur SHS multi-sources vers Zotero JSON",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
-Sources moissonnées :
-  - HAL (api.archives-ouvertes.fr) : recherche full-text native
-  - Isidore (api.isidore.science) : recherche full-text native
-  - OpenEdition : recherche via proxy Isidore + enrichissement OAI optionnel
-  - Cairn : recherche via proxy Isidore + enrichissement OAI optionnel
+Sources moissonnées (douze ; --sources, groupe francophone par défaut) :
+  Francophones (sans clé) :
+  - HAL (api.archives-ouvertes.fr) : API Solr native
+  - Isidore (api.isidore.science) : API native, 200 premiers résultats servis
+  - OpenEdition, Cairn, Persée, Érudit : flux Isidore partagé
+    + enrichissement OAI optionnel (--enrich-oai)
+  - Theses.fr : flux Isidore partagé
+  Internationales (groupe international ; all = francophone + international) :
+  - CrossRef (sans clé), OpenAlex (clé requise), Semantic Scholar (clé
+    facultative), CORE (clé requise)
+  Facturée à la requête (hors des groupes international et all) :
+  - Google Scholar par SerpAPI (clé requise) : à nommer (google_scholar)
+    ou groupe scholar
 
 Exemples :
   python main.py "discours numérique"
   python main.py "intelligence artificielle ET société" --max 2000
   python main.py "Foucault" --sources hal isidore --enrich-oai
+  python main.py '"discours numérique" AND (twitter OR facebook)' --sources all --query-en '"digital discourse"' --lang fr en --plan-only
         """,
     )
     parser.add_argument(
         "query",
-        help="Requête mot-clé (peut contenir des opérateurs booléens)",
+        help=("Requête mot-clé (peut contenir des opérateurs booléens ; "
+              "précédence NOT > AND > OR, une exclusion écrite au niveau "
+              "d'une alternative porte sur toute l'alternative : parenthéser "
+              "en cas de doute, --plan-only pour vérifier la lecture)"),
     )
     parser.add_argument(
         "--max",
@@ -290,16 +372,19 @@ Exemples :
         help=(
             "Sources et/ou groupes à moissonner. Sources : "
             f"{', '.join(sorted(CONNECTORS.keys()))}. "
-            "Groupes : francophone (défaut), international, all. "
-            "Les sources internationales (crossref/openalex/semantic_scholar/"
-            "core) requièrent une clé API pour 3 d'entre elles (voir .env.example)."
+            "Groupes : francophone (défaut), international, all "
+            "(francophone + international), scholar (google_scholar seul). "
+            "Clés d'API : openalex, core et google_scholar les exigent, "
+            "semantic_scholar la rend facultative, crossref n'en a pas "
+            "(voir .env.example). google_scholar est facturé à la requête et "
+            "n'appartient à aucun autre groupe : le nommer pour l'activer."
         ),
     )
     parser.add_argument(
         "--enrich-oai",
         action="store_true",
-        help="Active l'enrichissement OAI pour OpenEdition et Cairn "
-             "(plus lent mais métadonnées plus riches)",
+        help="Active l'enrichissement OAI pour OpenEdition, Cairn, Persée "
+             "et Érudit (plus lent mais métadonnées plus riches)",
     )
     parser.add_argument(
         "--no-dedup",
@@ -318,19 +403,93 @@ Exemples :
         default=None,
         help="Date maximale inclusive (YYYY ou YYYY-MM-DD)",
     )
-    parser.add_argument(
+    # Option cache à trois états : --cache (activé), --no-cache (désactivé),
+    # absente (None ⇒ héritée de MOISSON_CACHE, cf.
+    # utils.http.resolve_cache_option). Ne jamais transformer l'absence en
+    # False explicite : cela neutraliserait MOISSON_CACHE=1.
+    cache_group = parser.add_mutually_exclusive_group()
+    cache_group.add_argument(
         "--cache",
+        dest="cache",
         action="store_true",
+        default=None,
         help="Active le cache HTTP local (rejeu rapide, mode quasi-offline). "
-             "TTL configurable via MOISSON_CACHE_TTL (défaut 24h)",
+             "TTL configurable via MOISSON_CACHE_TTL (défaut 24h). Sans "
+             "--cache ni --no-cache : valeur de MOISSON_CACHE (0/1)",
     )
+    cache_group.add_argument(
+        "--no-cache",
+        dest="cache",
+        action="store_false",
+        help="Désactive le cache HTTP local, même si MOISSON_CACHE=1",
+    )
+    parser.set_defaults(cache=None)
     parser.add_argument(
         "--workers",
         type=int,
         default=1,
-        help="Nombre de workers parallèles pour le moissonnage des sources "
-             "(défaut: 1 = séquentiel). Recommandé: 2 (HAL+Isidore parallèles, "
-             "puis OpenEdition+Cairn parallèles)",
+        help="Nombre de sources moissonnées en même temps, dans un pool "
+             "unique sans barrière entre sources (défaut: 1 = séquentiel ; "
+             "4 recommandé, valeur par défaut de l'outil MCP ; borné par "
+             "MOISSON_HARVEST_MAX_WORKERS). La politesse par serveur "
+             "s'applique quel que soit ce nombre",
+    )
+    parser.add_argument(
+        "--mode",
+        choices=list(MODES),
+        default=MODE_COLLECTE,
+        help="Mode de moisson : collecte (défaut en CLI : ordre déterministe, "
+             "exhaustivité dans la limite du plafond) ou bibliographie (défaut "
+             "du serveur MCP : meilleures notices selon l'ordre natif de "
+             "chaque source). Transmis aux sources qui l'exploitent.",
+    )
+    # Plan de requête (OPT-11) : langues, variantes explicites, aperçu.
+    parser.add_argument(
+        "--lang",
+        nargs="+",
+        default=None,
+        metavar="CODE",
+        help="Langues des documents (codes ISO 639-1, ex. --lang fr en) : "
+             "filtre natif là où la source le permet (HAL, OpenAlex, Google "
+             "Scholar), local ailleurs (notices sans langue conservées), "
+             "impossible pour CrossRef et Semantic Scholar (signalé)",
+    )
+    parser.add_argument(
+        "--query-en",
+        default=None,
+        metavar="REQUETE",
+        help="Variante anglaise de la requête, envoyée aux sources "
+             "majoritairement anglophones (CrossRef, OpenAlex, Semantic "
+             "Scholar, CORE). Sans elle, ces sources reçoivent la requête "
+             "d'origine : aucune traduction automatique",
+    )
+    parser.add_argument(
+        "--variant",
+        action="append",
+        default=[],
+        metavar="LANG=REQUETE",
+        help="Variante explicite de la requête pour une langue (répétable), "
+             "ex. --variant en='\"digital discourse\"' --variant fr=\"discours "
+             "numérique\"",
+    )
+    parser.add_argument(
+        "--ranking",
+        choices=list(RANKING_MODES),
+        default=None,
+        help="Classement des notices après déduplication (OPT-13), affiché "
+             "en fin de moisson sans modifier le fichier de corpus : native "
+             "(fusion des rangs natifs des sources qui classent par "
+             "pertinence), local (concepts de la requête dans titre, "
+             "mots-clés et résumé, combinés au classement natif ; "
+             "expérimental), off (aucun). Défaut : MOISSON_RANKING, sinon "
+             "native",
+    )
+    parser.add_argument(
+        "--plan-only",
+        action="store_true",
+        help="Affiche le plan de requête (requête envoyée à chaque source, "
+             "filtres natifs et locaux, avertissements) sans rien exécuter : "
+             "aucune requête réseau, aucun fichier",
     )
     parser.add_argument(
         "--verbose",
@@ -345,13 +504,50 @@ Exemples :
     # Développe les groupes (francophone/international/all) en noms de sources
     args.sources = resolve_sources(args.sources)
 
-    # Préparation des chemins de sortie
+    # Variantes explicites (--variant LANG=REQUETE, --query-en).
+    variants = {}
+    for spec in args.variant:
+        lang, sep, text = spec.partition("=")
+        if not sep:
+            parser.error(f"--variant {spec!r} : forme attendue LANG=REQUETE")
+        variants[lang.strip().lower()] = text
+    if args.query_en is not None:
+        variants["en"] = args.query_en
+
+    # Demande et plan de requête, sans réseau : une demande invalide (requête
+    # vide, langue, variante, dates) est refusée avant toute écriture.
+    try:
+        request = SearchRequest(
+            query=args.query,
+            sources=args.sources,
+            from_date=args.from_date,
+            to_date=args.to_date,
+            mode=args.mode,
+            max_per_source=args.max,
+            enrich_oai=args.enrich_oai,
+            dedup=not args.no_dedup,
+            cache=args.cache,
+            workers=args.workers,
+            query_variants=variants,
+            languages=args.lang or [],
+        )
+        plan = request.query_plan()
+    except ValueError as exc:
+        parser.error(str(exc))
+    if args.plan_only:
+        print("Aperçu : aucune moisson exécutée, aucun fichier écrit.")
+        for line in plan.text_lines():
+            print(line)
+        return 0
+
+    # Préparation des chemins de sortie. Identifiant d'exécution = horodatage
+    # à la seconde + uuid court (OPT-16, C33) : deux moissons lancées dans la
+    # même seconde n'écrivent jamais les mêmes fichiers (corpus et raw/).
     args.output.mkdir(parents=True, exist_ok=True)
-    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    run_id = new_run_id()
+    started_at = now_iso()
     query_slug = slugify(args.query)
-    output_json = args.output / f"corpus_{query_slug}_{timestamp}.json"
-    output_csl = args.output / f"corpus_{query_slug}_{timestamp}.csl.json"
-    output_stats = args.output / f"corpus_{query_slug}_{timestamp}_stats.txt"
+    stem = corpus_stem(query_slug, run_id)
 
     logger.info("=" * 60)
     logger.info(f"Moissonneur SHS multi-sources")
@@ -361,118 +557,92 @@ Exemples :
     logger.info(f"Enrichissement OAI : {args.enrich_oai}")
     logger.info("=" * 60)
 
-    # Client HTTP partagé entre tous les connecteurs
-    # pour réutiliser les connexions TCP. Cache optionnel via --cache.
+    # Client HTTP partagé entre tous les connecteurs pour réutiliser les
+    # connexions TCP. Cache : --cache / --no-cache, ou hérité de MOISSON_CACHE
+    # quand l'option est absente (args.cache is None).
     http_client = HTTPClient(use_cache=args.cache)
-    if args.cache:
+    if http_client.cache_enabled:
         logger.info("Cache HTTP activé pour cette moisson")
-
-    # Topologie de moisson : sources natives (HAL, Isidore, Theses.fr...)
-    # exécutées en parallèle dans un premier groupe, puis sources proxy
-    # (OpenEdition, Cairn, Persée, Érudit) qui passent par Isidore dans
-    # un second groupe. Cf. connectors/registry.split_by_group.
-    native_names, proxy_names = split_by_group(args.sources)
-
-    def _build_group(names):
-        group = []
-        # Sources qui supportent l'enrichissement OAI
-        enrich_oai_capable = {"openedition", "cairn", "persee", "erudit"}
-        for name in names:
-            cls = get_connector_class(name)
-            kwargs = {}
-            if name in enrich_oai_capable:
-                kwargs["enrich_oai"] = args.enrich_oai
-            # Capitalisation pour affichage (préserve l'historique des logs)
-            display_name = {
-                "hal": "HAL", "isidore": "Isidore",
-                "openedition": "OpenEdition", "cairn": "Cairn",
-                "persee": "Persée", "theses_fr": "Theses.fr",
-                "erudit": "Érudit", "crossref": "CrossRef",
-                "openalex": "OpenAlex", "semantic_scholar": "Semantic Scholar",
-                "core": "CORE",
-            }.get(name, name.capitalize())
-            group.append((display_name, cls, kwargs))
-        return group
-
-    group_native = _build_group(native_names)
-    group_proxy = _build_group(proxy_names)
-
-    all_items = []
-
-    def _run_group(group):
-        """Exécute un groupe de sources en série ou en parallèle."""
-        results = []
-        if args.workers > 1 and len(group) > 1:
-            from concurrent.futures import ThreadPoolExecutor, as_completed
-            with ThreadPoolExecutor(max_workers=args.workers) as pool:
-                futures = {
-                    pool.submit(
-                        run_source, name, cls, args.query, args.max,
-                        args.output, timestamp, http_client,
-                        from_date=args.from_date, to_date=args.to_date,
-                        **kw,
-                    ): name
-                    for name, cls, kw in group
-                }
-                for f in as_completed(futures):
-                    name = futures[f]
-                    try:
-                        results.extend(f.result())
-                    except Exception as e:
-                        logger.error(f"Source {name} en erreur : {e}")
-        else:
-            for name, cls, kw in group:
-                items = run_source(
-                    name, cls, args.query, args.max,
-                    args.output, timestamp, http_client,
-                    from_date=args.from_date, to_date=args.to_date,
-                    **kw,
-                )
-                results.extend(items)
-        return results
-
+    # Audit des réponses natives (MOISSON_AUDIT_NATIVE=1) : capture bornée et
+    # expurgée dans <sortie>/.native_audit/<run_id>.jsonl, distincte de raw/.
+    native_audit = native_audit_for_run(args.output, run_id)
+    if native_audit is not None:
+        attach_native_audit(http_client, native_audit)
+        logger.info("Audit des réponses natives activé")
+    # run_id : suffixe des fichiers de l'exécution
+    # (corpus_<slug>_<run_id>.json, raw/<source>_<run_id>.json).
+    ctx = RunContext(run_id=run_id, http_client=http_client,
+                     output_dir=args.output)
     try:
-        # Groupe 1 : sources natives (HAL + Isidore en parallèle si workers>1)
-        all_items.extend(_run_group(group_native))
-        # Groupe 2 : proxies Isidore (en parallèle entre eux si workers>1)
-        all_items.extend(_run_group(group_proxy))
+        # --ranking transmis seulement s'il est fixé (défaut du moteur :
+        # MOISSON_RANKING, sinon native).
+        result = (harvest(request, ctx) if args.ranking is None
+                  else harvest(request, ctx, ranking=args.ranking))
     finally:
         http_client.close()
 
-    logger.info(f"Total avant déduplication : {len(all_items)} items")
+    all_items = result.items
+    status_lines = result.status_lines()
 
-    # Déduplication multi-stratégies
-    if not args.no_dedup:
-        all_items = deduplicate(all_items)
+    if result.all_failed:
+        # Aucune source n'a répondu sans panne, aucune notice : une panne,
+        # pas une absence de résultat. Rien n'est écrit (payloads bruts
+        # supprimés par le moteur).
+        logger.error("Aucune source n'a pu être moissonnée : aucun corpus écrit")
+        print("\n" + "=" * 60)
+        print("ÉCHEC : aucune source n'a pu être moissonnée ; aucun corpus "
+              "n'a été écrit.")
+        print("Statut par source :")
+        for line in status_lines:
+            print(line)
+        if not plan.trivial:
+            for line in plan.text_lines():
+                print(line)
+        print("=" * 60)
+        return EXIT_ALL_SOURCES_FAILED
 
-    # Export Zotero JSON natif (format interne riche, consommable par MCP /
-    # outils programmatiques)
-    output_json.write_text(
-        json.dumps(all_items, ensure_ascii=False, indent=2),
-        encoding="utf-8",
+    # Exports : Zotero JSON natif (format interne riche, consommable par MCP
+    # / outils programmatiques), CSL-JSON (importable directement dans Zotero
+    # Desktop via Fichier > Importer) et statistiques.
+    # Publication atomique, manifeste en dernier (OPT-16) : requête, plan,
+    # statuts, versions, empreintes, rangs et scores par notice ; jamais dans
+    # les notices elles-mêmes.
+    files = write_outputs(
+        all_items, args.output, stem, args.query, run_id=run_id,
+        started_at=started_at,
+        manifest=harvest_manifest_fields(result, ctx=ctx,
+                                         native_audit=native_audit),
     )
+    output_json, output_csl, output_stats = (
+        files.json_path, files.csl_path, files.stats_path)
     logger.info(f"Corpus Zotero JSON : {output_json} ({len(all_items)} items)")
-
-    # Export CSL-JSON (format BibTeX JSON standard, importable directement
-    # dans Zotero Desktop via Fichier > Importer)
-    csl_items = export_corpus_to_csl(all_items)
-    output_csl.write_text(
-        json.dumps(csl_items, ensure_ascii=False, indent=2),
-        encoding="utf-8",
-    )
-    logger.info(f"Corpus CSL-JSON : {output_csl} ({len(csl_items)} items)")
-
-    # Statistiques
-    stats = compute_stats(all_items)
-    write_stats_file(stats, output_stats, args.query)
+    logger.info(f"Corpus CSL-JSON : {output_csl} ({files.csl_count} items)")
     logger.info(f"Statistiques : {output_stats}")
+    logger.info(f"Manifeste : {files.manifest_path}")
 
     # Récapitulatif sortie standard
     print("\n" + "=" * 60)
     print(f"Terminé. {len(all_items)} items uniques.")
+    print("Statut par source :")
+    for line in status_lines:
+        print(line)
+    incomplete = result.not_complete
+    if incomplete:
+        print(f"ATTENTION : {len(incomplete)} source(s) incomplète(s) ou non "
+              f"exécutée(s) ; le corpus ne couvre pas tout le périmètre demandé.")
+    if not plan.trivial:
+        # Plan de requête (OPT-11) : requête envoyée par source, filtres,
+        # limites de traduction.
+        for line in plan.text_lines():
+            print(line)
+    # Classement (OPT-13) : premières notices et leur justification ; le
+    # fichier de corpus garde son ordre.
+    for line in ranking_text_lines(getattr(result, "ranking", None), all_items):
+        print(line)
     print(f"Zotero JSON (interne)  : {output_json}")
     print(f"CSL-JSON (Zotero IMPORT) : {output_csl}")
     print(f"Statistiques            : {output_stats}")
+    print(f"Manifeste               : {files.manifest_path}")
     print("=" * 60)
     print("\nPour importer dans Zotero :")
     print("  1. Ouvrir Zotero Desktop")
