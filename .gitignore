@@ -58,3 +58,6 @@ secrets.json
 # Artefacts de développement internes (hors application)
 .claude/
 /PLAN.md
+
+# Sorties locales du moissonneur (corpus, index, verrous, sélections, exports, évaluation)
+output/
