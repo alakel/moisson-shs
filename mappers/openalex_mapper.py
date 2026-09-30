@@ -4,7 +4,11 @@ Mapper OpenAlex Work → item Zotero JSON.
 Spécificités OpenAlex :
 - les résumés ne sont pas servis en clair (licence) mais via un index inversé
   ``abstract_inverted_index`` ``{token: [positions]}`` qu'on recompose ;
-- les ``concepts`` (avec score) deviennent des mots-clés au-dessus d'un seuil ;
+- les ``concepts`` (taxonomie attribuée automatiquement par OpenAlex) au-dessus
+  d'un seuil de score sont tracés dans ``extra`` (« OpenAlex concepts »),
+  jamais dans les mots-clés : ``tags`` ne porte que des mots-clés déclarés
+  (retour d'expérience du 2026-09-30, B1 : « Identity (music) » ou
+  « Space (punctuation) » arrivaient dans Zotero comme mots-clés) ;
 - ``cited_by_count``, statut OA et identifiants natifs sont tracés dans ``extra``
   (réimportés par Zotero dans son champ ``extra``).
 """
@@ -16,7 +20,7 @@ from typing import Dict, List, Optional
 from config import OPENALEX_CONCEPT_SCORE_MIN
 from mappers.scholarly_types import openalex_type_to_zotero
 from mappers.zotero_schema import (
-    append_to_extra, make_empty_item, make_tags, validate_and_clean,
+    append_to_extra, make_empty_item, validate_and_clean,
 )
 from utils.names import split_display_name
 
@@ -123,16 +127,14 @@ def map_openalex_item(raw: Dict) -> Dict:
     if doi:
         item["DOI"] = doi
 
-    # Concepts au-dessus du seuil → mots-clés
+    # Concepts au-dessus du seuil : ligne « OpenAlex concepts » d'extra
+    # seulement (classification automatique, pas des mots-clés déclarés).
     concepts = [
         c.get("display_name", "")
         for c in (raw.get("concepts") or [])
         if c.get("display_name")
         and c.get("score", 0) >= OPENALEX_CONCEPT_SCORE_MIN
     ]
-    if concepts:
-        item["tags"] = make_tags(concepts)
-
     # URL : landing page, sinon URL OA, sinon l'ID OpenAlex
     oa = raw.get("open_access") or {}
     item["url"] = (

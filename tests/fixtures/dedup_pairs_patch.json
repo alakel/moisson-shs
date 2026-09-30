@@ -1,0 +1,1343 @@
+{
+ "_source": "Paires réelles des corpus de output/ (2026-09-30) pour les règles optionnelles du sprint patch (co-diffusion, versions Zenodo, chapitres Google Books) ; attendu avec les trois règles actives. Sans règle active, chaque paire reste en deux notices.",
+ "pairs": [
+  {
+   "id": "C01",
+   "rule": "codiffusion",
+   "kind": "negative",
+   "expected_notices": 2,
+   "note": "titre générique ou compte rendu : autre année ou autre premier auteur",
+   "corpus": "corpus_author_georges_elia_sarfati_20260618_105059.json",
+   "items": [
+    {
+     "itemType": "bookSection",
+     "title": "Introduction",
+     "creators": [
+      {
+       "creatorType": "author",
+       "firstName": "Michael",
+       "lastName": "Rinn"
+      }
+     ],
+     "abstractNote": "Les études rhétoriques, littéraires et linguistiques ont souligné depuis plusieurs années l’importance que revêtent l’usage et la gestion des émotions dans le discours, rappelant la pérennité d’un concept élaboré depuis l’Antiquité grecque : le pathos. Défini par Aristote comme un langage-action, le pathos est conçu comme l’une des techniques d’argumentation destinées à produire la persuasion, cela en émouvant les récepteurs. Les critiques de la raison pratique n’ont cessé de dénoncer la dimension...",
+     "date": "2008-01-01",
+     "language": "",
+     "url": "https://doi.org/10.4000/books.pur.30412",
+     "tags": [],
+     "collections": [],
+     "relations": {},
+     "DOI": "10.4000/books.pur.30412",
+     "extra": "Sources: Isidore\nIsidore URI: https://isidore.science/resource/20.500.13089/7kog\nOriginal Source: Presses universitaires de Rennes\nDC Types: chapter, info:eu-repo/semantics/bookPart\nAlternative URLs: https://hdl.handle.net/20.500.13089/7kog | https://books.openedition.org/pur/30412"
+    },
+    {
+     "itemType": "document",
+     "title": "Introduction",
+     "creators": [
+      {
+       "creatorType": "author",
+       "firstName": "La Rédaction",
+       "lastName": "(Diaspora)"
+      }
+     ],
+     "abstractNote": "La Rédaction (Diaspora) . Introduction. In: Diasporas. Histoire et sociétés, n°2, 2003. Langues dépaysées. pp. 7-8.",
+     "date": "2003-01-01",
+     "language": "",
+     "url": "https://www.persee.fr/doc/diasp_1637-5823_2003_num_2_1_871",
+     "tags": [],
+     "collections": [],
+     "relations": {},
+     "extra": "Sources: Isidore\nIsidore URI: https://isidore.science/resource/10670/1.8761cf663f44aaeac7366225e8eaeb77cde6011f\nOriginal Source: Diasporas. Histoire et sociétés (documents)\nDC Types: intro\nAlternative URLs: http://oai.persee.fr/oai?verb=GetRecord&identifier=oai:persee:article/diasp_1637-5823_2003_num_2_1_871&metadataPrefix=tei"
+    }
+   ]
+  },
+  {
+   "id": "C02",
+   "rule": "codiffusion",
+   "kind": "negative",
+   "expected_notices": 2,
+   "note": "titre générique ou compte rendu : autre année ou autre premier auteur",
+   "corpus": "corpus_author_sophie_moirand_20260618_105038.json",
+   "items": [
+    {
+     "itemType": "bookSection",
+     "title": "Présentation",
+     "creators": [
+      {
+       "creatorType": "author",
+       "firstName": "Anne-Marie",
+       "lastName": "Loffler-Laurian"
+      }
+     ],
+     "abstractNote": "Ce volume d’articles publiés par le Centre de Recherche en Linguistique Contrastive de l’Université Paris III – Sorbonne Nouvelle marque la fondation de ce Centre. Ce n’est pas une présentation des travaux qui y ont été effectués, mais bien plutôt l’ouvrage collectif par lequel certains des auteurs ont voulu manifester la nécessité de donner une unité aux divers travaux de Linguistiques Contrastive menés dans différentes U.E.R. ou divers Instituts.* * *La négation est un vaste domaine qui a préoccupé...",
+     "date": "1986-01-01",
+     "language": "",
+     "url": "https://doi.org/10.4000/books.psn.11600",
+     "tags": [],
+     "collections": [],
+     "relations": {},
+     "DOI": "10.4000/books.psn.11600",
+     "extra": "Sources: Isidore\nIsidore URI: https://isidore.science/resource/20.500.13089/4k0h\nOriginal Source: Presses Sorbonne Nouvelle\nDC Types: chapter, info:eu-repo/semantics/bookPart\nAlternative URLs: https://hdl.handle.net/20.500.13089/4k0h | https://books.openedition.org/psn/11600"
+    },
+    {
+     "itemType": "document",
+     "title": "Présentation",
+     "creators": [
+      {
+       "creatorType": "author",
+       "firstName": "Henri",
+       "lastName": "Besse"
+      },
+      {
+       "creatorType": "author",
+       "firstName": "Sophie",
+       "lastName": "Moirand"
+      }
+     ],
+     "abstractNote": "Besse Henri, Moirand Sophie. Présentation. In: Langue française, n°24, 1974. Audio-visuel et enseignement du français. pp. 3-4.",
+     "date": "1974-01-01",
+     "language": "",
+     "url": "https://www.persee.fr/doc/lfr_0023-8368_1974_num_24_1_5690",
+     "tags": [],
+     "collections": [],
+     "relations": {},
+     "extra": "Sources: Isidore\nIsidore URI: https://isidore.science/resource/10670/1.39134ff21ef2510014e5f16f4ddf757cacd1ed1a\nOriginal Source: Langue française (documents)\nDC Types: liminaire\nAlternative URLs: http://oai.persee.fr/oai?verb=GetRecord&identifier=oai:persee:article/lfr_0023-8368_1974_num_24_1_5690&metadataPrefix=tei"
+    }
+   ]
+  },
+  {
+   "id": "C03",
+   "rule": "codiffusion",
+   "kind": "negative",
+   "expected_notices": 2,
+   "note": "titre générique ou compte rendu : autre année ou autre premier auteur",
+   "corpus": "corpus_author_sophie_moirand_20260618_105038.json",
+   "items": [
+    {
+     "itemType": "bookSection",
+     "title": "Présentation",
+     "creators": [
+      {
+       "creatorType": "author",
+       "firstName": "Sophie",
+       "lastName": "Moirand"
+      },
+      {
+       "creatorType": "author",
+       "firstName": "Florimond",
+       "lastName": "Rakotonoelina"
+      },
+      {
+       "creatorType": "author",
+       "firstName": "Sandrine",
+       "lastName": "Reboul-Touré"
+      }
+     ],
+     "abstractNote": "Ce volume réunit dix textes de Fabienne Cusin-Berche, publiés entre 1992 et 1999, qui nous paraissent refléter la ligne directrice de ses travaux, dont on trouvera une liste exhaustive en fin d’ouvrage , et qui constituent un ensemble cohérent autour d’un même objet : décrire les mots du français dans deux perspectives complémentaires, tels qu’ils sont entérinés par la langue et tels qu’ils sont utilisés en discours. Ces travaux sont représentatifs en effet des positions théoriques de Fabienne...",
+     "date": "2003-01-01",
+     "language": "fr",
+     "url": "https://doi.org/10.4000/books.psn.3383",
+     "tags": [],
+     "collections": [],
+     "relations": {},
+     "DOI": "10.4000/books.psn.3383",
+     "extra": "Sources: Isidore, OpenAlex\nIsidore URI: https://isidore.science/resource/20.500.13089/4h5w\nOriginal Source: Presses Sorbonne Nouvelle\nDC Types: foreword, info:eu-repo/semantics/bookPart\nAlternative URLs: https://hdl.handle.net/20.500.13089/4h5w | https://books.openedition.org/psn/3383\nOpenAlex ID: https://openalex.org/W4386598836\nCited by: 0\nOpen Access: no\nDOI: 10.4000/books.psn.3383\nOpenAlex concepts: Computer science",
+     "bookTitle": "Presses Sorbonne Nouvelle eBooks",
+     "pages": "11-13"
+    },
+    {
+     "itemType": "document",
+     "title": "Présentation",
+     "creators": [
+      {
+       "creatorType": "author",
+       "firstName": "Henri",
+       "lastName": "Besse"
+      },
+      {
+       "creatorType": "author",
+       "firstName": "Sophie",
+       "lastName": "Moirand"
+      }
+     ],
+     "abstractNote": "Besse Henri, Moirand Sophie. Présentation. In: Langue française, n°24, 1974. Audio-visuel et enseignement du français. pp. 3-4.",
+     "date": "1974-01-01",
+     "language": "",
+     "url": "https://www.persee.fr/doc/lfr_0023-8368_1974_num_24_1_5690",
+     "tags": [],
+     "collections": [],
+     "relations": {},
+     "extra": "Sources: Isidore\nIsidore URI: https://isidore.science/resource/10670/1.39134ff21ef2510014e5f16f4ddf757cacd1ed1a\nOriginal Source: Langue française (documents)\nDC Types: liminaire\nAlternative URLs: http://oai.persee.fr/oai?verb=GetRecord&identifier=oai:persee:article/lfr_0023-8368_1974_num_24_1_5690&metadataPrefix=tei"
+    }
+   ]
+  },
+  {
+   "id": "C04",
+   "rule": "codiffusion",
+   "kind": "positive",
+   "expected_notices": 1,
+   "note": "co-diffusion (même article, même numéro)",
+   "corpus": "corpus_author_catherine_kerbrat_orecchioni_20260618_095729.json",
+   "items": [
+    {
+     "itemType": "journalArticle",
+     "title": "Types d'interactions et genres de l'oral",
+     "creators": [
+      {
+       "creatorType": "author",
+       "firstName": "Catherine",
+       "lastName": "Kerbrat-Orecchioni"
+      },
+      {
+       "creatorType": "author",
+       "firstName": "Véronique",
+       "lastName": "Traverso"
+      }
+     ],
+     "abstractNote": "In order to investigate the issue of genre in oral communication, we take as our starting point two separate uses of this concept&#160;: one refers to culturally-socially recognized types of text and the other to forms of discourse organisation. When applied to oral communication, the former corresponds to Hymes&#8217; speech events or Levinson&#8217;s activity types, whereas the latter is more aptly described in terms of linguistic, pragmatic and rhetoric features. With this as a foundation, the paper deals with the way in which these two facets can be reconciled, the aim being 1) to sketch out a theoretical model of interaction and 2) to take into account the practical problems one is faced with when analyzing naturally occuring data.",
+     "date": "2004-03-01",
+     "language": "fr",
+     "url": "https://doi.org/10.3917/lang.153.0041",
+     "tags": [
+      {
+       "tag": "Sketch"
+      },
+      {
+       "tag": "Linguistics"
+      },
+      {
+       "tag": "Rhetoric"
+      },
+      {
+       "tag": "Point (geometry)"
+      },
+      {
+       "tag": "Order (exchange)"
+      },
+      {
+       "tag": "Foundation (evidence)"
+      },
+      {
+       "tag": "Computer science"
+      },
+      {
+       "tag": "Psychology"
+      },
+      {
+       "tag": "Epistemology"
+      },
+      {
+       "tag": "Sociology"
+      }
+     ],
+     "collections": [],
+     "relations": {},
+     "publicationTitle": "Langages",
+     "volume": "n° 153",
+     "issue": "1",
+     "pages": "41-51",
+     "ISSN": "0458-726X",
+     "DOI": "10.3917/lang.153.0041",
+     "extra": "Sources: OpenAlex\nOpenAlex ID: https://openalex.org/W4213314968\nCited by: 51\nOpen Access: yes\nDOI: 10.3917/lang.153.0041\nOpenAlex concepts: Sketch, Linguistics, Rhetoric, Point (geometry), Order (exchange), Foundation (evidence), Computer science, Psychology, Epistemology, Sociology"
+    },
+    {
+     "itemType": "journalArticle",
+     "title": "Types d'interactions et genres de l'oral",
+     "creators": [
+      {
+       "creatorType": "author",
+       "firstName": "Catherine",
+       "lastName": "Kerbrat-Orecchioni"
+      },
+      {
+       "creatorType": "author",
+       "firstName": "Véronique",
+       "lastName": "Traverso"
+      }
+     ],
+     "abstractNote": "Catherine Kerbrat-Orecchioni, Véronique traverso: Oral communication: genres and types of interaction. In order to investigate the issue of genre in oral communication, we take as our starting point two separate uses of this concept: one refers to culturally-socially recognized types of text and the other to forms of discourse organisation. When applied to oral communication, the former corresponds to Hymes' speech events or Levinson's activity types, whereas the latter is more aptly described in terms of linguistic, pragmatic and rhetoric features. With this as a foundation, the paper deals with the way in which these two facets can be reconciled, the aim being 1) to sketch out a theoretical model of interaction and 2) to take into account the practical problems one is faced with when analyzing naturally occuring data.",
+     "date": "2004-01-01",
+     "language": "en",
+     "url": "https://doi.org/10.3406/lgge.2004.931",
+     "tags": [
+      {
+       "tag": "Sketch"
+      },
+      {
+       "tag": "Linguistics"
+      },
+      {
+       "tag": "Rhetoric"
+      },
+      {
+       "tag": "Point (geometry)"
+      },
+      {
+       "tag": "Order (exchange)"
+      },
+      {
+       "tag": "Sociology"
+      },
+      {
+       "tag": "Psychology"
+      },
+      {
+       "tag": "Epistemology"
+      }
+     ],
+     "collections": [],
+     "relations": {},
+     "publicationTitle": "Langages",
+     "volume": "38",
+     "issue": "153",
+     "pages": "41-51",
+     "ISSN": "0458-726X",
+     "DOI": "10.3406/lgge.2004.931",
+     "extra": "Sources: OpenAlex, Semantic Scholar\nOpenAlex ID: https://openalex.org/W2167152957\nCited by: 45\nOpen Access: no\nDOI: 10.3406/lgge.2004.931\nOpenAlex concepts: Sketch, Linguistics, Rhetoric, Point (geometry), Order (exchange), Sociology, Psychology, Epistemology\nS2 corpus id: 170871805\nCited by: 48\nInfluential citations: 1\nOpen Access: yes\nDOI: 10.3406/LGGE.2004.931\nS2 fields: Linguistics, Sociology\npublicationTitle: Langages\nvolume: 38\npages: 41-51"
+    }
+   ]
+  },
+  {
+   "id": "C05",
+   "rule": "codiffusion",
+   "kind": "manquee",
+   "expected_notices": 2,
+   "note": "vraie co-diffusion écartée par la règle stricte : revue « Langages (documents) » côté Cairn, sans ISSN ni pages : revue non établie",
+   "corpus": "corpus_author_alain_rabatel_20260618_095713.json",
+   "items": [
+    {
+     "itemType": "journalArticle",
+     "title": "L'effacement énonciatif dans les discours rapportés et ses effets pragmatiques",
+     "creators": [
+      {
+       "creatorType": "author",
+       "firstName": "Alain",
+       "lastName": "Rabatel"
+      }
+     ],
+     "abstractNote": "L'article présente la notion d'effacement énonciatif, qui fonctionne en continuum, selon les degrés d'actualisation des marques lexicales et indexicales du locuteur. L'effacement énonciatif rend compte des choix du locuteur de paraître s'effacer de son dire. Cette possibilité repose sur la disjonction locuteur/énonciateur. Dans les discours rapportés, les diverses modalités d'effacement du locuteur/énonciateur citant ou cité correspondent à des postures énonciatives, en fonction des relations nouées par les énonciateurs dans la construction interactionnelle des points de vue : les coénonciateurs coproduisent un point de vue partagé, le surénonciateur (le locuteur citant, le plus souvent) impose son point de vue à l'autre, tandis que le sousénonciateur construit son point de vue en référence à un énonciateur dominant (le locuteur cité, le plus souvent).",
+     "date": "2004",
+     "language": "fr",
+     "url": "https://shs.hal.science/halshs-00433221v1",
+     "tags": [
+      {
+       "tag": "Sur-énonciation postures énonciatives"
+      },
+      {
+       "tag": "Sous-énonciation"
+      },
+      {
+       "tag": "Co-énonciation"
+      },
+      {
+       "tag": "Discours représentés"
+      },
+      {
+       "tag": "Discours rapportés"
+      },
+      {
+       "tag": "Effacement énonciatif"
+      }
+     ],
+     "collections": [],
+     "relations": {},
+     "DOI": "10.3917/lang.156.0003",
+     "publicationTitle": "Langages",
+     "ISSN": "0458-726X",
+     "volume": "4",
+     "issue": "156",
+     "pages": "3-17",
+     "extra": "Sources: HAL\nHAL ID: halshs-00433221\nHAL Domain: 0.shs, 1.shs.langue, 0.shs, 1.shs.litt, 0.shs, 1.shs.info\nHAL Laboratory: ICAR\nOpen Access: yes\nPDF URL: https://shs.hal.science/halshs-00433221/document\nSubmitted Date: 2018-03-27 16:07:44\nHAL Submit Type: file"
+    },
+    {
+     "itemType": "journalArticle",
+     "title": "L'effacement énonciatif dans les discours rapportés et ses effets pragmatiques",
+     "creators": [
+      {
+       "creatorType": "author",
+       "firstName": "Alain",
+       "lastName": "Rabatel"
+      }
+     ],
+     "abstractNote": "Alain Rabatel: Enunciative effacement in reported speech and pragmatic effects. This article presents the notion of enunciative effacement, which functions as a continuum, according to the degrees of production of lexical and indexical marks by the speaker. Enunciative effacement allows the speaker to efface himself from what he says, bringing about varied pragmatic effects. This possibility relies on the disconnection between speaker and enunciator, and especially on the existence of intratextual enunciators at the origin of points of view, which are not necessary spoken. In reported speech, the different types of speaker/enunciator's effacement quoting or quoted in the interactive construction of points of view correspond to enunciative postures: the coenunciators co-produce a shared point of view, the superenunciator (the most often, the speaker who quotes) imposes his point of view on others, while the subenunciator constructs his point of view with reference to a dominant enunciator (most often, the quoted speaker).",
+     "date": "2004-01-01",
+     "language": "",
+     "url": "https://www.persee.fr/doc/lgge_0458-726x_2004_num_38_156_960",
+     "tags": [],
+     "collections": [],
+     "relations": {},
+     "publicationTitle": "Langages (documents)",
+     "extra": "Sources: Isidore\nIsidore URI: https://isidore.science/resource/10.3406/lgge.2004.960\nOriginal Source: Langages (documents)\nDC Types: article\nAlternative URLs: http://oai.persee.fr/oai?verb=GetRecord&identifier=oai:persee:article/lgge_0458-726x_2004_num_38_156_960&metadataPrefix=tei"
+    }
+   ]
+  },
+  {
+   "id": "C06",
+   "rule": "codiffusion",
+   "kind": "manquee",
+   "expected_notices": 2,
+   "note": "vraie co-diffusion écartée par la règle stricte : titres à 0,996 (« sur-énonciation » / « surénonciation ») : titre non identique",
+   "corpus": "corpus_author_alain_rabatel_20260618_095713.json",
+   "items": [
+    {
+     "itemType": "journalArticle",
+     "title": "Stratégies d'effacement énonciatif et posture de sur-énonciation dans le Dictionnaire philosophique de Comte-Sponville",
+     "creators": [
+      {
+       "creatorType": "author",
+       "firstName": "Alain",
+       "lastName": "Rabatel"
+      }
+     ],
+     "abstractNote": "Cet article analyse la construction des postures énonciatives, essentiellement celle de surénonciateur, dans un contexte marqué par des formes variées d'effacement énonciatif (EE), depuis l'EE stricto sensu jusqu'à des formes d'EE lato sensu avec la désinscription énonciative. Le genre du dictionnaire (philosophique), qui sert de cadre à l'analyse, impose au locuteur/énonciateur premier des règles de scientificité relatives à la fiabilité des sources et à la présentation « objective » des idées et systèmes. Toutefois, ce Dictionnaire philosophique (DP) n'est pas écrit par un collectif de spécialistes, mais par un auteur unique, dont les modèles explicites sont Voltaire (Dictionnaire philosophique) et Alain (Définitions). Aussi ne se cantonne-t-il pas à une présentation sans parti pris des points de vue autorisés, il fait dialoguer ces autorités, discute avec elles, pour faire partager ses conceptions au lecteur. Les tensions qui traversent cet ouvrage scientifique à la subjectivité revendiquée sont sensibles à travers les jeux de l'EE, ainsi qu'à travers les signes plus ou moins discrets de la présence du sujet modal, qui emprunte volontiers une posture de surénonciateur. Celle-ci sera envisagée successivement sous l'angle de sa mise en scène discursive, autour de la figure du locuteur/énonciateur primaire (L1/E1), ensuite autour de la recontextualisation linguistique des citations du locuteur/énonciateur cité (l2/e2), enfin autour des stratégies d'argumentation par « autorité polyphonique » (Ducrot 1984), au plan des énoncés. Par cette investigation « en entonnoir », on entend montrer que les effets de l'EE sur la posture de surénonciateur sont non seulement la résultante de stratégies discursives, mais encore de phénomènes grammaticaux souvent congruents qui jouent au niveau de la phrase.",
+     "date": "2004",
+     "language": "fr",
+     "url": "https://shs.hal.science/halshs-00433224v1",
+     "tags": [
+      {
+       "tag": "Verbes attributifs du dire"
+      },
+      {
+       "tag": "Argumentation par autorité polyphonique"
+      },
+      {
+       "tag": "Effacement énonciatif"
+      },
+      {
+       "tag": "Désincription énonciative"
+      },
+      {
+       "tag": "Sur-énonciation"
+      }
+     ],
+     "collections": [],
+     "relations": {},
+     "DOI": "10.3917/lang.156.0018",
+     "publicationTitle": "Langages",
+     "ISSN": "0458-726X",
+     "volume": "4",
+     "issue": "156",
+     "pages": "18-33",
+     "extra": "Sources: HAL\nHAL ID: halshs-00433224\nHAL Domain: 0.shs, 1.shs.langue, 0.shs, 1.shs.litt, 0.shs, 1.shs.phil\nHAL Laboratory: ICAR\nOpen Access: yes\nPDF URL: https://shs.hal.science/halshs-00433224/document\nSubmitted Date: 2023-01-11 12:29:26\nHAL Submit Type: file"
+    },
+    {
+     "itemType": "journalArticle",
+     "title": "Stratégies d'effacement énonciatif et posture de surénonciation dans le Dictionnaire philosophique de Comte-Sponville",
+     "creators": [
+      {
+       "creatorType": "author",
+       "firstName": "Alain",
+       "lastName": "Rabatel"
+      }
+     ],
+     "abstractNote": "Alain Rabatel: Strategies of enunciative effacement and superenunciation posture in Comte-Sponville's Dictionnaire philosophique. Using an example from a philosophical dictionary, this article analyses the construction of enunciative postures, essentially those of the superenunciator, in a context marked by various forms of enunciative effacement, ranging from enunciative effacement stricto sensu to lato sensu forms of ЕЕ with enunciative disengagement. It emphasizes the posture of the superenunciator adopted by the speaker, through discourse management, the recontextualisation of reported speech and the argumentative role that it confers on them to support his own vision of things, by choosing when and how he wants to quote, by deciding on the beginning and the end of the quotation, by selecting the verbal episodes of the verba dicendi, by playing on range, the modalities of the sentence, and the argumentative orientation of the quotation, or by drawing on argumentative mechanisms based on polyphonic authority.",
+     "date": "2004-01-01",
+     "language": "",
+     "url": "https://www.persee.fr/doc/lgge_0458-726x_2004_num_38_156_961",
+     "tags": [],
+     "collections": [],
+     "relations": {},
+     "publicationTitle": "Langages (documents)",
+     "extra": "Sources: Isidore\nIsidore URI: https://isidore.science/resource/10.3406/lgge.2004.961\nOriginal Source: Langages (documents)\nDC Types: article\nAlternative URLs: http://oai.persee.fr/oai?verb=GetRecord&identifier=oai:persee:article/lgge_0458-726x_2004_num_38_156_961&metadataPrefix=tei"
+    }
+   ]
+  },
+  {
+   "id": "C07",
+   "rule": "codiffusion",
+   "kind": "manquee",
+   "expected_notices": 2,
+   "note": "vraie co-diffusion écartée par la règle stricte : titre court (moins de quatre mots significatifs)",
+   "corpus": "corpus_author_henning_nolke_20260618_095701.json",
+   "items": [
+    {
+     "itemType": "journalArticle",
+     "title": "Les lectures de ne...pas : éléments d'une explication modulaire",
+     "creators": [
+      {
+       "creatorType": "author",
+       "firstName": "Henning",
+       "lastName": "Nølke"
+      }
+     ],
+     "abstractNote": "The negation ne... pas gives rise to three different uses : Metalinguistic, polemic and descriptive. In order to explain these uses, the author advocates for a modular framework in which he suggests separate analyses of the scope and the focus of the negation. These two notions are given independent deifinitions. Scope is conceived as a structural phenomenon and focus as a functional one. It is shown that the three uses correspond to three different scope perspectives and that there is a close relation between the different uses and the principal types of focalisation. Finally, the author sketches a modular analysis of the metalinguistic negation which also takes into consideration aspects of morphology, syntax, truth-functinality and polyphony. The paper highlights both complexity of natural negation and the virtues of a modular approach.",
+     "date": "1994-01-01",
+     "language": "en",
+     "url": "https://doi.org/10.3406/linx.1994.1298",
+     "tags": [
+      {
+       "tag": "Negation"
+      },
+      {
+       "tag": "Scope (computer science)"
+      },
+      {
+       "tag": "Syntax"
+      },
+      {
+       "tag": "Explication"
+      },
+      {
+       "tag": "Focus (optics)"
+      },
+      {
+       "tag": "Linguistics"
+      },
+      {
+       "tag": "Metalanguage"
+      },
+      {
+       "tag": "Phenomenon"
+      },
+      {
+       "tag": "Natural (archaeology)"
+      },
+      {
+       "tag": "Polyphony"
+      },
+      {
+       "tag": "Computer science"
+      },
+      {
+       "tag": "Philosophy"
+      },
+      {
+       "tag": "Mathematics"
+      },
+      {
+       "tag": "Epistemology"
+      }
+     ],
+     "collections": [],
+     "relations": {},
+     "publicationTitle": "Linx",
+     "volume": "5",
+     "issue": "1",
+     "pages": "223-234",
+     "ISSN": "0246-8743",
+     "DOI": "10.3406/linx.1994.1298",
+     "extra": "Sources: OpenAlex\nOpenAlex ID: https://openalex.org/W4210955115\nCited by: 2\nOpen Access: yes\nDOI: 10.3406/linx.1994.1298\nOpenAlex concepts: Negation, Scope (computer science), Syntax, Explication, Focus (optics), Linguistics, Metalanguage, Phenomenon, Natural (archaeology), Polyphony, Computer science, Philosophy, Mathematics, Epistemology"
+    },
+    {
+     "itemType": "journalArticle",
+     "title": "Les lectures de ne...pas : éléments d’une explication modulaire",
+     "creators": [
+      {
+       "creatorType": "author",
+       "firstName": "Henning",
+       "lastName": "Nølke"
+      }
+     ],
+     "abstractNote": "On peut distinguer pour la négation ne...pas les emplois métalinguistiques, polémique et descriptif. Afin d’expliquer ces emplois, l’auteur propose, dans le cadre d’un modèle modulaire, un examen de la portée et du foyer (ou le focus) de la négation. Ces deux notions reçoivent d’abord des définitions indépendantes, respectivement structurale et énonciative. Il sera montré que les trois emplois correspondent à trois perspectives de portée différentes et qu’il y a un rapport entre les trois emplois examinés et les principaux types de focalisation. Enfin, l’auteur examine plus particulièrement la négation métalinguistique dont il esquisse une analyse modulaire ayant recours aussi à d’autres modules traitant de syntaxe, morphologie, vérifonctionnalité et polyphonie. L’article met en évidence à la fois la complexité du fonctionnement de la négation et les vertus d’une approche modulaire.",
+     "date": "1994-01-01",
+     "language": "fr",
+     "url": "https://doi.org/10.4000/linx.1212",
+     "tags": [
+      {
+       "tag": "Philosophy"
+      },
+      {
+       "tag": "Humanities"
+      }
+     ],
+     "collections": [],
+     "relations": {},
+     "publicationTitle": "Linx",
+     "volume": "5",
+     "pages": "223-234",
+     "ISSN": "0246-8743",
+     "DOI": "10.4000/linx.1212",
+     "extra": "Sources: OpenAlex, Semantic Scholar\nOpenAlex ID: https://openalex.org/W2093515437\nCited by: 3\nOpen Access: yes\nDOI: 10.4000/linx.1212\nOpenAlex concepts: Philosophy, Humanities\nS2 corpus id: 191448274\nInfluential citations: 0\nDOI: 10.4000/LINX.1212\nS2 fields: Art\nvolume: 5\npages: 223-234"
+    }
+   ]
+  },
+  {
+   "id": "C08",
+   "rule": "codiffusion",
+   "kind": "negative",
+   "expected_notices": 2,
+   "note": "titre générique ou compte rendu : autre année ou autre premier auteur",
+   "corpus": "corpus_author_georges_elia_sarfati_20260618_105059.json",
+   "items": [
+    {
+     "itemType": "journalArticle",
+     "title": "Présentation",
+     "creators": [
+      {
+       "creatorType": "author",
+       "firstName": "Georges-Élia",
+       "lastName": "Sarfati"
+      }
+     ],
+     "abstractNote": "",
+     "date": "2008-06-01",
+     "language": "fr",
+     "url": "https://doi.org/10.3917/lang.170.0003",
+     "tags": [
+      {
+       "tag": "Linguistics"
+      },
+      {
+       "tag": "History"
+      },
+      {
+       "tag": "Philosophy"
+      }
+     ],
+     "collections": [],
+     "relations": {},
+     "publicationTitle": "Langages",
+     "volume": "n° 170",
+     "issue": "2",
+     "pages": "3-12",
+     "ISSN": "0458-726X",
+     "DOI": "10.3917/lang.170.0003",
+     "extra": "Sources: OpenAlex\nOpenAlex ID: https://openalex.org/W4237192010\nCited by: 1\nOpen Access: yes\nDOI: 10.3917/lang.170.0003\nOpenAlex concepts: Linguistics, History, Philosophy"
+    },
+    {
+     "itemType": "document",
+     "title": "Présentation",
+     "creators": [
+      {
+       "creatorType": "author",
+       "firstName": "Anne",
+       "lastName": "Croll"
+      },
+      {
+       "creatorType": "author",
+       "firstName": "Annette",
+       "lastName": "Wieviorka"
+      }
+     ],
+     "abstractNote": "Croll Anne, Wieviorka Annette. Présentation. In: Mots, n°56, septembre 1998. La Shoah : silence... et voix, sous la direction de Anne Croll et Annette Wieviorka. pp. 3-4.",
+     "date": "1998-01-01",
+     "language": "",
+     "url": "https://www.persee.fr/doc/mots_0243-6450_1998_num_56_1_2361",
+     "tags": [],
+     "collections": [],
+     "relations": {},
+     "extra": "Sources: Isidore\nIsidore URI: https://isidore.science/resource/10670/1.e8abed114c64225d2b244825d23257d0248dc083\nOriginal Source: Mots. Les langages du politique (documents)\nDC Types: liminaire\nAlternative URLs: http://oai.persee.fr/oai?verb=GetRecord&identifier=oai:persee:article/mots_0243-6450_1998_num_56_1_2361&metadataPrefix=tei"
+    }
+   ]
+  },
+  {
+   "id": "C09",
+   "rule": "codiffusion",
+   "kind": "negative",
+   "expected_notices": 2,
+   "note": "titre générique ou compte rendu : autre année ou autre premier auteur",
+   "corpus": "corpus_author_alice_krieg_planque_20260618_105050.json",
+   "items": [
+    {
+     "itemType": "journalArticle",
+     "title": "Alice KRIEG-PLANQUE, « Purification ethnique ». Une formule et son histoire",
+     "creators": [
+      {
+       "creatorType": "author",
+       "firstName": "Patrick",
+       "lastName": "Michels"
+      }
+     ],
+     "abstractNote": "Constitué des chapitres 3 et 6 de sa thèse soutenue à l'université de paris 13, en science du langage en 2000, ce travail d'analyse de discours ne s'intéresse pas aux revendications des acteurs, mais à qui en a rendu compte, par quel moyen, dans quel lieu.Le corpus utilisé est constitué de la presse écrite (quotidiens, hebdomadaires, mensuels), extra-médiatique (revues, livres, bd, brochures, chansons, tracts).A. Krieg-Planque se penche sur la fonction que remplit la formulation, l'utilisation...",
+     "date": "2003-01-01",
+     "language": "",
+     "url": "https://doi.org/10.4000/balkanologie.1969",
+     "tags": [],
+     "collections": [],
+     "relations": {},
+     "DOI": "10.4000/balkanologie.1969",
+     "publicationTitle": "Balkanologie",
+     "extra": "Sources: Isidore\nIsidore URI: https://isidore.science/resource/20.500.13089/d6ks\nOriginal Source: Balkanologie\nDC Types: review, info:eu-repo/semantics/review\nAlternative URLs: https://hdl.handle.net/20.500.13089/d6ks | https://journals.openedition.org/balkanologie/1969"
+    },
+    {
+     "itemType": "document",
+     "title": "Krieg-Planque A., « Purification ethnique ». Une formule et son histoire",
+     "creators": [
+      {
+       "creatorType": "author",
+       "firstName": "Jacques",
+       "lastName": "Guilhaumou"
+      }
+     ],
+     "abstractNote": "Guilhaumou Jacques. Krieg-Planque A., « Purification ethnique ». Une formule et son histoire. In: Politix, vol. 16, n°63, Troisième trimestre 2003. Fréquentations militantes, sous la direction de Jean-Philippe Heurtin. pp. 199-202.",
+     "date": "2003-01-01",
+     "language": "",
+     "url": "https://www.persee.fr/doc/polix_0295-2319_2003_num_16_63_1300",
+     "tags": [],
+     "collections": [],
+     "relations": {},
+     "extra": "Sources: Isidore\nIsidore URI: https://isidore.science/resource/10.3406/polix.2003.1300\nOriginal Source: Politix. Revue des sciences sociales du politique (documents)\nDC Types: notecritique\nAlternative URLs: http://oai.persee.fr/oai?verb=GetRecord&identifier=oai:persee:article/polix_0295-2319_2003_num_16_63_1300&metadataPrefix=tei"
+    }
+   ]
+  },
+  {
+   "id": "C10",
+   "rule": "codiffusion",
+   "kind": "negative",
+   "expected_notices": 2,
+   "note": "titre générique ou compte rendu : autre année ou autre premier auteur",
+   "corpus": "corpus_author_alice_krieg_planque_20260618_105050.json",
+   "items": [
+    {
+     "itemType": "journalArticle",
+     "title": "Alice Krieg-Planque : « Purification ethnique ». Une formule et son histoire",
+     "creators": [
+      {
+       "creatorType": "author",
+       "firstName": "Jacques",
+       "lastName": "Noyer"
+      }
+     ],
+     "abstractNote": "Quels sont les modes de participation des discours à l’histoire d’un conflit et selon quelles logiques certains descripteurs tendent à s’imposer dans les récits qui en sont proposés au sein d’un espace public donné ? Comment certains mots, certains syntagmes fonctionnent, dans les usages qui peuvent en être faits à certains moments-clés de l’histoire d’un pays comme des indices, parfois fort éloquents, de distance ou d’adhésion par rapport à certaines thèses, certaines idées ? De quelles façons...",
+     "date": "2003-01-01",
+     "language": "",
+     "url": "https://doi.org/10.4000/edc.135",
+     "tags": [],
+     "collections": [],
+     "relations": {},
+     "DOI": "10.4000/edc.135",
+     "publicationTitle": "Études de communication",
+     "extra": "Sources: Isidore\nIsidore URI: https://isidore.science/resource/20.500.13089/fivm\nOriginal Source: Études de communication\nDC Types: review, info:eu-repo/semantics/review\nAlternative URLs: https://hdl.handle.net/20.500.13089/fivm | https://journals.openedition.org/edc/135"
+    },
+    {
+     "itemType": "document",
+     "title": "Krieg-Planque A., « Purification ethnique ». Une formule et son histoire",
+     "creators": [
+      {
+       "creatorType": "author",
+       "firstName": "Jacques",
+       "lastName": "Guilhaumou"
+      }
+     ],
+     "abstractNote": "Guilhaumou Jacques. Krieg-Planque A., « Purification ethnique ». Une formule et son histoire. In: Politix, vol. 16, n°63, Troisième trimestre 2003. Fréquentations militantes, sous la direction de Jean-Philippe Heurtin. pp. 199-202.",
+     "date": "2003-01-01",
+     "language": "",
+     "url": "https://www.persee.fr/doc/polix_0295-2319_2003_num_16_63_1300",
+     "tags": [],
+     "collections": [],
+     "relations": {},
+     "extra": "Sources: Isidore\nIsidore URI: https://isidore.science/resource/10.3406/polix.2003.1300\nOriginal Source: Politix. Revue des sciences sociales du politique (documents)\nDC Types: notecritique\nAlternative URLs: http://oai.persee.fr/oai?verb=GetRecord&identifier=oai:persee:article/polix_0295-2319_2003_num_16_63_1300&metadataPrefix=tei"
+    }
+   ]
+  },
+  {
+   "id": "C11",
+   "rule": "codiffusion",
+   "kind": "negative",
+   "expected_notices": 2,
+   "note": "titre générique ou compte rendu : autre année ou autre premier auteur",
+   "corpus": "corpus_author_alice_krieg_planque_20260618_105050.json",
+   "items": [
+    {
+     "itemType": "journalArticle",
+     "title": "Alice Krieg-Planque, «Purification ethnique» – Une formule et son histoire",
+     "creators": [
+      {
+       "creatorType": "author",
+       "firstName": "Rachele",
+       "lastName": "Raus"
+      }
+     ],
+     "abstractNote": "Dans ce livre Alice Krieg-Planque analyse le parcours de la formule «purification ethnique» qui a été utilisée en France pendant le conflit en ex Yougoslavie. L’A. définit les formules comme «des séquences qui revêtent un caractère problématique, autrement dit qui suscitent des questions et des réponses» (pp. 305-306).Dans le premier chapitre, il est question de retracer les cinq événements «mondains», c’est-à-dire réels, qui ont fournit le substrat historique à la formule dont il est question....",
+     "date": "2005-01-01",
+     "language": "",
+     "url": "https://doi.org/10.4000/studifrancesi.33968",
+     "tags": [],
+     "collections": [],
+     "relations": {},
+     "DOI": "10.4000/studifrancesi.33968",
+     "publicationTitle": "Studi Francesi",
+     "extra": "Sources: Isidore\nIsidore URI: https://isidore.science/resource/20.500.13089/l2th\nOriginal Source: Studi Francesi\nDC Types: review, info:eu-repo/semantics/review\nAlternative URLs: https://hdl.handle.net/20.500.13089/l2th | https://journals.openedition.org/studifrancesi/33968"
+    },
+    {
+     "itemType": "document",
+     "title": "Krieg-Planque A., « Purification ethnique ». Une formule et son histoire",
+     "creators": [
+      {
+       "creatorType": "author",
+       "firstName": "Jacques",
+       "lastName": "Guilhaumou"
+      }
+     ],
+     "abstractNote": "Guilhaumou Jacques. Krieg-Planque A., « Purification ethnique ». Une formule et son histoire. In: Politix, vol. 16, n°63, Troisième trimestre 2003. Fréquentations militantes, sous la direction de Jean-Philippe Heurtin. pp. 199-202.",
+     "date": "2003-01-01",
+     "language": "",
+     "url": "https://www.persee.fr/doc/polix_0295-2319_2003_num_16_63_1300",
+     "tags": [],
+     "collections": [],
+     "relations": {},
+     "extra": "Sources: Isidore\nIsidore URI: https://isidore.science/resource/10.3406/polix.2003.1300\nOriginal Source: Politix. Revue des sciences sociales du politique (documents)\nDC Types: notecritique\nAlternative URLs: http://oai.persee.fr/oai?verb=GetRecord&identifier=oai:persee:article/polix_0295-2319_2003_num_16_63_1300&metadataPrefix=tei"
+    }
+   ]
+  },
+  {
+   "id": "C12",
+   "rule": "codiffusion",
+   "kind": "negative",
+   "expected_notices": 2,
+   "note": "titre générique ou compte rendu : autre année ou autre premier auteur",
+   "corpus": "corpus_author_georges_elia_sarfati_20260618_105059.json",
+   "items": [
+    {
+     "itemType": "journalArticle",
+     "title": "Présentation",
+     "creators": [
+      {
+       "creatorType": "author",
+       "firstName": "Georges-Élia",
+       "lastName": "Sarfati"
+      }
+     ],
+     "abstractNote": "",
+     "date": "2008-06-01",
+     "language": "fr",
+     "url": "https://doi.org/10.3917/lang.170.0003",
+     "tags": [
+      {
+       "tag": "Linguistics"
+      },
+      {
+       "tag": "History"
+      },
+      {
+       "tag": "Philosophy"
+      }
+     ],
+     "collections": [],
+     "relations": {},
+     "publicationTitle": "Langages",
+     "volume": "n° 170",
+     "issue": "2",
+     "pages": "3-12",
+     "ISSN": "0458-726X",
+     "DOI": "10.3917/lang.170.0003",
+     "extra": "Sources: OpenAlex\nOpenAlex ID: https://openalex.org/W4237192010\nCited by: 1\nOpen Access: yes\nDOI: 10.3917/lang.170.0003\nOpenAlex concepts: Linguistics, History, Philosophy"
+    },
+    {
+     "itemType": "document",
+     "title": "Présentation",
+     "creators": [
+      {
+       "creatorType": "author",
+       "firstName": "Lucien",
+       "lastName": "Kupferman"
+      }
+     ],
+     "abstractNote": "Kupferman Lucien. Présentation. In: Scolia : Sciences Cognitives, Linguistiques et Intelligence Artificielle, N°10, 1997. 8èmes rencontres linguistiques en pays rhénan. pp. 5-8.",
+     "date": "1997-01-01",
+     "language": "",
+     "url": "https://www.persee.fr/doc/scoli_1253-9708_1997_num_10_1_959",
+     "tags": [],
+     "collections": [],
+     "relations": {},
+     "extra": "Sources: Isidore\nIsidore URI: https://isidore.science/resource/10670/1.a58ac717051269412024e0c7e82eee0ce47480a8\nOriginal Source: Scolia : Sciences Cognitives, Linguistiques et Intelligence Artificielle (documents)\nDC Types: intro\nAlternative URLs: http://oai.persee.fr/oai?verb=GetRecord&identifier=oai:persee:article/scoli_1253-9708_1997_num_10_1_959&metadataPrefix=tei"
+    }
+   ]
+  },
+  {
+   "id": "C13",
+   "rule": "codiffusion",
+   "kind": "positive",
+   "expected_notices": 1,
+   "note": "co-diffusion (même article, même numéro)",
+   "corpus": "corpus_author_alice_krieg_planque_20260618_105050.json",
+   "items": [
+    {
+     "itemType": "journalArticle",
+     "title": "Poser les « petites phrases » comme objet d’étude",
+     "creators": [
+      {
+       "creatorType": "author",
+       "firstName": "Alice",
+       "lastName": "Krieg-Planque"
+      },
+      {
+       "creatorType": "author",
+       "firstName": "Caroline",
+       "lastName": "Ollivier‐Yaniv"
+      }
+     ],
+     "abstractNote": "",
+     "date": "2011-06-01",
+     "language": "fr",
+     "url": "https://doi.org/10.3917/comla.168.0017",
+     "tags": [
+      {
+       "tag": "Art"
+      }
+     ],
+     "collections": [],
+     "relations": {},
+     "publicationTitle": "Communication & langages",
+     "volume": "N° 168",
+     "issue": "2",
+     "pages": "17-22",
+     "ISSN": "0336-1500",
+     "DOI": "10.3917/comla.168.0017",
+     "extra": "Sources: OpenAlex\nOpenAlex ID: https://openalex.org/W4389474045\nCited by: 28\nOpen Access: no\nDOI: 10.3917/comla.168.0017\nOpenAlex concepts: Art"
+    },
+    {
+     "itemType": "journalArticle",
+     "title": "Poser les « petites phrases » comme objet d’étude",
+     "creators": [
+      {
+       "creatorType": "author",
+       "firstName": "Alice",
+       "lastName": "Krieg-Planque"
+      },
+      {
+       "creatorType": "author",
+       "firstName": "Caroline",
+       "lastName": "Ollivier‐Yaniv"
+      }
+     ],
+     "abstractNote": "",
+     "date": "2011-06-01",
+     "language": "fr",
+     "url": "https://www.cairn.info/revue-communication-et-langages1-2011-2-page-17.htm",
+     "tags": [
+      {
+       "tag": "History"
+      }
+     ],
+     "collections": [],
+     "relations": {},
+     "publicationTitle": "Communication & langages",
+     "volume": "2011",
+     "issue": "2",
+     "pages": "17-22",
+     "ISSN": "0336-1500",
+     "DOI": "10.4074/s0336150011012026",
+     "extra": "Sources: OpenAlex, Semantic Scholar\nOpenAlex ID: https://openalex.org/W2769632488\nCited by: 2\nOpen Access: no\nDOI: 10.4074/s0336150011012026\nOpenAlex concepts: History\nS2 corpus id: 186565224\nCited by: 5\nInfluential citations: 0\nOpen Access: unknown\nDOI: 10.4074/S0336150011012026"
+    }
+   ]
+  },
+  {
+   "id": "C14",
+   "rule": "codiffusion",
+   "kind": "positive",
+   "expected_notices": 1,
+   "note": "co-diffusion (même article, même numéro)",
+   "corpus": "corpus_author_alice_krieg_planque_20260618_105050.json",
+   "items": [
+    {
+     "itemType": "journalArticle",
+     "title": "Les “petites phrases” : un objet pour l’analyse des discours politiques et médiatiques",
+     "creators": [
+      {
+       "creatorType": "author",
+       "firstName": "Alice",
+       "lastName": "Krieg-Planque"
+      }
+     ],
+     "abstractNote": "Coordination Alice Krieg-Planque et Caroline Ollivier-Yaniv",
+     "date": "2011",
+     "language": "fr",
+     "url": "https://shs.hal.science/halshs-01150003v1",
+     "tags": [
+      {
+       "tag": "Médias"
+      },
+      {
+       "tag": "Communication politiques"
+      },
+      {
+       "tag": "Petites phrases"
+      },
+      {
+       "tag": "Formules"
+      }
+     ],
+     "collections": [],
+     "relations": {},
+     "DOI": "10.4074/s0336150011012038",
+     "publicationTitle": "HAL (Le Centre pour la Communication Scientifique Directe)",
+     "ISSN": "0336-1500",
+     "issue": "168",
+     "pages": "23-41",
+     "extra": "Sources: HAL, OpenAlex\nHAL ID: halshs-01150003\nHAL Domain: 0.shs, 1.shs.langue, 0.shs, 1.shs.info\nHAL Laboratory: CEDITEC\nOpen Access: no\nSubmitted Date: 2015-05-08 03:52:27\nHAL Submit Type: notice\nOpenAlex ID: https://openalex.org/W2610341926\nCited by: 10\nDOI: 10.4074/s0336150011012038\nOpenAlex concepts: Humanities, Sociology, Philosophy",
+     "volume": "2011"
+    },
+    {
+     "itemType": "journalArticle",
+     "title": "Les « petites phrases » : un objet pour l’analyse des discours politiques et médiatiques",
+     "creators": [
+      {
+       "creatorType": "author",
+       "firstName": "Alice",
+       "lastName": "Krieg-Planque"
+      }
+     ],
+     "abstractNote": "Résumé Ce texte s’emploie à caractériser les « petites phrases » en tant qu’objet pour l’analyse des discours politiques et médiatiques, dans le cadre plus large d’une étude des faits de communication dans leur dimension discursive. Les « petites phrases » sont appréhendées sous plusieurs aspects, dont les termes sont explicités : caractéristiques de l’expression « petite phrase » elle-même ; dimension énonciative du phénomène ; déterminants génériques et sémiotiques façonnés par les médias ; intégration des contraintes par les politiques et les communicants ; caractéristiques qui favorisent la reprise et la circulation des énoncés ; appréciation par les acteurs sociaux eux-mêmes du phénomène des « petites phrases ».",
+     "date": "2011-06-01",
+     "language": "fr",
+     "url": "https://doi.org/10.3917/comla.168.0023",
+     "tags": [
+      {
+       "tag": "Humanities"
+      },
+      {
+       "tag": "Philosophy"
+      }
+     ],
+     "collections": [],
+     "relations": {},
+     "publicationTitle": "Communication & langages",
+     "volume": "N° 168",
+     "issue": "2",
+     "pages": "23-41",
+     "ISSN": "0336-1500",
+     "DOI": "10.3917/comla.168.0023",
+     "extra": "Sources: OpenAlex, Semantic Scholar\nOpenAlex ID: https://openalex.org/W4389473735\nCited by: 33\nOpen Access: yes\nDOI: 10.3917/comla.168.0023\nOpenAlex concepts: Humanities, Philosophy\nS2 corpus id: 157179159\nCited by: 18\nInfluential citations: 4\nOpen Access: unknown\nS2 fields: Political Science"
+    }
+   ]
+  },
+  {
+   "id": "C15",
+   "rule": "codiffusion",
+   "kind": "positive",
+   "expected_notices": 1,
+   "note": "co-diffusion (même article, même numéro)",
+   "corpus": "corpus_author_amar_lakel_20260617_120549.json",
+   "items": [
+    {
+     "itemType": "journalArticle",
+     "title": "Juan Branco, influenceur éphémère ou figure d’un nouvel « intellectuel numérique » ?",
+     "creators": [
+      {
+       "creatorType": "author",
+       "firstName": "Franck",
+       "lastName": "Cormerais"
+      },
+      {
+       "creatorType": "author",
+       "firstName": "Amar",
+       "lastName": "Lakel"
+      }
+     ],
+     "abstractNote": "L’ouvrage Crépuscule, Macron et les oligarques. L’enquête-vérité a rapidement généré une forte couverture médiatique sur les réseaux sociaux, devenant un phénomène viral en quelques semaines. Des polémistes tels que Juan Branco, Étienne Chouard, et Michel Onfray ont été associés à ce mouvement contestataire numérique. En utilisant une méthodologie originale de constitution de corpus numérique, nous avons utilisé les méthodes digitales pour analyser la stratégie de ce qui apparaît comme une nouvelle forme d’intervention. Notre thèse est de montrer qu’une génération d’influenceurs numériques tente de faire émerger une figure hybride de l’Intellectuel. Nous inter-rogeons la pertinence de ce label en utilisant les méthodes mixtes pour comprendre les espaces du web et faire émerger de nouveaux objets de recherche.",
+     "date": "2023-04-01",
+     "language": "fr",
+     "url": "https://hal.science/hal-04766242v1",
+     "tags": [
+      {
+       "tag": "Media activist"
+      },
+      {
+       "tag": "Web mapping"
+      },
+      {
+       "tag": "Buzz"
+      },
+      {
+       "tag": "Intellectual"
+      },
+      {
+       "tag": "Digital controversy"
+      },
+      {
+       "tag": "Cartographie web"
+      },
+      {
+       "tag": "Mediactiviste"
+      },
+      {
+       "tag": "Intellectuel"
+      },
+      {
+       "tag": "Controverse numérique"
+      }
+     ],
+     "collections": [],
+     "relations": {},
+     "DOI": "10.4000/quaderni.2731",
+     "publicationTitle": "Quaderni",
+     "ISSN": "0987-1381",
+     "volume": "2",
+     "issue": "109",
+     "pages": "39-58",
+     "extra": "Sources: HAL, OpenAlex\nHAL ID: hal-04766242\nHAL Domain: 0.shs, 1.shs.info, 0.shs, 1.shs.scipo, 0.shs, 1.shs.socio\nHAL Laboratory: MICA\nOpen Access: no\nSubmitted Date: 2024-11-04 18:25:15\nHAL Submit Type: notice\nOpenAlex ID: https://openalex.org/W4382405531\nCited by: 0\nOpen Access: yes\nDOI: 10.4000/quaderni.2731\nOpenAlex concepts: Humanities, Art, Political science, Philosophy"
+    },
+    {
+     "itemType": "journalArticle",
+     "title": "Juan Branco, influenceur éphémère ou figure d’un nouvel « intellectuel numérique » ?",
+     "creators": [
+      {
+       "creatorType": "author",
+       "firstName": "Franck",
+       "lastName": "Cormerais"
+      },
+      {
+       "creatorType": "author",
+       "firstName": "Amar",
+       "lastName": "Lakel"
+      }
+     ],
+     "abstractNote": "L’ouvrage Crépuscule, Macron et les oligarques. L’enquête-vérité a rapidement généré une forte couverture médiatique sur les réseaux sociaux, devenant un phénomène viral en quelques semaines. Des polémistes tels que Juan Branco, Étienne Chouard, et Michel Onfray ont été associés à ce mouvement contestataire numérique. En utilisant une méthodologie originale de constitution de corpus numérique, nous avons utilisé les méthodes digitales pour analyser la stratégie de ce qui apparaît comme une nouvelle forme d’intervention. Notre thèse est de montrer qu’une génération d’influenceurs numériques tente de faire émerger une figure hybride de l’Intellectuel. Nous inter-rogeons la pertinence de ce label en utilisant les méthodes mixtes pour comprendre les espaces du web et faire émerger de nouveaux objets de recherche.",
+     "date": "2023-07-03",
+     "language": "fr",
+     "url": "https://doi.org/10.3917/quad.109.0039",
+     "tags": [
+      {
+       "tag": "Art"
+      },
+      {
+       "tag": "Political science"
+      }
+     ],
+     "collections": [],
+     "relations": {},
+     "publicationTitle": "Quaderni",
+     "volume": "n° 109",
+     "issue": "2",
+     "pages": "39-58",
+     "ISSN": "0987-1381",
+     "DOI": "10.3917/quad.109.0039",
+     "extra": "Sources: OpenAlex\nOpenAlex ID: https://openalex.org/W4408697486\nCited by: 0\nOpen Access: no\nDOI: 10.3917/quad.109.0039\nOpenAlex concepts: Art, Political science"
+    }
+   ]
+  },
+  {
+   "id": "C16",
+   "rule": "zenodo",
+   "kind": "positive",
+   "expected_notices": 1,
+   "note": "DOI de concept et DOI de version Zenodo (MWI)",
+   "corpus": "patch_2026-09-30.json",
+   "items": [
+    {
+     "itemType": "document",
+     "title": "My Web Intelligence (MWI)",
+     "creators": [
+      {
+       "creatorType": "author",
+       "firstName": "Amar",
+       "lastName": "Lakel"
+      }
+     ],
+     "abstractNote": "My Web Intelligence 1.0.0 First stable release of the flagship repository for reproducible web corpus analysis. MWI is a Python-based research tool designed for digital humanities and information-communication sciences (ICS). It enables researchers to collect, qualify, and analyze web corpora with full methodological transparency. Purpose MWI operationalizes the \"pragmatics of digital enunciation\" framework, providing computational tools to: Map digital ecosystems and online controversies Identify strategic positions of speakers in heterogeneous web corpora Analyze discourse dynamics through network and semantic analysis Key Features Data Collection Focus crawling with configurable depth and relevance scoring SerpAPI integration for bootstrapping corpora from search engines Mercury Parser pipeline for high-quality content extraction SEO Rank enrichment for domain authority metrics Media analysis (images, videos, audio) with metadata extraction Semantic Analysis Paragraph-level embeddings (OpenAI, Mistral, Gemini, HuggingFace, Ollama) Pseudolinks computation — semantic similarity between paragraphs across pages NLI classification (entailment/neutral/contradiction) via Cross-Encoder models Cosine and LSH-based similarity for scalable corpus analysis Export and Visualization CSV exports (pages, domains, media, pseudolinks) GEXF graphs for Gephi network visualization Aggregated exports at page and domain levels Raw corpus export for external NLP pipelines Infrastructure Docker and Docker Compose support SQLite database with migration system Bilingual documentation (English/French) Automated tests with pytest Installation # Docker Compose (recommended) ./scripts/docker-compose-setup.sh # Local Python python3 -m venv .venv && source .venv/bin/activate pip install -r requirements.txt python scripts/install-basic.py python mywi.py db setup Documentation Full README Installation Guide French README Citation If you use MWI in your research, please cite: @article{lakel2021mwi, author = {Lakel, Amar}, title = {My web intelligence : un outil pour l'analyse du web et des réseaux}, journal = {I2D - Information, données \\& documents}, year = {2021}, volume = {1}, number = {1}, pages = {96--103}, doi = {10.3917/i2d.211.0096} } Related Resources R Package: mwiR — R analysis bridge for MWI exports Data Repository: NAKALA Collection Project Website: mywebintelligence.net Institutional Context Developed at MICA Laboratory (Mediation, Information, Communication, Arts), Universite Bordeaux Montaigne, as part of the E3D research team (Etudes Digitales: du Dispositif au Document). Migration Notice This repository (mwi) is the active flagship. The legacy JavaScript repository (MyWebIntelligence) is now archived. What's New in 1.0.0 Complete rewrite in Python with modular architecture Paragraph-level embedding pipeline with multiple providers NLI-based semantic relation classification Pseudolinks computation and export (paragraph/page/domain levels) Docker Compose deployment with interactive setup Mercury Parser integration for content extraction SEO Rank API integration Comprehensive test suite Bilingual documentation Contributing Contributions welcome. Please open an issue to discuss proposed changes before submitting a pull request. License MIT License — see LICENSE Maintainer: Amar Lakel (@alakel) Lab: MICA, Universite Bordeaux Montaigne Contact: amar.lakel@u-bordeaux-montaigne.fr",
+     "date": "2026-01-26",
+     "language": "",
+     "url": "https://doi.org/10.5281/zenodo.18376428",
+     "tags": [
+      {
+       "tag": "Computer science"
+      },
+      {
+       "tag": "Python (programming language)"
+      },
+      {
+       "tag": "World Wide Web"
+      },
+      {
+       "tag": "Metadata"
+      },
+      {
+       "tag": "Visualization"
+      },
+      {
+       "tag": "Information retrieval"
+      },
+      {
+       "tag": "Documentation"
+      },
+      {
+       "tag": "Web crawler"
+      },
+      {
+       "tag": "Web page"
+      },
+      {
+       "tag": "Semantic Web"
+      },
+      {
+       "tag": "Web application"
+      },
+      {
+       "tag": "Artificial intelligence"
+      },
+      {
+       "tag": "Intelligence analysis"
+      }
+     ],
+     "collections": [],
+     "relations": {},
+     "DOI": "10.5281/zenodo.18376428",
+     "extra": "Sources: OpenAlex\nOpenAlex ID: https://openalex.org/W7125678169\nCited by: 0\nOpen Access: yes\nDOI: 10.5281/zenodo.18376428\nOpenAlex concepts: Computer science, Python (programming language), World Wide Web, Metadata, Visualization, Information retrieval, Documentation, Web crawler, Web page, Semantic Web, Web application, Artificial intelligence, Intelligence analysis\npublicationTitle: Zenodo (CERN European Organization for Nuclear Research)"
+    },
+    {
+     "itemType": "document",
+     "title": "My Web Intelligence (MWI)",
+     "creators": [
+      {
+       "creatorType": "author",
+       "firstName": "Amar",
+       "lastName": "Lakel"
+      }
+     ],
+     "abstractNote": "My Web Intelligence 1.0.0 First stable release of the flagship repository for reproducible web corpus analysis. MWI is a Python-based research tool designed for digital humanities and information-communication sciences (ICS). It enables researchers to collect, qualify, and analyze web corpora with full methodological transparency. Purpose MWI operationalizes the \"pragmatics of digital enunciation\" framework, providing computational tools to: Map digital ecosystems and online controversies Identify strategic positions of speakers in heterogeneous web corpora Analyze discourse dynamics through network and semantic analysis Key Features Data Collection Focus crawling with configurable depth and relevance scoring SerpAPI integration for bootstrapping corpora from search engines Mercury Parser pipeline for high-quality content extraction SEO Rank enrichment for domain authority metrics Media analysis (images, videos, audio) with metadata extraction Semantic Analysis Paragraph-level embeddings (OpenAI, Mistral, Gemini, HuggingFace, Ollama) Pseudolinks computation — semantic similarity between paragraphs across pages NLI classification (entailment/neutral/contradiction) via Cross-Encoder models Cosine and LSH-based similarity for scalable corpus analysis Export and Visualization CSV exports (pages, domains, media, pseudolinks) GEXF graphs for Gephi network visualization Aggregated exports at page and domain levels Raw corpus export for external NLP pipelines Infrastructure Docker and Docker Compose support SQLite database with migration system Bilingual documentation (English/French) Automated tests with pytest Installation # Docker Compose (recommended) ./scripts/docker-compose-setup.sh # Local Python python3 -m venv .venv && source .venv/bin/activate pip install -r requirements.txt python scripts/install-basic.py python mywi.py db setup Documentation Full README Installation Guide French README Citation If you use MWI in your research, please cite: @article{lakel2021mwi, author = {Lakel, Amar}, title = {My web intelligence : un outil pour l'analyse du web et des réseaux}, journal = {I2D - Information, données \\& documents}, year = {2021}, volume = {1}, number = {1}, pages = {96--103}, doi = {10.3917/i2d.211.0096} } Related Resources R Package: mwiR — R analysis bridge for MWI exports Data Repository: NAKALA Collection Project Website: mywebintelligence.net Institutional Context Developed at MICA Laboratory (Mediation, Information, Communication, Arts), Universite Bordeaux Montaigne, as part of the E3D research team (Etudes Digitales: du Dispositif au Document). Migration Notice This repository (mwi) is the active flagship. The legacy JavaScript repository (MyWebIntelligence) is now archived. What's New in 1.0.0 Complete rewrite in Python with modular architecture Paragraph-level embedding pipeline with multiple providers NLI-based semantic relation classification Pseudolinks computation and export (paragraph/page/domain levels) Docker Compose deployment with interactive setup Mercury Parser integration for content extraction SEO Rank API integration Comprehensive test suite Bilingual documentation Contributing Contributions welcome. Please open an issue to discuss proposed changes before submitting a pull request. License MIT License — see LICENSE Maintainer: Amar Lakel (@alakel) Lab: MICA, Universite Bordeaux Montaigne Contact: amar.lakel@u-bordeaux-montaigne.fr",
+     "date": "2026-01-26",
+     "language": "",
+     "url": "https://doi.org/10.5281/zenodo.18376429",
+     "tags": [
+      {
+       "tag": "Computer science"
+      },
+      {
+       "tag": "Python (programming language)"
+      },
+      {
+       "tag": "World Wide Web"
+      },
+      {
+       "tag": "Metadata"
+      },
+      {
+       "tag": "Visualization"
+      },
+      {
+       "tag": "Information retrieval"
+      },
+      {
+       "tag": "Documentation"
+      },
+      {
+       "tag": "Web crawler"
+      },
+      {
+       "tag": "Web page"
+      },
+      {
+       "tag": "Semantic Web"
+      },
+      {
+       "tag": "Web application"
+      },
+      {
+       "tag": "Artificial intelligence"
+      },
+      {
+       "tag": "Intelligence analysis"
+      }
+     ],
+     "collections": [],
+     "relations": {},
+     "DOI": "10.5281/zenodo.18376429",
+     "extra": "Sources: OpenAlex\nOpenAlex ID: https://openalex.org/W7125700445\nCited by: 0\nOpen Access: yes\nDOI: 10.5281/zenodo.18376429\nOpenAlex concepts: Computer science, Python (programming language), World Wide Web, Metadata, Visualization, Information retrieval, Documentation, Web crawler, Web page, Semantic Web, Web application, Artificial intelligence, Intelligence analysis\npublicationTitle: Zenodo (CERN European Organization for Nuclear Research)"
+    }
+   ]
+  },
+  {
+   "id": "C17",
+   "rule": "scholar_chapters",
+   "kind": "positive",
+   "expected_notices": 1,
+   "note": "chapitre vu dans Google Books (numéro « 1 ») et chez l'éditeur",
+   "corpus": "patch_2026-09-30.json",
+   "items": [
+    {
+     "itemType": "book",
+     "title": "1 Imagining action on climate change",
+     "creators": [
+      {
+       "creatorType": "author",
+       "firstName": "Ø",
+       "lastName": "Gjerstad"
+      },
+      {
+       "creatorType": "author",
+       "firstName": "A",
+       "lastName": "Catellani"
+      },
+      {
+       "creatorType": "author",
+       "firstName": "K",
+       "lastName": "Fløttum"
+      }
+     ],
+     "abstractNote": "… The second approach is a qualitative analysis of the survey answers, using Greimas’(Greimas & Courtés, 1982) actantial model, focusing specifically on the respondents’ views on …",
+     "date": "2025",
+     "language": "",
+     "url": "https://books.google.com/books?hl=en&lr=&id=JmuHEQAAQBAJ&oi=fnd&pg=PT27&dq=(%22actantial+model%22+Greimas+computational)+OR+automatic+OR+(extraction+narrative)&ots=Uu9F0v3cx1&sig=lnXCtPX47pPLnuT48qVkQON_yec",
+     "tags": [],
+     "collections": [],
+     "relations": {},
+     "extra": "Sources: Google Scholar (SerpAPI)\nScholar result ID: ZoFdJyWxLz4J\nScholar host: books.google.com\nScholar truncation: auteurs et/ou revue tronqués par Google Scholar — à vérifier contre la source primaire avant citation\nScholar snippet: le champ résumé contient un extrait Google Scholar, non le résumé de l'éditeur\npublicationTitle: An Interdisciplinary Approach"
+    },
+    {
+     "itemType": "journalArticle",
+     "title": "Imagining action on climate change: A comparison of Belgian and Norwegian surveys",
+     "creators": [
+      {
+       "creatorType": "author",
+       "firstName": "Ø",
+       "lastName": "Gjerstad"
+      },
+      {
+       "creatorType": "author",
+       "firstName": "A",
+       "lastName": "Catellani"
+      }
+     ],
+     "abstractNote": "… Having examined lexical frequencies and corresponding topics, our attention now turns to the narrative properties of the responses, focusing on Greimas’ axis of power, including the …",
+     "date": "2025",
+     "language": "",
+     "url": "https://api.taylorfrancis.com/content/chapters/edit/download?identifierName=doi&identifierValue=10.4324/9781003630968-3&type=chapterpdf",
+     "tags": [],
+     "collections": [],
+     "relations": {},
+     "publicationTitle": "Approach to Climate",
+     "extra": "Sources: Google Scholar (SerpAPI)\nScholar result ID: MyqrUpxX9qgJ\nCited by: 1\nScholar cites ID: 12175014971556178483\nScholar host: api.taylorfrancis.com\nScholar truncation: auteurs et/ou revue tronqués par Google Scholar — à vérifier contre la source primaire avant citation\nScholar snippet: le champ résumé contient un extrait Google Scholar, non le résumé de l'éditeur"
+    }
+   ]
+  },
+  {
+   "id": "C18",
+   "rule": "scholar_chapters",
+   "kind": "positive",
+   "expected_notices": 1,
+   "note": "chapitre vu dans Google Books (numéro « 53 ») et chez l'éditeur",
+   "corpus": "patch_2026-09-30.json",
+   "items": [
+    {
+     "itemType": "book",
+     "title": "53 Narrative Analysis",
+     "creators": [
+      {
+       "creatorType": "author",
+       "firstName": "R",
+       "lastName": "Franzosi"
+      }
+     ],
+     "abstractNote": "… What, When, and Where-and visualize the results in geographic maps and network graphs. … Suite package and run the SVO (Subject-Verb-Object) extractor. Installation on a personal …",
+     "date": "2023",
+     "language": "",
+     "url": "https://books.google.com/books?hl=en&lr=&id=613bEAAAQBAJ&oi=fnd&pg=PT359&dq=%22quantitative+narrative+analysis%22+subject+action+object+network&ots=hoUVl_3FZ6&sig=98-EbsZMze0R75hKRDaULq3Z1_w",
+     "tags": [],
+     "collections": [],
+     "relations": {},
+     "extra": "Sources: Google Scholar (SerpAPI)\nScholar result ID: CeZW53c2IlAJ\nScholar host: books.google.com\nScholar truncation: auteurs et/ou revue tronqués par Google Scholar — à vérifier contre la source primaire avant citation\nScholar snippet: le champ résumé contient un extrait Google Scholar, non le résumé de l'éditeur\npublicationTitle: The Handbook of Teaching Qualitative and Mixed"
+    },
+    {
+     "itemType": "journalArticle",
+     "title": "Narrative Analysis",
+     "creators": [
+      {
+       "creatorType": "author",
+       "firstName": "R",
+       "lastName": "Franzosi"
+      }
+     ],
+     "abstractNote": "… , When, and Where—and visualize the results in geographic maps and network graphs. … NLP Suite package and run the SVO (Subject-Verb-Object) extractor. Installation on a personal …",
+     "date": "2023",
+     "language": "",
+     "url": "https://api.taylorfrancis.com/content/chapters/edit/download?identifierName=doi&identifierValue=10.4324/9781003213277-62&type=chapterpdf",
+     "tags": [],
+     "collections": [],
+     "relations": {},
+     "publicationTitle": "The Handbook of Teaching Qualitative and Mixed",
+     "extra": "Sources: Google Scholar (SerpAPI)\nScholar result ID: SBwX5YL-9IUJ\nCited by: 1\nScholar cites ID: 9652619739504516168\nScholar host: api.taylorfrancis.com\nScholar truncation: auteurs et/ou revue tronqués par Google Scholar — à vérifier contre la source primaire avant citation\nScholar snippet: le champ résumé contient un extrait Google Scholar, non le résumé de l'éditeur"
+    }
+   ]
+  }
+ ]
+}

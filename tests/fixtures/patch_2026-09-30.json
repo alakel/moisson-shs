@@ -1,0 +1,481 @@
+{
+ "_source": "Notices réelles des corpus du 2026-09-30 (retour d'expérience moisson-shs 0.3.0) : corpus_author_amar_lakel_20260930_160948_d08f2952, corpus_actantial_model_greimas_computational_or_automatic_or_extrac_20260930_154351_853ae332, corpus_quantitative_narrative_analysis_subject_action_object_networ_20260930_160931_89526013. Utilisées par les tests du sprint patch (PAT-06, PAT-07, PAT-08, PAT-14).",
+ "quaderni": [
+  {
+   "itemType": "journalArticle",
+   "title": "Juan Branco, influenceur éphémère ou figure d’un nouvel « intellectuel numérique » ?",
+   "creators": [
+    {
+     "creatorType": "author",
+     "firstName": "Franck",
+     "lastName": "Cormerais"
+    },
+    {
+     "creatorType": "author",
+     "firstName": "Amar",
+     "lastName": "Lakel"
+    }
+   ],
+   "abstractNote": "L’ouvrage Crépuscule, Macron et les oligarques. L’enquête-vérité a rapidement généré une forte couverture médiatique sur les réseaux sociaux, devenant un phénomène viral en quelques semaines. Des polémistes tels que Juan Branco, Étienne Chouard, et Michel Onfray ont été associés à ce mouvement contestataire numérique. En utilisant une méthodologie originale de constitution de corpus numérique, nous avons utilisé les méthodes digitales pour analyser la stratégie de ce qui apparaît comme une nouvelle forme d’intervention. Notre thèse est de montrer qu’une génération d’influenceurs numériques tente de faire émerger une figure hybride de l’Intellectuel. Nous inter-rogeons la pertinence de ce label en utilisant les méthodes mixtes pour comprendre les espaces du web et faire émerger de nouveaux objets de recherche.",
+   "date": "2023-07-03",
+   "language": "fr",
+   "url": "https://doi.org/10.3917/quad.109.0039",
+   "tags": [
+    {
+     "tag": "Art"
+    },
+    {
+     "tag": "Political science"
+    }
+   ],
+   "collections": [],
+   "relations": {},
+   "publicationTitle": "Quaderni",
+   "volume": "n° 109",
+   "issue": "2",
+   "pages": "39-58",
+   "ISSN": "0987-1381",
+   "DOI": "10.3917/quad.109.0039",
+   "extra": "Sources: OpenAlex\nOpenAlex ID: https://openalex.org/W4408697486\nCited by: 0\nOpen Access: no\nDOI: 10.3917/quad.109.0039\nOpenAlex concepts: Art, Political science"
+  },
+  {
+   "title": "Juan Branco, influenceur éphémère ou figure d’un nouvel « intellectuel numérique » ?",
+   "abstractNote": "L’ouvrage Crépuscule, Macron et les oligarques. L’enquête-vérité a rapidement généré une forte couverture médiatique sur les réseaux sociaux, devenant un phénomène viral en quelques semaines. Des polémistes tels que Juan Branco, Étienne Chouard, et Michel Onfray ont été associés à ce mouvement contestataire numérique. En utilisant une méthodologie originale de constitution de corpus numérique, nous avons utilisé les méthodes digitales pour analyser la stratégie de ce qui apparaît comme une nouvelle forme d’intervention. Notre thèse est de montrer qu’une génération d’influenceurs numériques tente de faire émerger une figure hybride de l’Intellectuel. Nous inter-rogeons la pertinence de ce label en utilisant les méthodes mixtes pour comprendre les espaces du web et faire émerger de nouveaux objets de recherche.",
+   "date": "2023-04-01",
+   "language": "fr",
+   "url": "https://hal.science/hal-04766242v1",
+   "DOI": "10.4000/quaderni.2731",
+   "publicationTitle": "Quaderni",
+   "ISSN": "0987-1381",
+   "volume": "2",
+   "issue": "109",
+   "pages": "39-58",
+   "itemType": "journalArticle",
+   "creators": [
+    {
+     "creatorType": "author",
+     "firstName": "Franck",
+     "lastName": "Cormerais"
+    },
+    {
+     "creatorType": "author",
+     "firstName": "Amar",
+     "lastName": "Lakel"
+    }
+   ],
+   "tags": [
+    {
+     "tag": "Art"
+    },
+    {
+     "tag": "Buzz"
+    },
+    {
+     "tag": "Cartographie web"
+    },
+    {
+     "tag": "Controverse numérique"
+    },
+    {
+     "tag": "Digital controversy"
+    },
+    {
+     "tag": "Humanities"
+    },
+    {
+     "tag": "Intellectual"
+    },
+    {
+     "tag": "Intellectuel"
+    },
+    {
+     "tag": "Media activist"
+    },
+    {
+     "tag": "Mediactiviste"
+    },
+    {
+     "tag": "Philosophy"
+    },
+    {
+     "tag": "Political science"
+    },
+    {
+     "tag": "Web mapping"
+    }
+   ],
+   "collections": [],
+   "relations": {},
+   "extra": "Sources: HAL, OpenAlex\nHAL ID: hal-04766242\nHAL Domain: 0.shs, 1.shs.info, 0.shs, 1.shs.scipo, 0.shs, 1.shs.socio\nHAL Laboratory: MICA\nOpen Access: no\nSubmitted Date: 2024-11-04 18:25:15\nHAL Submit Type: notice\nOpenAlex ID: https://openalex.org/W4382405531\nCited by: 0\nOpen Access: yes\nDOI: 10.4000/quaderni.2731\nOpenAlex concepts: Humanities, Art, Political science, Philosophy\nAlternative URLs: https://doi.org/10.4000/quaderni.2731\nDedup evidence: 2 notices ; clés doi:10.4000/quaderni.2731 ; origines title+creators+date+url+itemType+issue+language+volume=HAL, abstractNote+DOI+publicationTitle+ISSN+pages=OpenAlex"
+  }
+ ],
+ "mwi_zenodo": [
+  {
+   "itemType": "document",
+   "title": "My Web Intelligence (MWI)",
+   "creators": [
+    {
+     "creatorType": "author",
+     "firstName": "Amar",
+     "lastName": "Lakel"
+    }
+   ],
+   "abstractNote": "My Web Intelligence 1.0.0 First stable release of the flagship repository for reproducible web corpus analysis. MWI is a Python-based research tool designed for digital humanities and information-communication sciences (ICS). It enables researchers to collect, qualify, and analyze web corpora with full methodological transparency. Purpose MWI operationalizes the \"pragmatics of digital enunciation\" framework, providing computational tools to: Map digital ecosystems and online controversies Identify strategic positions of speakers in heterogeneous web corpora Analyze discourse dynamics through network and semantic analysis Key Features Data Collection Focus crawling with configurable depth and relevance scoring SerpAPI integration for bootstrapping corpora from search engines Mercury Parser pipeline for high-quality content extraction SEO Rank enrichment for domain authority metrics Media analysis (images, videos, audio) with metadata extraction Semantic Analysis Paragraph-level embeddings (OpenAI, Mistral, Gemini, HuggingFace, Ollama) Pseudolinks computation — semantic similarity between paragraphs across pages NLI classification (entailment/neutral/contradiction) via Cross-Encoder models Cosine and LSH-based similarity for scalable corpus analysis Export and Visualization CSV exports (pages, domains, media, pseudolinks) GEXF graphs for Gephi network visualization Aggregated exports at page and domain levels Raw corpus export for external NLP pipelines Infrastructure Docker and Docker Compose support SQLite database with migration system Bilingual documentation (English/French) Automated tests with pytest Installation # Docker Compose (recommended) ./scripts/docker-compose-setup.sh # Local Python python3 -m venv .venv && source .venv/bin/activate pip install -r requirements.txt python scripts/install-basic.py python mywi.py db setup Documentation Full README Installation Guide French README Citation If you use MWI in your research, please cite: @article{lakel2021mwi, author = {Lakel, Amar}, title = {My web intelligence : un outil pour l'analyse du web et des réseaux}, journal = {I2D - Information, données \\& documents}, year = {2021}, volume = {1}, number = {1}, pages = {96--103}, doi = {10.3917/i2d.211.0096} } Related Resources R Package: mwiR — R analysis bridge for MWI exports Data Repository: NAKALA Collection Project Website: mywebintelligence.net Institutional Context Developed at MICA Laboratory (Mediation, Information, Communication, Arts), Universite Bordeaux Montaigne, as part of the E3D research team (Etudes Digitales: du Dispositif au Document). Migration Notice This repository (mwi) is the active flagship. The legacy JavaScript repository (MyWebIntelligence) is now archived. What's New in 1.0.0 Complete rewrite in Python with modular architecture Paragraph-level embedding pipeline with multiple providers NLI-based semantic relation classification Pseudolinks computation and export (paragraph/page/domain levels) Docker Compose deployment with interactive setup Mercury Parser integration for content extraction SEO Rank API integration Comprehensive test suite Bilingual documentation Contributing Contributions welcome. Please open an issue to discuss proposed changes before submitting a pull request. License MIT License — see LICENSE Maintainer: Amar Lakel (@alakel) Lab: MICA, Universite Bordeaux Montaigne Contact: amar.lakel@u-bordeaux-montaigne.fr",
+   "date": "2026-01-26",
+   "language": "",
+   "url": "https://doi.org/10.5281/zenodo.18376428",
+   "tags": [
+    {
+     "tag": "Computer science"
+    },
+    {
+     "tag": "Python (programming language)"
+    },
+    {
+     "tag": "World Wide Web"
+    },
+    {
+     "tag": "Metadata"
+    },
+    {
+     "tag": "Visualization"
+    },
+    {
+     "tag": "Information retrieval"
+    },
+    {
+     "tag": "Documentation"
+    },
+    {
+     "tag": "Web crawler"
+    },
+    {
+     "tag": "Web page"
+    },
+    {
+     "tag": "Semantic Web"
+    },
+    {
+     "tag": "Web application"
+    },
+    {
+     "tag": "Artificial intelligence"
+    },
+    {
+     "tag": "Intelligence analysis"
+    }
+   ],
+   "collections": [],
+   "relations": {},
+   "DOI": "10.5281/zenodo.18376428",
+   "extra": "Sources: OpenAlex\nOpenAlex ID: https://openalex.org/W7125678169\nCited by: 0\nOpen Access: yes\nDOI: 10.5281/zenodo.18376428\nOpenAlex concepts: Computer science, Python (programming language), World Wide Web, Metadata, Visualization, Information retrieval, Documentation, Web crawler, Web page, Semantic Web, Web application, Artificial intelligence, Intelligence analysis\npublicationTitle: Zenodo (CERN European Organization for Nuclear Research)"
+  },
+  {
+   "itemType": "document",
+   "title": "My Web Intelligence (MWI)",
+   "creators": [
+    {
+     "creatorType": "author",
+     "firstName": "Amar",
+     "lastName": "Lakel"
+    }
+   ],
+   "abstractNote": "My Web Intelligence 1.0.0 First stable release of the flagship repository for reproducible web corpus analysis. MWI is a Python-based research tool designed for digital humanities and information-communication sciences (ICS). It enables researchers to collect, qualify, and analyze web corpora with full methodological transparency. Purpose MWI operationalizes the \"pragmatics of digital enunciation\" framework, providing computational tools to: Map digital ecosystems and online controversies Identify strategic positions of speakers in heterogeneous web corpora Analyze discourse dynamics through network and semantic analysis Key Features Data Collection Focus crawling with configurable depth and relevance scoring SerpAPI integration for bootstrapping corpora from search engines Mercury Parser pipeline for high-quality content extraction SEO Rank enrichment for domain authority metrics Media analysis (images, videos, audio) with metadata extraction Semantic Analysis Paragraph-level embeddings (OpenAI, Mistral, Gemini, HuggingFace, Ollama) Pseudolinks computation — semantic similarity between paragraphs across pages NLI classification (entailment/neutral/contradiction) via Cross-Encoder models Cosine and LSH-based similarity for scalable corpus analysis Export and Visualization CSV exports (pages, domains, media, pseudolinks) GEXF graphs for Gephi network visualization Aggregated exports at page and domain levels Raw corpus export for external NLP pipelines Infrastructure Docker and Docker Compose support SQLite database with migration system Bilingual documentation (English/French) Automated tests with pytest Installation # Docker Compose (recommended) ./scripts/docker-compose-setup.sh # Local Python python3 -m venv .venv && source .venv/bin/activate pip install -r requirements.txt python scripts/install-basic.py python mywi.py db setup Documentation Full README Installation Guide French README Citation If you use MWI in your research, please cite: @article{lakel2021mwi, author = {Lakel, Amar}, title = {My web intelligence : un outil pour l'analyse du web et des réseaux}, journal = {I2D - Information, données \\& documents}, year = {2021}, volume = {1}, number = {1}, pages = {96--103}, doi = {10.3917/i2d.211.0096} } Related Resources R Package: mwiR — R analysis bridge for MWI exports Data Repository: NAKALA Collection Project Website: mywebintelligence.net Institutional Context Developed at MICA Laboratory (Mediation, Information, Communication, Arts), Universite Bordeaux Montaigne, as part of the E3D research team (Etudes Digitales: du Dispositif au Document). Migration Notice This repository (mwi) is the active flagship. The legacy JavaScript repository (MyWebIntelligence) is now archived. What's New in 1.0.0 Complete rewrite in Python with modular architecture Paragraph-level embedding pipeline with multiple providers NLI-based semantic relation classification Pseudolinks computation and export (paragraph/page/domain levels) Docker Compose deployment with interactive setup Mercury Parser integration for content extraction SEO Rank API integration Comprehensive test suite Bilingual documentation Contributing Contributions welcome. Please open an issue to discuss proposed changes before submitting a pull request. License MIT License — see LICENSE Maintainer: Amar Lakel (@alakel) Lab: MICA, Universite Bordeaux Montaigne Contact: amar.lakel@u-bordeaux-montaigne.fr",
+   "date": "2026-01-26",
+   "language": "",
+   "url": "https://doi.org/10.5281/zenodo.18376429",
+   "tags": [
+    {
+     "tag": "Computer science"
+    },
+    {
+     "tag": "Python (programming language)"
+    },
+    {
+     "tag": "World Wide Web"
+    },
+    {
+     "tag": "Metadata"
+    },
+    {
+     "tag": "Visualization"
+    },
+    {
+     "tag": "Information retrieval"
+    },
+    {
+     "tag": "Documentation"
+    },
+    {
+     "tag": "Web crawler"
+    },
+    {
+     "tag": "Web page"
+    },
+    {
+     "tag": "Semantic Web"
+    },
+    {
+     "tag": "Web application"
+    },
+    {
+     "tag": "Artificial intelligence"
+    },
+    {
+     "tag": "Intelligence analysis"
+    }
+   ],
+   "collections": [],
+   "relations": {},
+   "DOI": "10.5281/zenodo.18376429",
+   "extra": "Sources: OpenAlex\nOpenAlex ID: https://openalex.org/W7125700445\nCited by: 0\nOpen Access: yes\nDOI: 10.5281/zenodo.18376429\nOpenAlex concepts: Computer science, Python (programming language), World Wide Web, Metadata, Visualization, Information retrieval, Documentation, Web crawler, Web page, Semantic Web, Web application, Artificial intelligence, Intelligence analysis\npublicationTitle: Zenodo (CERN European Organization for Nuclear Research)"
+  }
+ ],
+ "gjerstad": [
+  {
+   "itemType": "book",
+   "title": "1 Imagining action on climate change",
+   "creators": [
+    {
+     "creatorType": "author",
+     "firstName": "Ø",
+     "lastName": "Gjerstad"
+    },
+    {
+     "creatorType": "author",
+     "firstName": "A",
+     "lastName": "Catellani"
+    },
+    {
+     "creatorType": "author",
+     "firstName": "K",
+     "lastName": "Fløttum"
+    }
+   ],
+   "abstractNote": "… The second approach is a qualitative analysis of the survey answers, using Greimas’(Greimas & Courtés, 1982) actantial model, focusing specifically on the respondents’ views on …",
+   "date": "2025",
+   "language": "",
+   "url": "https://books.google.com/books?hl=en&lr=&id=JmuHEQAAQBAJ&oi=fnd&pg=PT27&dq=(%22actantial+model%22+Greimas+computational)+OR+automatic+OR+(extraction+narrative)&ots=Uu9F0v3cx1&sig=lnXCtPX47pPLnuT48qVkQON_yec",
+   "tags": [],
+   "collections": [],
+   "relations": {},
+   "extra": "Sources: Google Scholar (SerpAPI)\nScholar result ID: ZoFdJyWxLz4J\nScholar host: books.google.com\nScholar truncation: auteurs et/ou revue tronqués par Google Scholar — à vérifier contre la source primaire avant citation\nScholar snippet: le champ résumé contient un extrait Google Scholar, non le résumé de l'éditeur\npublicationTitle: An Interdisciplinary Approach"
+  },
+  {
+   "itemType": "journalArticle",
+   "title": "Imagining action on climate change: A comparison of Belgian and Norwegian surveys",
+   "creators": [
+    {
+     "creatorType": "author",
+     "firstName": "Ø",
+     "lastName": "Gjerstad"
+    },
+    {
+     "creatorType": "author",
+     "firstName": "A",
+     "lastName": "Catellani"
+    }
+   ],
+   "abstractNote": "… Having examined lexical frequencies and corresponding topics, our attention now turns to the narrative properties of the responses, focusing on Greimas’ axis of power, including the …",
+   "date": "2025",
+   "language": "",
+   "url": "https://api.taylorfrancis.com/content/chapters/edit/download?identifierName=doi&identifierValue=10.4324/9781003630968-3&type=chapterpdf",
+   "tags": [],
+   "collections": [],
+   "relations": {},
+   "publicationTitle": "Approach to Climate",
+   "extra": "Sources: Google Scholar (SerpAPI)\nScholar result ID: MyqrUpxX9qgJ\nCited by: 1\nScholar cites ID: 12175014971556178483\nScholar host: api.taylorfrancis.com\nScholar truncation: auteurs et/ou revue tronqués par Google Scholar — à vérifier contre la source primaire avant citation\nScholar snippet: le champ résumé contient un extrait Google Scholar, non le résumé de l'éditeur"
+  }
+ ],
+ "franzosi": [
+  {
+   "itemType": "book",
+   "title": "53 Narrative Analysis",
+   "creators": [
+    {
+     "creatorType": "author",
+     "firstName": "R",
+     "lastName": "Franzosi"
+    }
+   ],
+   "abstractNote": "… What, When, and Where-and visualize the results in geographic maps and network graphs. … Suite package and run the SVO (Subject-Verb-Object) extractor. Installation on a personal …",
+   "date": "2023",
+   "language": "",
+   "url": "https://books.google.com/books?hl=en&lr=&id=613bEAAAQBAJ&oi=fnd&pg=PT359&dq=%22quantitative+narrative+analysis%22+subject+action+object+network&ots=hoUVl_3FZ6&sig=98-EbsZMze0R75hKRDaULq3Z1_w",
+   "tags": [],
+   "collections": [],
+   "relations": {},
+   "extra": "Sources: Google Scholar (SerpAPI)\nScholar result ID: CeZW53c2IlAJ\nScholar host: books.google.com\nScholar truncation: auteurs et/ou revue tronqués par Google Scholar — à vérifier contre la source primaire avant citation\nScholar snippet: le champ résumé contient un extrait Google Scholar, non le résumé de l'éditeur\npublicationTitle: The Handbook of Teaching Qualitative and Mixed"
+  },
+  {
+   "itemType": "journalArticle",
+   "title": "Narrative Analysis",
+   "creators": [
+    {
+     "creatorType": "author",
+     "firstName": "R",
+     "lastName": "Franzosi"
+    }
+   ],
+   "abstractNote": "… , When, and Where—and visualize the results in geographic maps and network graphs. … NLP Suite package and run the SVO (Subject-Verb-Object) extractor. Installation on a personal …",
+   "date": "2023",
+   "language": "",
+   "url": "https://api.taylorfrancis.com/content/chapters/edit/download?identifierName=doi&identifierValue=10.4324/9781003213277-62&type=chapterpdf",
+   "tags": [],
+   "collections": [],
+   "relations": {},
+   "publicationTitle": "The Handbook of Teaching Qualitative and Mixed",
+   "extra": "Sources: Google Scholar (SerpAPI)\nScholar result ID: SBwX5YL-9IUJ\nCited by: 1\nScholar cites ID: 9652619739504516168\nScholar host: api.taylorfrancis.com\nScholar truncation: auteurs et/ou revue tronqués par Google Scholar — à vérifier contre la source primaire avant citation\nScholar snippet: le champ résumé contient un extrait Google Scholar, non le résumé de l'éditeur"
+  }
+ ],
+ "numbered_title": [
+  {
+   "itemType": "document",
+   "title": "200 Years of Children in the Novel: On their Visibility, Value, and Agency",
+   "creators": [
+    {
+     "creatorType": "author",
+     "firstName": "A",
+     "lastName": "Piper"
+    }
+   ],
+   "abstractNote": "… gap through a large-scale computational analysis 11 of two … for analyzing narrative agency (Greimas 1984; Greimas and … beings, the 79 actantial model reduces narrative to a set of …",
+   "date": "2026",
+   "language": "",
+   "url": "https://tuprints.ulb.tu-darmstadt.de/server/api/core/bitstreams/09bceeec-6802-4677-826a-c24dc4a6b8c2/content",
+   "tags": [],
+   "collections": [],
+   "relations": {},
+   "extra": "Sources: Google Scholar (SerpAPI)\nScholar result ID: plm3dm3JeS8J\nScholar cluster ID: 3420986863944948134\nScholar versions: 3\nFull text: https://tuprints.ulb.tu-darmstadt.de/server/api/core/bitstreams/09bceeec-6802-4677-826a-c24dc4a6b8c2/content\nScholar host: tuprints.ulb.tu-darmstadt.de\nScholar snippet: le champ résumé contient un extrait Google Scholar, non le résumé de l'éditeur"
+  }
+ ],
+ "hdr": [
+  {
+   "title": "Perspectives algorithmiques des processus interprétatifs du chercheur : Vers une analyse des énoncés en régime numérique : Scientific Problematics and New Epistemological Approaches",
+   "abstractNote": "HDR en Sciences de l'Information et de la Communication, préparée sous la direction du Professeur Franck Cormerais (MICA, Université Bordeaux Montaigne). Le mémoire est composé de deux volumes : Volume 1 - Biographie académique et critique d'une sélection d'articles ; Volume 2 - Problématique scientifique et nouvelles approches épistémologiques, suivi d'annexes comprenant la bibliographie complète et un glossaire.",
+   "date": "2026-01-20",
+   "language": "fr",
+   "url": "https://hal.science/tel-05525754v1",
+   "thesisType": "Habilitation à diriger des recherches",
+   "university": "Université Bordeaux Montaigne",
+   "itemType": "thesis",
+   "creators": [
+    {
+     "creatorType": "author",
+     "firstName": "Amar",
+     "lastName": "Lakel"
+    }
+   ],
+   "tags": [
+    {
+     "tag": "Algorithmic hermeneutics"
+    },
+    {
+     "tag": "Analyse de réseaux"
+    },
+    {
+     "tag": "Analyse du discours numérique"
+    },
+    {
+     "tag": "Art"
+    },
+    {
+     "tag": "Artificial intelligence"
+    },
+    {
+     "tag": "Context (archaeology)"
+    },
+    {
+     "tag": "Controverses en ligne"
+    },
+    {
+     "tag": "Digital discourse analysis"
+    },
+    {
+     "tag": "Digital humanities"
+    },
+    {
+     "tag": "Digital methods"
+    },
+    {
+     "tag": "Digital public sphere"
+    },
+    {
+     "tag": "Discursive formations"
+    },
+    {
+     "tag": "Enunciative pragmatics"
+    },
+    {
+     "tag": "Epistemology of social sciences"
+    },
+    {
+     "tag": "Espace public numérique"
+    },
+    {
+     "tag": "Ethnography"
+    },
+    {
+     "tag": "Formations discursives"
+    },
+    {
+     "tag": "Grands modèles de discours"
+    },
+    {
+     "tag": "Grands modèles de langage"
+    },
+    {
+     "tag": "Herméneutique algorithmique"
+    },
+    {
+     "tag": "Humanities"
+    },
+    {
+     "tag": "Humanités numériques"
+    },
+    {
+     "tag": "Information and communication sciences"
+    },
+    {
+     "tag": "Intelligence artificielle"
+    },
+    {
+     "tag": "Large discourse models"
+    },
+    {
+     "tag": "Large language models"
+    },
+    {
+     "tag": "Méthodes digitales"
+    },
+    {
+     "tag": "Network analysis"
+    },
+    {
+     "tag": "Online controversies"
+    },
+    {
+     "tag": "Philosophy"
+    },
+    {
+     "tag": "Pragmatique de l'énonciation"
+    },
+    {
+     "tag": "Sciences de l'information et de la communication"
+    },
+    {
+     "tag": "Sociology"
+    },
+    {
+     "tag": "Web crawling"
+    },
+    {
+     "tag": "Épistémologie des SHS"
+    }
+   ],
+   "collections": [],
+   "relations": {},
+   "extra": "Sources: HAL, OpenAlex\nHAL ID: tel-05525754\nHAL Domain: 0.shs, 1.shs.info, 0.scco, 1.scco.ling, 0.shs, 1.shs.scipo, 0.shs, 1.shs.socio\nHAL Laboratory: MICA\nOpen Access: no\nSubmitted Date: 2026-02-24 15:58:57\nHAL Submit Type: notice\nOpenAlex ID: https://openalex.org/W7131539949\nCited by: 0\nOpenAlex concepts: Humanities, Philosophy, Sociology, Context (archaeology), Art, Ethnography\npublicationTitle: HAL (Le Centre pour la Communication Scientifique Directe)\nDedup evidence: 2 notices ; clés hal:tel-05525754, url:hal.science/tel-05525754v1 ; origines title+creators+date+url+itemType+language+thesisType+university=HAL, abstractNote=OpenAlex"
+  }
+ ]
+}

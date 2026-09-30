@@ -14,7 +14,7 @@ from typing import Any, Dict, List, Optional
 
 from mappers.scholarly_types import crossref_type_to_zotero
 from mappers.zotero_schema import (
-    append_to_extra, make_empty_item, make_tags, validate_and_clean,
+    append_to_extra, make_empty_item, validate_and_clean,
 )
 
 SOURCE_LABEL = "CrossRef"
@@ -134,10 +134,9 @@ def map_crossref_item(raw: Dict) -> Dict:
     if raw.get("URL"):
         item["url"] = raw["URL"]
 
-    # Sujets → tags
+    # Sujets : catégories attribuées à la revue, pas des mots-clés déclarés
+    # de l'article ; tracés dans extra (« CrossRef subjects », PAT-04).
     subjects = [s for s in (raw.get("subject") or []) if s]
-    if subjects:
-        item["tags"] = make_tags(subjects)
 
     # === Traçabilité (extra) ===
     append_to_extra(item, "Sources", SOURCE_LABEL)
@@ -145,6 +144,8 @@ def map_crossref_item(raw: Dict) -> Dict:
         append_to_extra(item, "DOI", doi)
     # Statut OA non fourni par CrossRef
     append_to_extra(item, "Open Access", "unknown")
+    if subjects:
+        append_to_extra(item, "CrossRef subjects", ", ".join(subjects))
     refs = raw.get("is-referenced-by-count")
     if isinstance(refs, int):
         # str() pour préserver la valeur 0 (garde `if not value` du helper).

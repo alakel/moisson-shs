@@ -172,6 +172,46 @@ def classify_exception(exc: BaseException) -> Tuple[str, str]:
     return REASON_EXCEPTION, type(exc).__name__
 
 
+# Statuts d'un refus d'accès : reçus sans clé, ils disent que la source
+# exige une clé (source non configurée), non qu'elle est en panne.
+KEYLESS_REFUSAL_STATUSES = (401, 403)
+
+
+def keyless_refusal(error: Any, has_key: bool, env_var: str) -> Optional[str]:
+    """
+    Détail d'un refus d'accès (HTTP 401 ou 403) reçu par une source
+    interrogée **sans clé** (PAT-05) : la source est alors non configurée
+    (motif ``missing_key``), non en panne. Constat du 2026-09-30 : Semantic
+    Scholar répond 403 sans clé, et ce refus était rendu comme une erreur
+    HTTP (dans ``fetch_by_doi``, il empêchait même de conclure « non
+    trouvé »).
+
+    Args:
+        error: exception ``requests.HTTPError``, statut entier ou détail
+            court de la forme « HTTP 403 ».
+        has_key: une clé a-t-elle été envoyée ? Avec une clé, un refus est
+            une vraie erreur (clé refusée) : ``None``.
+        env_var: variable d'environnement de la clé, nommée dans le détail.
+
+    Returns:
+        Le détail (« HTTP 403 sans clé : définir … »), ou ``None``.
+    """
+    if has_key:
+        return None
+    status = None
+    if isinstance(error, requests.HTTPError):
+        status = getattr(getattr(error, "response", None), "status_code", None)
+    elif isinstance(error, int):
+        status = error
+    elif isinstance(error, str):
+        head = error.strip().split()
+        if len(head) >= 2 and head[0] == "HTTP" and head[1].isdigit():
+            status = int(head[1])
+    if status not in KEYLESS_REFUSAL_STATUSES:
+        return None
+    return f"HTTP {status} sans clé : définir {env_var}"
+
+
 # === Rangs et scores natifs (OPT-12) ===
 
 def native_score(value: Any) -> Optional[float]:

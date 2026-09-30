@@ -577,8 +577,10 @@ ENV_CORE_KEY = "CORE_API_KEY"              # requis (sur inscription)
 REQUEST_DELAY_S2 = float(os.environ.get("MOISSON_REQUEST_DELAY_S2", "1.05"))
 REQUEST_DELAY_CORE = float(os.environ.get("MOISSON_REQUEST_DELAY_CORE", "6.0"))
 
-# Seuil de score minimal pour retenir un concept OpenAlex comme mot-clé
-# (réduit le bruit des concepts de bas niveau de confiance).
+# Seuil de score minimal d'un concept OpenAlex retenu dans la ligne
+# « OpenAlex concepts » d'extra (réduit le bruit des concepts de bas niveau
+# de confiance). Les concepts n'entrent plus dans les mots-clés (PAT-04,
+# retour d'expérience du 2026-09-30) : ce seuil ne règle plus que la trace.
 OPENALEX_CONCEPT_SCORE_MIN = float(
     os.environ.get("MOISSON_OPENALEX_CONCEPT_SCORE_MIN", "0.3")
 )

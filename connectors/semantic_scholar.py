@@ -40,7 +40,7 @@ from typing import Dict, List, Optional
 
 from connectors.base import Connector
 from config import ENV_S2_KEY, REQUEST_DELAY_S2, S2_BIBLIO_SORT, S2_GRAPH_API
-from engine.models import MODE_BIBLIOGRAPHIE
+from engine.models import MODE_BIBLIOGRAPHIE, REASON_MISSING_KEY, keyless_refusal
 from mappers.semantic_scholar_mapper import map_s2_item
 from utils.http import OperationCancelled
 from utils.secrets import get_api_key
@@ -151,8 +151,16 @@ class SemanticScholarConnector(Connector):
                     )
                     payload = response.json()
                 except Exception as e:
-                    logger.error(f"[S2] Échec requête : {e}")
-                    report.fail_with(e)
+                    # 401 ou 403 sans clé, avant toute page : source non
+                    # configurée (clé requise), non en panne (PAT-05).
+                    refusal = (keyless_refusal(e, bool(self.api_key), ENV_S2_KEY)
+                               if report.pages == 0 else None)
+                    if refusal:
+                        logger.warning(f"[S2] {refusal}")
+                        report.skip(REASON_MISSING_KEY, refusal)
+                    else:
+                        logger.error(f"[S2] Échec requête : {e}")
+                        report.fail_with(e)
                     break
 
                 batch = payload.get("data") or []

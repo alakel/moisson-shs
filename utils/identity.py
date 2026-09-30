@@ -331,11 +331,31 @@ def hal_id_from_url(url: Optional[str]) -> Optional[str]:
     return normalize_hal_id(segments[0])
 
 
+def doi_from_identifier_query(url: Optional[str]) -> Optional[str]:
+    """
+    DOI porté par les paramètres ``identifierName=doi`` et
+    ``identifierValue=10.…`` d'une URL Taylor & Francis (téléchargement de
+    chapitre servi par Google Scholar), ou ``None``. Constat du 2026-09-30 :
+    40 notices Scholar sans DOI portaient ainsi le leur (PAT-07).
+    """
+    split = _split_url(url)
+    if split is None:
+        return None
+    parts, host = split
+    if not _bare_host(host).endswith("taylorfrancis.com"):
+        return None
+    params = {k.lower(): v for k, v in parse_qsl(parts.query or "")}
+    if (params.get("identifiername") or "").strip().lower() != "doi":
+        return None
+    return normalize_doi(params.get("identifiervalue") or "")
+
+
 def doi_from_url(url: Optional[str]) -> Optional[str]:
     """
     DOI lisible sans ambiguïté dans une URL : hôte ``doi.org``, chemins
-    éditeurs reconnus (``/doi/``, ``/article/10.``, ``/chapter/10.``), ou
-    DOI Persée dérivé d'une URL ``persee.fr/doc/...`` au motif strict.
+    éditeurs reconnus (``/doi/``, ``/article/10.``, ``/chapter/10.``),
+    paramètres ``identifierName=doi&identifierValue=…`` de Taylor & Francis,
+    ou DOI Persée dérivé d'une URL ``persee.fr/doc/...`` au motif strict.
     """
     split = _split_url(url)
     if split is None:
@@ -344,6 +364,10 @@ def doi_from_url(url: Optional[str]) -> Optional[str]:
     host = _bare_host(host)
     path = unquote(parts.path or "")
     low = path.lower()
+
+    from_query = doi_from_identifier_query(url)
+    if from_query:
+        return from_query
 
     if host == "persee.fr":
         m = _PERSEE_DOC_RE.match(low.rstrip("/"))

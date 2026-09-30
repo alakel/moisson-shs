@@ -3,7 +3,9 @@ Mapper Semantic Scholar (paper) → item Zotero JSON.
 
 Déduplication par ``externalIds.DOI`` sinon ``externalIds.CorpusId``. Les
 métriques propres à S2 (``citationCount``, ``influentialCitationCount``,
-``s2FieldsOfStudy``) et l'identifiant CorpusId sont tracés dans ``extra``.
+``s2FieldsOfStudy``) et l'identifiant CorpusId sont tracés dans ``extra`` ;
+les champs d'étude, classification automatique, n'entrent jamais dans les
+mots-clés (``tags`` = mots-clés déclarés, PAT-04).
 """
 
 from __future__ import annotations
@@ -12,7 +14,7 @@ from typing import Dict, List
 
 from mappers.scholarly_types import s2_type_to_zotero
 from mappers.zotero_schema import (
-    append_to_extra, make_empty_item, make_tags, validate_and_clean,
+    append_to_extra, make_empty_item, validate_and_clean,
 )
 from utils.names import split_display_name
 
@@ -79,16 +81,13 @@ def map_s2_item(raw: Dict) -> Dict:
     if doi:
         item["DOI"] = doi
 
-    # Champs d'étude → mots-clés
+    # Champs d'étude : ligne « S2 fields » d'extra seulement (plus bas).
     fields = sorted({
         f.get("category") for f in (raw.get("s2FieldsOfStudy") or [])
         if f.get("category")
     })
     if not fields:
         fields = [f for f in (raw.get("fieldsOfStudy") or []) if f]
-    if fields:
-        item["tags"] = make_tags(fields)
-
     # URL : PDF OA, sinon DOI, sinon page S2
     oa = raw.get("openAccessPdf") or {}
     item["url"] = (

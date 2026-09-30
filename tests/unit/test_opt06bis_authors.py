@@ -400,9 +400,9 @@ def test_compound_and_inverted_names_stay_fast(monkeypatch):
     calls = [0]
     real_match = dedup._match
 
-    def counting_match(a, b, approximate=True):
+    def counting_match(a, b, approximate=True, rules=None):
         calls[0] += 1
-        return real_match(a, b, approximate)
+        return real_match(a, b, approximate, rules)
 
     monkeypatch.setattr(dedup, "_match", counting_match)
 

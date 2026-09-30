@@ -46,10 +46,14 @@ class TestCrossrefMapper:
         assert "Sources: CrossRef" in item["extra"]
         assert "Cited by: 17" in item["extra"]
 
-    def test_tags_from_subjects(self, crossref_work):
+    def test_subjects_in_extra_not_in_tags(self, crossref_work):
+        """PAT-04 : les sujets CrossRef (catégories de la revue) sont tracés
+        dans extra, jamais en mots-clés."""
         item = map_crossref_item(crossref_work)
-        tags = {t["tag"] for t in item["tags"]}
-        assert "Artificial Intelligence" in tags and "Law" in tags
+        assert not item.get("tags")
+        line = next(l for l in _extra_lines(item)
+                    if l.startswith("CrossRef subjects: "))
+        assert "Artificial Intelligence" in line and "Law" in line
 
     def test_date_from_parts_variants(self):
         assert date_from_parts({"date-parts": [[2020, 5, 15]]}) == "2020-05-15"
@@ -87,11 +91,15 @@ class TestOpenAlexMapper:
         assert item["abstractNote"] == "This paper examines regulatory frameworks"
 
     def test_concepts_threshold(self, openalex_work):
+        """PAT-04 : les concepts retenus (score >= seuil) vont dans la ligne
+        « OpenAlex concepts » d'extra, jamais dans les mots-clés."""
         item = map_openalex_item(openalex_work)
-        tags = {t["tag"] for t in item["tags"]}
-        assert "Artificial intelligence" in tags
-        assert "Political science" in tags  # 0.55 >= 0.3
-        assert "Low confidence noise" not in tags  # 0.12 filtré
+        assert not item.get("tags")
+        line = next(l for l in _extra_lines(item)
+                    if l.startswith("OpenAlex concepts: "))
+        assert "Artificial intelligence" in line
+        assert "Political science" in line  # 0.55 >= 0.3
+        assert "Low confidence noise" not in line  # 0.12 filtré
 
     def test_extra_metadata(self, openalex_work):
         item = map_openalex_item(openalex_work)
@@ -142,10 +150,13 @@ class TestS2Mapper:
         assert "Influential citations: 5" in item["extra"]
         assert "arXiv: 2209.01234" in item["extra"]
 
-    def test_fields_as_tags(self, s2_paper):
+    def test_fields_in_extra_not_in_tags(self, s2_paper):
+        """PAT-04 : les champs d'étude S2 (classification automatique) sont
+        tracés dans extra, jamais en mots-clés."""
         item = map_s2_item(s2_paper)
-        tags = {t["tag"] for t in item["tags"]}
-        assert "Computer Science" in tags and "Linguistics" in tags
+        assert not item.get("tags")
+        line = next(l for l in _extra_lines(item) if l.startswith("S2 fields: "))
+        assert "Computer Science" in line and "Linguistics" in line
 
     def test_url_prefers_oa_pdf(self, s2_paper):
         item = map_s2_item(s2_paper)

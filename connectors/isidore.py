@@ -270,8 +270,12 @@ def report_from_scan(status: Optional[IsidoreScanStatus],
         "scanned": status.scanned,
         "retained": status.retained,
         "flow_records": status.flow_records,
-        "total_available": status.total_available,
     })
+    # Total annoncé par Isidore : inconnu (None) tant qu'aucune page n'est
+    # reçue ou si la réponse n'a pas de meta.@items ; jamais publié vide,
+    # un compteur doit rester un nombre (PAT-05).
+    if status.total_available is not None:
+        report.counters["total_available"] = status.total_available
     if status.mapping_errors:
         report.counters["mapping_errors"] = status.mapping_errors
     if status.cap_reached:

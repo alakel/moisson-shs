@@ -95,7 +95,7 @@ revérifiés en live les 2026-09-28 et 2026-09-29.
   `publication_year`, `type`, `language`, `is_oa`.
 - Tri : pertinence par défaut avec `search` (`relevance_score:desc`, score capturé).
 - Résumés : `abstract_inverted_index` (index inversé recomposé par le mapper).
-- Métadonnées riches : `concepts` (seuil `MOISSON_OPENALEX_CONCEPT_SCORE_MIN`), `cited_by_count`,
+- Métadonnées riches : `concepts` (seuil `MOISSON_OPENALEX_CONCEPT_SCORE_MIN`, ligne `extra` « OpenAlex concepts », jamais en mots-clés), `cited_by_count`,
   `open_access`, `ids`, `referenced_works`.
 - Auteurs : `/authors` (profils), filtre `author.id` ou `author.orcid` sur `/works`, pagination par
   curseur (`MOISSON_AUTHOR_OPENALEX_PAGE_SIZE`, 200).
@@ -151,8 +151,13 @@ revérifiés en live les 2026-09-28 et 2026-09-29.
   demandé. Délai de grâce des résolveurs moins prioritaires : `MOISSON_FETCH_BY_DOI_GRACE` (5 s) ;
   durée maximale `MOISSON_FETCH_BY_DOI_MAX_SECONDS` (60 s).
 - `corpus_resolve_dois` interroge CrossRef par `query.bibliographic` (5 candidats), règles
-  `doi-match/3` : titre ≥ 0,90 corroboré par l'année (± 1) et le premier auteur, 0,97 sans
-  corroboration ; ces seuils ne peuvent être que durcis.
+  `doi-match/4` : titre ≥ 0,90 corroboré par l'année (± 1) et le premier auteur, 0,97 sans
+  corroboration ; ces seuils ne peuvent être que durcis. Depuis `doi-match/4` (2026-09-30) : un
+  titre coupé par Google Scholar (points de suspension) exige l'année **et** l'auteur et au moins
+  30 caractères et 5 mots ; avec `MOISSON_DOI_CHAPTER_PREFIX=1` (désactivé par défaut), le numéro
+  de chapitre en tête d'un titre Google Books est ignoré face à un chapitre CrossRef, année et
+  auteur exigés, titre corrigé après acceptation seulement. Rapport au format 2 : auteurs des
+  candidats, règle appliquée, concordances d'année et d'auteur.
 
 ### Schéma Zotero
 
@@ -374,3 +379,9 @@ tronqués à 55 caractères.
   fusion champ-à-champ (`SOURCE_FIELD_PRIORITY`).
 - Rangs et scores natifs (`native_sort`, `native_filters`, rang et score par notice) sont rendus dans
   `by_source_status` et le manifeste, jamais dans les notices.
+- Mots-clés (`tags`) : seulement des mots-clés **déclarés** (auteur, éditeur, catalogue : HAL,
+  Isidore, OAI-PMH, CORE). Les classifications attribuées automatiquement vont dans `extra` :
+  concepts OpenAlex (« OpenAlex concepts »), champs d'étude de Semantic Scholar (« S2 fields »),
+  catégories de revue de CrossRef (« CrossRef subjects »). Règle posée le 2026-09-30 (PAT-04,
+  retour d'expérience B1) : les concepts arrivaient dans Zotero comme mots-clés (« Identity
+  (music) », « Space (punctuation) »). Les corpus antérieurs ne sont pas réécrits.

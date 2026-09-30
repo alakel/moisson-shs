@@ -63,7 +63,7 @@ from engine.models import (
     REASON_MISSING_KEY, REASON_NETWORK_ERROR, STATUS_CANCELLED,
     STATUS_COMPLETE, STATUS_EMPTY, STATUS_ERROR, STATUS_LABELS,
     STATUS_PARTIAL, STATUS_SKIPPED, SUCCESS_STATUSES, SearchReport,
-    SourceResult, classify_exception, resolve_source_status,
+    SourceResult, classify_exception, keyless_refusal, resolve_source_status,
 )
 from utils.http import HTTPClient, get_default_client
 from utils.deduplication import deduplicate
@@ -74,7 +74,7 @@ from connectors.isidore_scan import ScanRegistry
 from connectors.openedition import OpenEditionConnector
 from connectors.cairn import CairnConnector
 from mappers.zotero_schema import (
-    make_empty_item, validate_and_clean, make_tags, append_to_extra,
+    make_empty_item, validate_and_clean, append_to_extra,
 )
 from mappers.doc_type_mapping import map_dublin_core_type
 from mappers.hal_mapper import map_hal_to_zotero
@@ -647,13 +647,13 @@ def _map_crossref_work(data: Dict) -> Dict:
     if data.get("URL"):
         item["url"] = data["URL"]
 
-    # Subject → tags
-    subjects = data.get("subject", [])
-    if subjects:
-        item["tags"] = make_tags(subjects)
-
     # Source (libellé canonique aligné sur mappers/crossref_mapper.SOURCE_LABEL)
     append_to_extra(item, "Sources", "CrossRef")
+    # Sujets : catégories de la revue, tracées dans extra comme le fait
+    # mappers/crossref_mapper, jamais en mots-clés (PAT-04).
+    subjects = [str(x) for x in (data.get("subject") or []) if x]
+    if subjects:
+        append_to_extra(item, "CrossRef subjects", ", ".join(subjects))
     return validate_and_clean(item)
 
 
@@ -806,6 +806,13 @@ def _lookup_s2(doi: str,
         f"Semantic Scholar échec sur {doi}",
         params={"fields": _S2_FIELDS}, headers=headers,
     )
+    if state == LOOKUP_ERROR:
+        # 401 ou 403 sans clé : résolveur non interrogé (clé requise), comme
+        # CORE sans clé ; il ne rend plus le statut global « erreur » (PAT-05).
+        refusal = keyless_refusal(detail, bool(api_key), ENV_S2_KEY)
+        if refusal:
+            return ResolverOutcome("Semantic Scholar", LOOKUP_SKIPPED,
+                                   detail=refusal)
     if state != "ok":
         return ResolverOutcome("Semantic Scholar", state, detail=detail)
     if not payload:
@@ -1781,6 +1788,11 @@ def _apply_report(res: AuthorSourceResult,
         res.exhausted = report.exhausted
         res.provider_window = report.provider_window
         for key, value in (report.counters or {}).items():
+            # Compteurs numériques seulement : un total inconnu (None) du flux
+            # Isidore faisait lever TypeError, et la panne réseau devenait
+            # « erreur inattendue » (PAT-05, retour d'expérience B5).
+            if isinstance(value, bool) or not isinstance(value, (int, float)):
+                continue
             res.counters[key] = res.counters.get(key, 0) + value
         for message in report.warnings:
             res.warn(message)
@@ -2309,7 +2321,11 @@ def _search_s2_author(
         res.method = METHOD_NAME
         cands, state, detail = _s2_candidates(name, http_client, headers)
         if cands is None:
-            res.set_status(STATUS_ERROR, *_outcome_failure(state, detail))
+            refusal = keyless_refusal(detail, bool(api_key), ENV_S2_KEY)
+            if refusal:
+                res.set_status(STATUS_SKIPPED, REASON_MISSING_KEY, refusal)
+            else:
+                res.set_status(STATUS_ERROR, *_outcome_failure(state, detail))
             return res
         chosen = _decide(res, cands, lambda big: _s2_candidate_details(
             big, http_client, headers), orcid=orcid)
@@ -2347,7 +2363,12 @@ def _paginate_s2_papers(res: AuthorSourceResult, client: Any,
                 params={"fields": _S2_FIELDS, "offset": offset, "limit": limit},
                 headers=headers)
             if state != "ok":
-                report.fail(*_outcome_failure(state, detail))
+                refusal = (keyless_refusal(detail, bool(headers), ENV_S2_KEY)
+                           if report.pages == 0 else None)
+                if refusal:
+                    report.skip(REASON_MISSING_KEY, refusal)
+                else:
+                    report.fail(*_outcome_failure(state, detail))
                 all_exhausted = False
                 break
             papers = (payload or {}).get("data") or []

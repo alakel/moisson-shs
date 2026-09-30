@@ -43,7 +43,19 @@ D'où une règle d'acceptation délibérément stricte et entièrement traçable
    version publiée à une notice ``preprint`` ; un type CrossRef qui n'est pas
    une publication autonome (évaluation, composant, numéro de revue…) n'est
    jamais retenu. L'appariement par préfixe exige que le préfixe s'arrête à
-   une frontière de mot.
+   une frontière de mot ;
+7. titre coupé par Google Scholar (règles ``doi-match/4``, durcissement) :
+   un titre de notice terminé par des points de suspension n'est apparié
+   qu'avec l'année **et** le premier auteur, et s'il garde au moins
+   ``TRUNCATED_MIN_CHARS`` caractères et ``TRUNCATED_MIN_WORDS`` mots ;
+8. numéro de chapitre Google Books (règles ``doi-match/4``, drapeau
+   ``MOISSON_DOI_CHAPTER_PREFIX``, désactivé par défaut) : pour une notice
+   dont le lien est Google Books et dont le titre commence par un numéro
+   (« 53 Narrative Analysis »), le numéro est ignoré face à un candidat de
+   type chapitre dont le titre ne commence par aucun nombre ; année et
+   premier auteur sont alors exigés, les titres génériques exclus, et le
+   titre de la notice n'est corrigé qu'après acceptation (titre d'origine
+   gardé dans ``extra``, ligne ``Scholar title``).
 
 Les seuils ne peuvent pas être assouplis : un seuil de titre sous 0,90, un
 seuil renforcé sous 0,97, une tolérance d'année au-delà d'un an ou moins de
@@ -78,6 +90,7 @@ from __future__ import annotations
 import inspect
 import logging
 import math
+import os
 import re
 import threading
 import time
@@ -124,8 +137,29 @@ USER_AGENT = f"moisson-shs/1.0 (mailto:{CONTACT_EMAIL})"
 # assouplissables. « 3 » (2026-09-28) : garde-fous de nature (documents
 # dérivés, numéros de titre discordants, prépublication et version publiée,
 # types CrossRef non autonomes), préfixe arrêté à une frontière de mot, type
-# CrossRef tracé ; seuils inchangés.
-RULES_VERSION = "doi-match/3"
+# CrossRef tracé ; seuils inchangés. « 4 » (2026-09-30, sprint patch) :
+# titre coupé par Google Scholar apparié seulement avec l'année et l'auteur
+# et sur un préfixe substantiel (durcissement) ; numéro de chapitre Google
+# Books ignoré face à un chapitre CrossRef (drapeau, désactivé par défaut) ;
+# rapport au format 2 (auteurs des candidats, règle appliquée) ; seuils
+# inchangés.
+RULES_VERSION = "doi-match/4"
+
+# Titre coupé par Google Scholar (points de suspension en fin de titre) :
+# préfixe minimal pour l'apparier (Scholar ne coupe qu'au-delà de 108
+# caractères, constaté sur 209 titres coupés le 2026-09-30).
+TRUNCATED_MIN_CHARS = 30
+TRUNCATED_MIN_WORDS = 5
+
+# Règle du numéro de chapitre Google Books (drapeau, désactivé par défaut
+# jusqu'à la vérification humaine du sprint patch ; « 1 » l'active).
+CHAPTER_PREFIX_ENV = "MOISSON_DOI_CHAPTER_PREFIX"
+# Types CrossRef d'un chapitre : le numéro en tête désigne « chapitre n ».
+CHAPTER_CROSSREF_TYPES = frozenset({
+    "book-chapter", "book-section", "book-part", "reference-entry",
+})
+_CHAPTER_TITLE_RE = re.compile(r"^\s*(\d{1,3})\s*[.):-]?\s+(\S.*)$")
+_TRUNCATED_TITLE_RE = re.compile(r"(?:…|\.\.\.)\s*$")
 
 # Planchers et plafonds des paramètres de la règle (invariant de précision :
 # les seuils actuels ne sont jamais abaissés). Volontairement NON surchargeables
@@ -161,7 +195,13 @@ ALL_STATUSES = (
 )
 
 REPORT_FORMAT = "moisson-shs/doi-report"
-REPORT_FORMAT_VERSION = 1
+# 2 (2026-09-30) : chaque candidat porte ses auteurs, la règle appliquée et
+# la concordance d'année et d'auteur, même quand un garde-fou l'écarte.
+REPORT_FORMAT_VERSION = 2
+
+# Règle appliquée à un candidat (rapport).
+RULE_STANDARD = "standard"
+RULE_CHAPTER_PREFIX = "numéro de chapitre"
 
 
 class DoiRuleError(ValueError):
@@ -658,6 +698,49 @@ def _nature_check(item: Dict, candidate: Dict, na: str, nb: str,
     return None, None
 
 
+def chapter_prefix_enabled() -> bool:
+    """Règle du numéro de chapitre Google Books active (drapeau)."""
+    return os.environ.get(CHAPTER_PREFIX_ENV, "").strip().lower() in (
+        "1", "true", "yes", "on", "oui")
+
+
+def title_truncated(title: str) -> bool:
+    """Titre terminé par des points de suspension (coupe de Google Scholar)."""
+    return bool(isinstance(title, str) and _TRUNCATED_TITLE_RE.search(title))
+
+
+def _chapter_number(item: Dict, candidate: Dict,
+                    enabled: Optional[bool] = None) -> Tuple[Optional[str], str]:
+    """
+    Numéro de chapitre ignoré par la règle ``doi-match/4`` et titre de la
+    notice sans ce numéro, ou ``(None, titre)`` si la règle ne s'applique
+    pas : drapeau inactif, titre sans numéro en tête, lien autre que Google
+    Books, candidat qui n'est pas un chapitre ou dont le titre commence par
+    un nombre, reste du titre générique ou de moins de deux mots
+    significatifs.
+    """
+    title = item.get("title", "") or ""
+    if not (chapter_prefix_enabled() if enabled is None else enabled):
+        return None, title
+    m = _CHAPTER_TITLE_RE.match(title)
+    if not m:
+        return None, title
+    url = item.get("url") or ""
+    if not (isinstance(url, str) and "books.google." in url.lower()):
+        return None, title
+    if _candidate_type(candidate) not in CHAPTER_CROSSREF_TYPES:
+        return None, title
+    nb = normalize_title(_candidate_title(candidate))
+    if not nb or nb[0].isdigit():
+        return None, title
+    rest = m.group(2)
+    from utils.deduplication import _significant_words, _title_class
+    norm = normalize_title(rest)
+    if _title_class(norm) == "blocked" or _significant_words(norm) < 2:
+        return None, title
+    return m.group(1), rest
+
+
 def _first_author_lastname(item: Dict) -> str:
     """Nom de famille du premier auteur de l'item Zotero, normalisé."""
     for creator in item.get("creators") or []:
@@ -707,7 +790,7 @@ def evaluate_candidate(
         champ ``extra`` en cas d'acceptation, et au journal en cas de rejet.
         Un candidat « plausible » (voir ``_evaluate``) n'est pas accepté.
     """
-    accepted, ratio, reason, _ = _evaluate(
+    accepted, ratio, reason, _plausible, _details = _evaluate(
         item, candidate, threshold, strict_threshold, year_tolerance)
     return accepted, ratio, reason
 
@@ -718,78 +801,124 @@ def _evaluate(
     threshold: float = DOI_TITLE_THRESHOLD,
     strict_threshold: float = DOI_TITLE_THRESHOLD_UNCORROBORATED,
     year_tolerance: int = DOI_YEAR_TOLERANCE,
-) -> Tuple[bool, float, str, bool]:
+    chapter_prefix: Optional[bool] = None,
+) -> Tuple[bool, float, str, bool, Dict[str, Any]]:
     """
     Évaluation complète d'un candidat.
 
     Returns:
-        ``(admissible, similarité, motif, plausible)``. ``plausible`` : le
-        candidat satisfait toute la règle mais seule la suite de son titre le
-        signale comme dérivé ou numéroté (réserve de ``_nature_check``) ; il
-        n'est jamais retenu, et il rend la notice ambiguë s'il accompagne un
-        candidat admissible.
+        ``(admissible, similarité, motif, plausible, détails)``.
+        ``plausible`` : le candidat satisfait toute la règle mais seule la
+        suite de son titre le signale comme dérivé ou numéroté (réserve de
+        ``_nature_check``) ; il n'est jamais retenu, et il rend la notice
+        ambiguë s'il accompagne un candidat admissible. ``détails`` (rapport,
+        format 2) : ``rule`` (règle appliquée), ``chapter_number``,
+        ``title_used`` (titre comparé), ``year_match`` et ``author_match``
+        (``True``, ``False`` ou ``None`` si non vérifiable), calculés même
+        quand un garde-fou écarte le candidat.
     """
     threshold, strict_threshold, year_tolerance, _ = check_rule_parameters(
         threshold, strict_threshold, year_tolerance
     )
-    na = normalize_title(item.get("title", ""))
+    number, title = _chapter_number(item, candidate, chapter_prefix)
+    details: Dict[str, Any] = {
+        "rule": RULE_CHAPTER_PREFIX if number else RULE_STANDARD,
+        "chapter_number": number, "title_used": title,
+        "year_match": None, "author_match": None,
+    }
+
+    # Concordances d'année et d'auteur, calculées d'abord pour le rapport.
+    y_item = extract_year(item.get("date", ""))
+    y_cand = _candidate_year(candidate)
+    gap = None
+    if y_item and y_cand:
+        gap = abs(int(y_item) - int(y_cand))
+        details["year_match"] = gap <= year_tolerance
+    last = _first_author_lastname(item)
+    cand_lasts = _candidate_lastnames(candidate)
+    if last and cand_lasts:
+        details["author_match"] = last in cand_lasts
+
+    def result(ok: bool, ratio: float, motif: str, plausible: bool = False):
+        return ok, ratio, motif, plausible, details
+
+    na = normalize_title(title)
     nb = normalize_title(_candidate_title(candidate))
     ratio, by_prefix, tail_a, tail_b = _align_titles(na, nb)
     if ratio < threshold:
-        return (False, ratio,
-                f"titre {ratio:.2f} sous le seuil {threshold:.2f}", False)
+        return result(False, ratio,
+                      f"titre {ratio:.2f} sous le seuil {threshold:.2f}")
 
     # --- Nature du document (doi-match/3) ---
     exclusion, reserve = _nature_check(item, candidate, na, nb, tail_a,
                                        tail_b)
     if exclusion:
-        return False, ratio, exclusion, False
+        return result(False, ratio, exclusion)
 
     corroborations: List[str] = []
 
     # --- Année ---
-    y_item = extract_year(item.get("date", ""))
-    y_cand = _candidate_year(candidate)
-    if y_item and y_cand:
-        gap = abs(int(y_item) - int(y_cand))
+    if gap is not None:
         if gap > year_tolerance:
-            return False, ratio, f"année {y_item} contre {y_cand}", False
+            return result(False, ratio, f"année {y_item} contre {y_cand}")
         corroborations.append(
             "année exacte" if gap == 0 else f"année à {gap} près"
         )
 
     # --- Premier auteur ---
-    last = _first_author_lastname(item)
-    cand_lasts = _candidate_lastnames(candidate)
     if last and cand_lasts:
         if last not in cand_lasts:
-            return False, ratio, f"auteur '{last}' absent du candidat", False
+            return result(False, ratio, f"auteur '{last}' absent du candidat")
         corroborations.append("auteur")
 
     # --- Corroboration minimale ---
     # Un appariement par préfixe n'est jamais accepté seul : le titre y est
     # incomplet des deux côtés du test, donc non discriminant à lui seul.
     if by_prefix and not corroborations:
-        return False, ratio, (
+        return result(False, ratio, (
             "appariement par préfixe sans corroboration d'année ni d'auteur"
-        ), False
+        ))
     if not corroborations and ratio < strict_threshold:
-        return False, ratio, (
+        return result(False, ratio, (
             f"aucune corroboration possible et titre {ratio:.2f} sous le "
             f"seuil renforcé {strict_threshold:.2f}"
-        ), False
+        ))
+    both = details["year_match"] is True and details["author_match"] is True
+
+    # --- Titre coupé par Google Scholar (doi-match/4, durcissement) ---
+    truncated = title_truncated(title)
+    if truncated:
+        if not both:
+            return result(False, ratio, (
+                "titre coupé par Google Scholar : année et premier auteur "
+                "exigés tous deux"))
+        if len(na) < TRUNCATED_MIN_CHARS or \
+                len(na.split()) < TRUNCATED_MIN_WORDS:
+            return result(False, ratio, (
+                f"titre coupé par Google Scholar trop court pour être "
+                f"apparié ({len(na)} caractères, {len(na.split())} mots)"))
+
+    # --- Numéro de chapitre Google Books (doi-match/4, drapeau) ---
+    if number and not both:
+        return result(False, ratio, (
+            f"numéro de chapitre « {number} » ignoré : année et premier "
+            f"auteur exigés tous deux"))
 
     motif = f"titre {ratio:.2f}" + (" (préfixe)" if by_prefix else "")
     if corroborations:
         motif += ", " + ", ".join(corroborations)
     else:
         motif += ", sans corroboration"
+    if truncated:
+        motif += ", titre coupé"
+    if number:
+        motif += f", numéro de chapitre « {number} » ignoré"
     if reserve:
-        return False, ratio, (
+        return result(False, ratio, (
             f"{reserve} : non retenu, mais la notice peut en être un titre "
             f"tronqué ({motif})"
-        ), True
-    return True, ratio, motif, False
+        ), True)
+    return result(True, ratio, motif)
 
 
 def decide(
@@ -821,23 +950,31 @@ def decide(
                 "candidates": []}
 
     evaluated = []
+    titles_used: List[str] = []
     for cand in candidates:
-        accepted, ratio, reason, plausible = _evaluate(
+        accepted, ratio, reason, plausible, details = _evaluate(
             item, cand, threshold, strict_threshold, year_tolerance
         )
-        _, by_prefix = best_title_ratio(item.get("title", ""),
+        _, by_prefix = best_title_ratio(details["title_used"],
                                         _candidate_title(cand))
         evaluated.append({
             "doi": _clean_doi(cand.get("DOI")) or None,
             "title": _candidate_title(cand),
             "year": _candidate_year(cand),
             "type": _candidate_type(cand) or None,
+            # Format 2 : auteurs du candidat (noms de famille normalisés),
+            # règle appliquée, concordances d'année et d'auteur.
+            "authors": _candidate_lastnames(cand)[:10],
+            "rule": details["rule"],
+            "year_match": details["year_match"],
+            "author_match": details["author_match"],
             "score": round(ratio, 4),
             "prefix": bool(by_prefix),
             "admissible": bool(accepted),
             "plausible": bool(plausible),
             "reason": reason,
         })
+        titles_used.append(details["title_used"])
 
     best = max(evaluated, key=lambda c: c["score"])
     admissible = [c for c in evaluated if c["admissible"]]
@@ -873,6 +1010,11 @@ def decide(
         result.update(status=STATUS_ACCEPTED, doi=chosen["doi"],
                       reason=chosen["reason"], best_score=chosen["score"],
                       best_doi=chosen["doi"], doi_type=chosen["type"])
+        if chosen["rule"] == RULE_CHAPTER_PREFIX:
+            # Titre corrigé après acceptation seulement (règle du numéro de
+            # chapitre) ; le titre d'origine reste dans extra.
+            index = next(i for i, c in enumerate(evaluated) if c is chosen)
+            result["title_correction"] = titles_used[index]
         return result
     listed = ", ".join(f"{c['doi']} ({c['score']:.2f})"
                        for c in distinct.values())
@@ -1414,6 +1556,9 @@ def resolve_dois(
             entry["doi"] = doi
             entry["doi_type"] = decision.get("doi_type")
             enriched = dict(item)
+            if decision.get("title_correction"):
+                append_to_extra(enriched, "Scholar title", item.get("title", ""))
+                enriched["title"] = decision["title_correction"]
             append_to_extra(enriched, "DOI", doi)
             type_note = (f" ; type CrossRef {decision['doi_type']}"
                          if decision.get("doi_type") else "")

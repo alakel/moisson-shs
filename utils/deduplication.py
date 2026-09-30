@@ -137,6 +137,39 @@ Les champs sont regroupés par origine (forme historique « title=HAL,
 creators=HAL » toujours lue).
 
 Aucun champ Zotero arbitraire n'est ajouté.
+
+Règles optionnelles (sprint patch, retour d'expérience du 2026-09-30)
+--------------------------------------------------------------------
+Trois règles étroites, chacune derrière son drapeau et **désactivée par
+défaut** jusqu'au gate de la vérification humaine (PAT-09) :
+
+- *co-diffusion* (``MOISSON_DEDUP_CODIFFUSION``) : un même article diffusé par
+  deux plateformes (Cairn, OpenEdition, Persée, Érudit), ou par une plateforme
+  et l'éditeur, porte deux DOI. Ils sont déclarés **équivalents** (exception
+  au garde-fou DOI) si les titres normalisés sont identiques et non courts,
+  même année, même premier auteur, même revue (ISSN commun ou titre de revue
+  identique), mêmes pages quand les deux en ont, types compatibles, aucun
+  compte rendu, aucun DOI de dépôt ou de prépublication. DOI conservé :
+  Cairn, puis celui de l'éditeur, OpenEdition, Érudit, Persée (décision du
+  2026-09-30) ; les autres restent dans ``extra`` sous la clé ``DOI alias``
+  (jamais ``DOI:``), relue aux fusions suivantes ;
+- *versions Zenodo* (``MOISSON_DEDUP_ZENODO_VERSIONS``) : deux DOI
+  ``10.5281/zenodo.<n>`` de même titre normalisé, mêmes créateurs, même
+  année et même type sont le DOI de concept et un DOI de version ; le plus
+  petit numéro (concept présumé : Zenodo l'attribue avant ceux des versions)
+  est conservé ;
+- *chapitres Google Books* (``MOISSON_DEDUP_SCHOLAR_CHAPTERS``) : entre deux
+  notices Google Scholar seules dont l'une est un résultat Google Books typé
+  ``book`` (type donné à tout lien Google Books), le type ne bloque pas
+  l'appariement et le numéro de chapitre placé en tête du titre Google Books
+  (« 53 Narrative Analysis ») est ignoré à la comparaison ; la notice
+  fusionnée garde le titre sans numéro. Toutes les autres conditions de
+  l'étape 2 restent exigées.
+
+Les équivalences de DOI agissent au niveau des classes de l'étape 1 (le DOI
+canonique d'une famille sert d'étiquette), jamais en levant le veto : deux DOI
+qu'aucune règle ne déclare équivalents ne fusionnent toujours pas. Chaque
+équivalence est tracée dans ``Dedup evidence`` (segment ``équivalences``).
 """
 
 from __future__ import annotations
@@ -147,6 +180,7 @@ import logging
 import os
 import re
 from collections import defaultdict
+from dataclasses import dataclass
 from functools import lru_cache
 from typing import Any, Dict, Iterable, List, Optional, Set, Tuple
 
@@ -193,6 +227,47 @@ _EVIDENCE_MAX_KEYS = 10
 _EVIDENCE_MAX_FUZZY = 5
 
 EVIDENCE_PREFIX = "Dedup evidence:"
+
+# Drapeaux des règles optionnelles (en-tête du module) : « 1 », « true »,
+# « yes », « on » ou « oui » les activent ; désactivées par défaut.
+CODIFFUSION_ENV = "MOISSON_DEDUP_CODIFFUSION"
+ZENODO_VERSIONS_ENV = "MOISSON_DEDUP_ZENODO_VERSIONS"
+SCHOLAR_CHAPTERS_ENV = "MOISSON_DEDUP_SCHOLAR_CHAPTERS"
+
+# Version des règles, écrite dans les manifestes : dedup/1 = règles d'OPT-06
+# (« opt06 ») ; dedup/2 ajoute les trois règles optionnelles, dont l'état
+# (drapeaux) est écrit à côté.
+RULES_VERSION = "dedup/2"
+
+# Préfixes DOI des plateformes de diffusion des revues (co-diffusion).
+CODIFFUSION_PLATFORMS = {"10.3917": "Cairn", "10.4000": "OpenEdition",
+                         "10.3406": "Persée", "10.7202": "Érudit"}
+# Préfixes de dépôts et de prépublications : une version déposée n'est pas
+# une co-diffusion de l'article publié (prudence bibliographique).
+NON_CODIFFUSION_PREFIXES = frozenset({
+    "10.5281", "10.48550", "10.2139", "10.31219", "10.31234", "10.31235",
+    "10.1101", "10.21203", "10.20944", "10.22541", "10.6084",
+})
+# DOI conservé après une co-diffusion (décision DP-2 du 2026-09-30) : Cairn,
+# puis le DOI de l'éditeur (préfixe hors plateformes), OpenEdition, Érudit,
+# Persée ; à rang égal, ordre lexicographique.
+_CODIFFUSION_KEEP_RANK = {"10.3917": 0, "10.4000": 2, "10.7202": 3,
+                          "10.3406": 4}
+_PUBLISHER_KEEP_RANK = 1
+# Clé de la ligne d'extra qui garde les autres DOI d'une notice fusionnée par
+# équivalence (jamais « DOI: », lue comme DOI déclaré quand le champ est vide).
+ALIAS_KEY = "DOI alias"
+ALIAS_CODIFFUSION = "co-diffusion"
+ALIAS_ZENODO = "version Zenodo"
+_ZENODO_DOI_RE = re.compile(r"^10\.5281/zenodo\.(\d+)$")
+_ALIAS_VALUE_RE = re.compile(r"^(\S+)(?:\s+\((.+)\))?$")
+# Numéro de chapitre en tête d'un titre normalisé (« 53 narrative analysis »)
+# et du titre brut (« 53 Narrative Analysis », « 4. Les interactions »).
+_CHAPTER_NUMBER_RE = re.compile(r"^(\d{1,3}) \S")
+_LEADING_NUMBER_RAW_RE = re.compile(r"^\s*\d{1,3}\s*[.):-]?\s+")
+# Types qu'une notice Google Scholar peut porter face au même chapitre vu
+# dans Google Books (typé « book » par le lien).
+_SCHOLAR_CHAPTER_OTHER_TYPES = {"journalArticle", "document", "book", ""}
 
 
 # === Priorité de source par champ (fusion cross-corpus FR/EN) ===
@@ -455,7 +530,7 @@ def parse_evidence(item: Dict) -> Optional[Dict[str, Any]]:
     if raw is None:
         return None
     ev: Dict[str, Any] = {"count": 1, "keys": [], "fuzzy": [], "origins": {},
-                          "ambiguous": ""}
+                          "ambiguous": "", "equivalences": []}
     for seg in (s.strip() for s in raw.split(" ; ")):
         if not seg:
             continue
@@ -466,6 +541,9 @@ def parse_evidence(item: Dict) -> Optional[Dict[str, Any]]:
             ev["keys"] = [k.strip() for k in seg[5:].split(", ") if k.strip()]
         elif seg.startswith("floue "):
             ev["fuzzy"] = [f.strip() for f in seg[6:].split(" + ") if f.strip()]
+        elif seg.startswith("équivalences "):
+            ev["equivalences"] = [f.strip() for f in seg[13:].split(" + ")
+                                  if f.strip()]
         elif seg.startswith("origines "):
             # « title+creators=HAL, abstractNote=CrossRef » ; forme historique
             # « title=HAL, creators=HAL » acceptée.
@@ -495,6 +573,10 @@ def format_evidence(ev: Dict[str, Any]) -> str:
     fuzzy = list(ev.get("fuzzy") or [])
     if fuzzy:
         segs.append("floue " + " + ".join(fuzzy[:_EVIDENCE_MAX_FUZZY]))
+    equivalences = list(ev.get("equivalences") or [])
+    if equivalences:
+        segs.append("équivalences "
+                    + " + ".join(equivalences[:_EVIDENCE_MAX_FUZZY]))
     origins = ev.get("origins") or {}
     if origins:
         # Champs regroupés par origine, dans l'ordre de leur premier champ.
@@ -802,6 +884,24 @@ def merge_items(items: List[Dict],
     if type_origin:
         origins["itemType"] = type_origin
 
+    # Équivalence de DOI (règles optionnelles) : le DOI conservé l'emporte,
+    # avec la graphie de la notice qui le porte.
+    equivalence = (evidence or {}).get("doi_equivalence") or {}
+    if equivalence.get("canonical"):
+        for info in infos:
+            raw = info.item.get("DOI")
+            if isinstance(raw, str) and normalize_doi(raw) == \
+                    equivalence["canonical"]:
+                merged["DOI"] = raw.strip()
+                origins["DOI"] = info.origin("DOI")
+                break
+        else:
+            merged["DOI"] = equivalence["canonical"]
+    # Chapitre Google Books apparié sans son numéro : la notice fusionnée
+    # garde le titre sans numéro (la valeur la plus longue l'emporterait).
+    if any("numéro de chapitre" in m for m in (evidence or {}).get("fuzzy") or []):
+        _prefer_unnumbered_title(infos, merged, origins)
+
     def present(field: str) -> bool:
         return any(field in info.item for info in infos)
 
@@ -869,6 +969,28 @@ def merge_items(items: List[Dict],
     return merged
 
 
+def _prefer_unnumbered_title(infos: List[_MemberInfo], merged: Dict[str, Any],
+                             origins: Dict[str, Tuple[str, ...]]) -> None:
+    """Remplace un titre retenu qui commence par un numéro de chapitre par le
+    titre d'un membre qui en est le reste sans numéro (règle des chapitres
+    Google Books)."""
+    title = merged.get("title") or ""
+    m = _LEADING_NUMBER_RAW_RE.match(title) if isinstance(title, str) else None
+    if not m:
+        return
+    rest = _norm_title(title[m.end():])
+    if not rest:
+        return
+    for info in infos:
+        cand = info.item.get("title")
+        if isinstance(cand, str) and cand.strip() \
+                and not _LEADING_NUMBER_RAW_RE.match(cand) \
+                and _norm_title(cand).startswith(rest):
+            merged["title"] = cand
+            origins["title"] = info.origin("title")
+            return
+
+
 def _park_disallowed_fields(merged: Dict[str, Any]) -> List[str]:
     """
     Retire de la notice fusionnée les champs que son type ne prévoit pas
@@ -906,6 +1028,8 @@ def _merge_extra(infos: List[_MemberInfo], merged: Dict[str, Any],
     seen_dois: Set[str] = set()
     snippet_line = truncation_line = None
     alt_urls: List[str] = []
+    equivalence = (evidence or {}).get("doi_equivalence") or {}
+    aliases: Dict[str, str] = dict(equivalence.get("aliases") or {})
     def add_line(raw: str, info: Optional[_MemberInfo]) -> None:
         nonlocal snippet_line, truncation_line
         line = raw.strip()
@@ -936,7 +1060,9 @@ def _merge_extra(infos: List[_MemberInfo], merged: Dict[str, Any],
         if key == "DOI":
             norm = normalize_doi(line.split(":", 1)[1])
             if norm:
-                if norm in seen_dois:
+                # DOI devenu alias par équivalence : gardé en « DOI alias »
+                # (jamais « DOI: », lue comme DOI déclaré).
+                if norm in seen_dois or norm in aliases:
                     return
                 seen_dois.add(norm)
         if line not in seen:
@@ -953,6 +1079,8 @@ def _merge_extra(infos: List[_MemberInfo], merged: Dict[str, Any],
     # (même traitement : dédoublonnage, DOI normalisés).
     for raw in parked or []:
         add_line(raw, None)
+    for alias in sorted(aliases):
+        add_line(f"{ALIAS_KEY}: {alias} ({aliases[alias]})", None)
 
     chosen_url = (merged.get("url") or "").strip()
     alt_urls = [u for u in alt_urls if u != chosen_url]
@@ -981,10 +1109,14 @@ def _combine_evidence(infos: List[_MemberInfo],
     count = sum(i.count for i in infos)
     keys: List[str] = []
     fuzzy: List[str] = []
+    equivalences: List[str] = []
     for info in infos:
         if info.evidence:
             keys.extend(info.evidence["keys"])
             fuzzy.extend(info.evidence["fuzzy"])
+            equivalences.extend(info.evidence.get("equivalences") or [])
+    equivalences.extend(((evidence or {}).get("doi_equivalence") or {})
+                        .get("motifs") or [])
     if evidence and evidence.get("keys") is not None:
         keys.extend(evidence["keys"])
     else:
@@ -1002,6 +1134,7 @@ def _combine_evidence(infos: List[_MemberInfo],
         "fuzzy": sorted(set(fuzzy)),
         "origins": {f: list(o) for f, o in origins.items() if o and o != ("",)},
         "ambiguous": ambiguous,
+        "equivalences": sorted(set(equivalences)),
     }
 
 
@@ -1436,7 +1569,7 @@ class _Features:
     __slots__ = ("title", "year", "author", "authors", "itype", "tclass",
                  "review", "doi", "hal", "isbn", "arxiv", "pmid", "raw_title",
                  "containers", "page_range", "chars", "author_profile",
-                 "profiles")
+                 "profiles", "scholar_only", "books_google")
 
     def __init__(self, record: Dict):
         self.raw_title = record.get("title", "") or ""
@@ -1460,6 +1593,26 @@ class _Features:
         self.containers = _containers(record)
         self.page_range = _has_page_range(record)
         self.chars = None  # profil de caractères du titre, à la demande
+        # Règle des chapitres Google Books (PAT-07) : notice venue de Google
+        # Scholar seul, et lien Google Books (typé « book » par le mapper).
+        self.scholar_only = item_sources(record) == {"google_scholar"}
+        url = record.get("url") or ""
+        self.books_google = isinstance(url, str) and \
+            "books.google." in url.lower()
+
+    def without_chapter_number(self, number: str) -> "_Features":
+        """Copie dont le titre perd le numéro de chapitre ``number`` placé en
+        tête (règle des chapitres Google Books) ; le reste est inchangé."""
+        clone = object.__new__(_Features)
+        for slot in _Features.__slots__:
+            setattr(clone, slot, getattr(self, slot))
+        clone.raw_title = _LEADING_NUMBER_RAW_RE.sub("", self.raw_title,
+                                                     count=1)
+        clone.title = self.title[len(number):].strip()
+        clone.tclass = _title_class(clone.title)
+        clone.review = _is_review_title(clone.title)
+        clone.chars = None
+        return clone
 
     def order_key(self) -> Tuple:
         """Clé totale (sur les caractéristiques comparées) qui fixe l'ordre
@@ -1633,7 +1786,8 @@ def _title_ratio_upper_bound(a: "_Features", b: "_Features") -> float:
     return bound
 
 
-def hard_compatible(a: _Features, b: _Features) -> bool:
+def hard_compatible(a: _Features, b: _Features,
+                    rules: Optional["DedupRules"] = None) -> bool:
     """
     Contraintes dures entre deux groupes, indépendantes de la similarité des
     titres : types compatibles, aucune relation partie/tout (le contenant de
@@ -1642,7 +1796,9 @@ def hard_compatible(a: _Features, b: _Features) -> bool:
     identifiants HAL distincts seulement pour un titre identique d'au moins
     quatre mots significatifs et la même année). Vérifiées pour chaque paire
     d'un regroupement flou : une notice de type générique ne peut pas relier
-    un livre et un chapitre.
+    un livre et un chapitre. Avec la règle des chapitres Google Books
+    (``rules.scholar_chapters``), le type ne départage pas deux notices de
+    :func:`scholar_chapter_pair`.
     """
     if a.doi and b.doi and a.doi != b.doi:
         return False
@@ -1650,7 +1806,9 @@ def hard_compatible(a: _Features, b: _Features) -> bool:
             or _conflict(a.pmid, b.pmid)):
         return False
     if not _types_compatible(a.itype, b.itype):
-        return False
+        rules = rules if rules is not None else dedup_rules()
+        if not (rules.scholar_chapters and scholar_chapter_pair(a, b)):
+            return False
     if _part_of(a, b) or _part_of(b, a):
         return False
     if a.review != b.review:
@@ -1691,14 +1849,24 @@ def _tolerant_candidate(first, others) -> bool:
                                      for o in others)
 
 
-def _match(a: _Features, b: _Features, approximate: bool = True):
+def _match(a: _Features, b: _Features, approximate: bool = True,
+           rules: Optional["DedupRules"] = None):
     """
     Appariement de deux groupes sans clé forte commune.
 
     Returns:
-        ``None`` ou ``(exact, ratio, par_préfixe, écart_d_année, auteur)``.
+        ``None`` ou ``(exact, ratio, par_préfixe, écart_d_année, auteur,
+        note)`` ; ``note`` dit qu'un numéro de chapitre Google Books a été
+        ignoré (règle des chapitres), ``None`` sinon.
     """
     from utils.doi_resolver import best_title_ratio
+
+    rules = rules if rules is not None else dedup_rules()
+    note = None
+    if rules.scholar_chapters and scholar_chapter_pair(a, b):
+        a, b, number = _strip_chapter_number(a, b)
+        if number:
+            note = f"numéro de chapitre « {number} » ignoré"
 
     # Ordre canonique de la paire : SequenceMatcher n'est pas strictement
     # symétrique et le motif nomme un auteur ; la décision et le motif ne
@@ -1739,10 +1907,10 @@ def _match(a: _Features, b: _Features, approximate: bool = True):
     if not exact and (not approximate or a.tclass != "ok"
                       or b.tclass != "ok"):
         return None
-    if not hard_compatible(a, b):
+    if not hard_compatible(a, b, rules):
         return None
     if exact:
-        return (True, 1.0, False, gap, matched)
+        return (True, 1.0, False, gap, matched, note)
     la, lb = len(a.title), len(b.title)
     # Filtres bon marché d'abord. Borne supérieure du rapport de
     # SequenceMatcher (2M / (la + lb)) : inutile de comparer si elle est sous
@@ -1765,21 +1933,24 @@ def _match(a: _Features, b: _Features, approximate: bool = True):
         return None
     if by_prefix and gap != 0:
         return None
-    return (False, ratio, by_prefix, gap, matched)
+    return (False, ratio, by_prefix, gap, matched, note)
 
 
 def _motif(match) -> str:
-    exact, ratio, by_prefix, gap, matched = match
+    exact, ratio, by_prefix, gap, matched = match[:5]
+    note = match[5] if len(match) > 5 else None
     if exact:
         motif = "titre identique"
     else:
         motif = f"titre {ratio:.2f}" + (" préfixe" if by_prefix else "")
     motif += " année exacte" if gap == 0 else f" année ±{gap}"
-    return motif + f" auteur {matched}"
+    motif += f" auteur {matched}"
+    return motif + (f" ({note})" if note else "")
 
 
 def fuzzy_match(a: _Features, b: _Features,
-                approximate: bool = True) -> Optional[str]:
+                approximate: bool = True,
+                rules: Optional["DedupRules"] = None) -> Optional[str]:
     """
     Appariement de deux groupes sans clé forte commune ; renvoie le motif
     (``titre 0.95 année exacte auteur x``) ou ``None``.
@@ -1795,8 +1966,309 @@ def fuzzy_match(a: _Features, b: _Features,
     dures de :func:`hard_compatible`. Le résultat ne dépend pas de l'ordre
     des arguments.
     """
-    m = _match(a, b, approximate)
+    m = _match(a, b, approximate, rules)
     return _motif(m) if m else None
+
+
+# === Règles optionnelles (sprint patch) et équivalences de DOI ===
+
+_TRUE_VALUES = ("1", "true", "yes", "on", "oui")
+
+
+def _flag(env: str, explicit: Optional[bool]) -> bool:
+    if explicit is not None:
+        return bool(explicit)
+    return os.environ.get(env, "").strip().lower() in _TRUE_VALUES
+
+
+@dataclass(frozen=True)
+class DedupRules:
+    """Règles optionnelles actives (voir l'en-tête du module)."""
+
+    codiffusion: bool = False
+    zenodo_versions: bool = False
+    scholar_chapters: bool = False
+
+    def as_dict(self) -> Dict[str, bool]:
+        return {"codiffusion": self.codiffusion,
+                "zenodo_versions": self.zenodo_versions,
+                "scholar_chapters": self.scholar_chapters}
+
+
+def dedup_rules(codiffusion: Optional[bool] = None,
+                zenodo_versions: Optional[bool] = None,
+                scholar_chapters: Optional[bool] = None) -> DedupRules:
+    """Règles optionnelles : paramètres explicites, sinon variables
+    d'environnement ; désactivées par défaut."""
+    return DedupRules(_flag(CODIFFUSION_ENV, codiffusion),
+                      _flag(ZENODO_VERSIONS_ENV, zenodo_versions),
+                      _flag(SCHOLAR_CHAPTERS_ENV, scholar_chapters))
+
+
+def scholar_chapter_pair(a: _Features, b: _Features) -> bool:
+    """
+    Deux notices venues de Google Scholar seul, dont l'une est un résultat
+    Google Books typé ``book`` (type donné à tout lien Google Books par
+    ``mappers/scholarly_types.py``) : pour elles, le type ne départage pas un
+    chapitre vu dans Google Books et le même chapitre vu ailleurs.
+    """
+    if not (a.scholar_only and b.scholar_only):
+        return False
+    return any(x.books_google and x.itype == "book"
+               and y.itype in _SCHOLAR_CHAPTER_OTHER_TYPES
+               for x, y in ((a, b), (b, a)))
+
+
+def _chapter_number(f: _Features) -> Optional[str]:
+    m = _CHAPTER_NUMBER_RE.match(f.title)
+    return m.group(1) if m else None
+
+
+def _strip_chapter_number(a: _Features, b: _Features):
+    """
+    Retire le numéro de chapitre en tête du titre de la notice Google Books,
+    seulement si l'autre titre ne commence par aucun numéro : un vrai titre
+    numérique (« 200 Years of Children in the Novel ») garde son nombre tant
+    qu'aucune autre notice n'en confirme le retrait par l'égalité du reste.
+
+    Returns:
+        ``(a, b, numéro)`` ; ``numéro`` vaut ``None`` si rien n'est retiré.
+    """
+    na, nb = _chapter_number(a), _chapter_number(b)
+    if na and a.books_google and nb is None:
+        return a.without_chapter_number(na), b, na
+    if nb and b.books_google and na is None:
+        return a, b.without_chapter_number(nb), nb
+    return a, b, None
+
+
+def _doi_prefix(doi: str) -> str:
+    return doi.split("/", 1)[0] if doi else ""
+
+
+def _identity_doi(item: Dict) -> Optional[str]:
+    """DOI d'identité d'une notice (clé ``doi:`` de l'extracteur commun)."""
+    for key, _derived in strong_key_sources(item):
+        if key.startswith("doi:"):
+            return key[4:]
+    return None
+
+
+_ISSN_RE = re.compile(r"\b(\d{4})-?(\d{3}[\dXx])\b")
+
+
+def _issns(item: Dict) -> Set[str]:
+    values = [item.get("ISSN")]
+    values.extend(v for k, v in extra_lines(item) if k == "ISSN")
+    out: Set[str] = set()
+    for v in values:
+        if isinstance(v, str):
+            out.update((a + b).upper() for a, b in _ISSN_RE.findall(v))
+    return out
+
+
+def _norm_pages(item: Dict) -> str:
+    value = item.get("pages")
+    if not _non_empty(value):
+        value = next((v for k, v in extra_lines(item) if k == "pages"), "")
+    text = re.sub(r"[–—‐‑−]", "-", str(value or ""))
+    text = re.sub(r"[^\d-]", "", text)
+    text = re.sub(r"-+", "-", text).strip("-")
+    return text if re.search(r"\d", text) else ""
+
+
+class _DoiNotice:
+    """Notice porteuse d'un DOI, lue pour les règles d'équivalence."""
+
+    __slots__ = ("doi", "feats", "issns", "pages", "zenodo")
+
+    def __init__(self, item: Dict, doi: str):
+        self.doi = doi
+        self.feats = _Features(item)
+        self.issns = _issns(item)
+        self.pages = _norm_pages(item)
+        m = _ZENODO_DOI_RE.match(doi)
+        self.zenodo = int(m.group(1)) if m else None
+
+
+def _format_issn(value: str) -> str:
+    return f"{value[:4]}-{value[4:]}"
+
+
+def codiffusion_motif(a: _DoiNotice, b: _DoiNotice) -> Optional[str]:
+    """
+    Motif de la règle de co-diffusion (en-tête du module), ou ``None``.
+
+    Deux DOI de préfixes différents, dont au moins un de plateforme de
+    diffusion et aucun de dépôt ou de prépublication ; titres normalisés
+    identiques et non courts ; même année ; même premier auteur ; même revue
+    (ISSN commun ou titre de revue identique) ; mêmes pages quand les deux
+    notices en ont ; types compatibles ; aucun compte rendu.
+    """
+    pa, pb = _doi_prefix(a.doi), _doi_prefix(b.doi)
+    if pa == pb:
+        return None
+    if pa not in CODIFFUSION_PLATFORMS and pb not in CODIFFUSION_PLATFORMS:
+        return None
+    if pa in NON_CODIFFUSION_PREFIXES or pb in NON_CODIFFUSION_PREFIXES:
+        return None
+    fa, fb = a.feats, b.feats
+    if not fa.title or fa.title != fb.title:
+        return None
+    if fa.tclass != "ok" or fb.tclass != "ok":
+        return None
+    if fa.review or fb.review:
+        return None
+    if fa.year is None or fa.year != fb.year:
+        return None
+    if not fa.author or fa.author != fb.author:
+        return None
+    if not _types_compatible(fa.itype, fb.itype):
+        return None
+    common_issn = a.issns & b.issns
+    if not common_issn and not (fa.containers & fb.containers):
+        return None
+    if a.pages and b.pages and a.pages != b.pages:
+        return None
+    parts = ["titre identique", f"année {fa.year}", f"auteur {fa.author}"]
+    if common_issn:
+        parts.append("ISSN " + ", ".join(_format_issn(x)
+                                         for x in sorted(common_issn)))
+    else:
+        parts.append("revue identique")
+    if a.pages and b.pages:
+        parts.append(f"pages {a.pages}")
+    return ", ".join(parts)
+
+
+def zenodo_motif(a: _DoiNotice, b: _DoiNotice) -> Optional[str]:
+    """
+    Motif de la règle des versions Zenodo, ou ``None`` : deux DOI Zenodo
+    distincts, titres normalisés identiques (non génériques), même année,
+    mêmes créateurs, même type.
+    """
+    if a.zenodo is None or b.zenodo is None or a.zenodo == b.zenodo:
+        return None
+    fa, fb = a.feats, b.feats
+    if not fa.title or fa.title != fb.title or fa.tclass == "blocked":
+        return None
+    if fa.year is None or fa.year != fb.year:
+        return None
+    if not fa.authors or set(fa.authors) != set(fb.authors):
+        return None
+    if fa.itype != fb.itype:
+        return None
+    return (f"titre identique, année {fa.year}, mêmes créateurs, concept "
+            f"présumé : plus petit numéro")
+
+
+def _keep_doi(family: Iterable[str]) -> str:
+    """DOI conservé d'une famille d'équivalence."""
+    family = sorted(set(family))
+    zenodo = [_ZENODO_DOI_RE.match(d) for d in family]
+    if all(zenodo):
+        return min(family, key=lambda d: int(_ZENODO_DOI_RE.match(d).group(1)))
+    return min(family, key=lambda d: (
+        _CODIFFUSION_KEEP_RANK.get(_doi_prefix(d), _PUBLISHER_KEEP_RANK), d))
+
+
+def alias_kind(canonical: str, alias: str) -> str:
+    """Nature d'un DOI alias : version Zenodo ou co-diffusion."""
+    if _ZENODO_DOI_RE.match(canonical or "") and _ZENODO_DOI_RE.match(alias or ""):
+        return ALIAS_ZENODO
+    return ALIAS_CODIFFUSION
+
+
+def _parse_alias(value: str) -> Tuple[Optional[str], str]:
+    m = _ALIAS_VALUE_RE.match((value or "").strip())
+    if not m:
+        return None, ALIAS_CODIFFUSION
+    return normalize_doi(m.group(1)), (m.group(2) or ALIAS_CODIFFUSION).strip()
+
+
+def doi_equivalences(items: List[Dict],
+                     rules: Optional[DedupRules] = None):
+    """
+    Familles de DOI équivalents d'un lot de notices (règles de co-diffusion
+    et des versions Zenodo, lignes ``DOI alias`` d'une fusion antérieure).
+
+    Returns:
+        ``(canon, motifs)`` : ``canon`` associe chaque DOI d'une famille (de
+        deux DOI ou plus) au DOI conservé ; ``motifs`` associe le DOI conservé
+        aux motifs des équivalences de sa famille. Vides si aucune règle
+        d'équivalence n'est active.
+    """
+    rules = rules if rules is not None else dedup_rules()
+    if not (rules.codiffusion or rules.zenodo_versions):
+        return {}, {}
+    parent: Dict[str, str] = {}
+
+    def find(x: str) -> str:
+        parent.setdefault(x, x)
+        while parent[x] != x:
+            parent[x] = parent[parent[x]]
+            x = parent[x]
+        return x
+
+    def union(x: str, y: str) -> None:
+        rx, ry = find(x), find(y)
+        if rx != ry:
+            if rx < ry:
+                parent[ry] = rx
+            else:
+                parent[rx] = ry
+
+    links: List[Tuple[str, str, Optional[str]]] = []
+    by_title: Dict[str, List[_DoiNotice]] = defaultdict(list)
+    for item in items:
+        doi = _identity_doi(item)
+        if not doi:
+            continue
+        for key, value in extra_lines(item):
+            if key != ALIAS_KEY:
+                continue
+            alias, kind = _parse_alias(value)
+            enabled = (rules.zenodo_versions if kind == ALIAS_ZENODO
+                       else rules.codiffusion)
+            if alias and alias != doi and enabled:
+                links.append((doi, alias, None))
+        notice = _DoiNotice(item, doi)
+        if notice.feats.title and notice.feats.tclass != "blocked":
+            by_title[notice.feats.title].append(notice)
+    for group in by_title.values():
+        if len(group) < 2:
+            continue
+        for x, a in enumerate(group):
+            for b in group[x + 1:]:
+                if a.doi == b.doi:
+                    continue
+                motif, kind = None, None
+                if rules.codiffusion:
+                    motif, kind = codiffusion_motif(a, b), ALIAS_CODIFFUSION
+                if motif is None and rules.zenodo_versions:
+                    motif, kind = zenodo_motif(a, b), ALIAS_ZENODO
+                if motif:
+                    lo, hi = sorted((a.doi, b.doi))
+                    links.append((lo, hi, f"{kind} {lo} = {hi} ({motif})"))
+    for x, y, _m in links:
+        union(x, y)
+    families: Dict[str, Set[str]] = defaultdict(set)
+    for d in list(parent):
+        families[find(d)].add(d)
+    canon: Dict[str, str] = {}
+    keep_of: Dict[str, str] = {}
+    for root, family in families.items():
+        if len(family) < 2:
+            continue
+        keep = _keep_doi(family)
+        keep_of[root] = keep
+        for d in family:
+            canon[d] = keep
+    motifs: Dict[str, List[str]] = defaultdict(list)
+    for x, _y, m in links:
+        if m and x in canon:
+            motifs[canon[x]].append(m)
+    return canon, {k: sorted(set(v)) for k, v in motifs.items()}
 
 
 # === Déduplication ===
@@ -1884,9 +2356,14 @@ def _split_by_doi(nodes: List[int], dois: Dict[int, Optional[str]],
     return out, len(by_doi) > 1
 
 
-def _strong_groups(items: List[Dict]):
+def _strong_groups(items: List[Dict],
+                   canon: Optional[Dict[str, str]] = None):
     """
     Étape 1 : groupes par clés fortes avec garde-fou DOI.
+
+    ``canon`` (voir :func:`doi_equivalences`, calculé selon les drapeaux
+    s'il n'est pas fourni) remplace chaque DOI d'une famille d'équivalence
+    par le DOI conservé : la classe DOI porte l'étiquette canonique.
 
     Toute clé forte partagée relie les notices, avec trois restrictions :
     une clé ``url:`` partagée par plus de ``URL_KEY_MAX_SHARE`` titres
@@ -1902,6 +2379,8 @@ def _strong_groups(items: List[Dict]):
         ``retenus`` liste les paires ``(i, j, clé)`` non reliées.
     """
     n = len(items)
+    if canon is None:
+        canon, _motifs = doi_equivalences(items)
     dois: Dict[int, Optional[str]] = {}
     by_key: Dict[str, List[int]] = defaultdict(list)
     for i, it in enumerate(items):
@@ -1909,8 +2388,9 @@ def _strong_groups(items: List[Dict]):
         for key, _derived in strong_key_sources(it):
             if key.startswith("doi:"):
                 # La clé doi: est le DOI d'identité (identity_doi) : elle
-                # porte la classe DOI, pas un lien ordinaire.
-                dois[i] = key[4:]
+                # porte la classe DOI, pas un lien ordinaire ; un DOI d'une
+                # famille d'équivalence prend l'étiquette canonique.
+                dois[i] = canon.get(key[4:], key[4:])
                 continue
             by_key[key].append(i)
     doi_members: Dict[str, List[int]] = defaultdict(list)
@@ -2013,7 +2493,8 @@ def _group_doi(members: List[int], dois: Dict[int, Optional[str]]):
 
 def deduplicate_with_report(items: List[Dict],
                             fuzzy: Optional[bool] = None,
-                            with_groups: bool = False):
+                            with_groups: bool = False,
+                            rules: Optional[DedupRules] = None):
     """
     Déduplique et renvoie ``(notices, rapport)``.
 
@@ -2023,22 +2504,27 @@ def deduplicate_with_report(items: List[Dict],
     ``doi_split_components`` (composants scindés pour DOI contradictoires),
     ``ambiguous`` (notices laissées à part entre plusieurs DOI),
     ``version_splits`` (notices de sortie tenues à part d'une autre version
-    du même dépôt HAL), ``fuzzy`` (passe active ou non). Avec
+    du même dépôt HAL), ``fuzzy`` (passe active ou non),
+    ``doi_equivalences`` (notices de sortie qui réunissent des DOI déclarés
+    équivalents), ``rules`` (état des règles optionnelles). Avec
     ``with_groups=True``, ``groups`` donne pour chaque notice de sortie (même
     ordre) les indices des notices d'entrée qu'elle réunit (liste vide pour
     une entrée vide).
     """
     items = list(items or [])
+    rules = rules if rules is not None else dedup_rules()
     report = {"input": len(items), "output": 0, "merged_groups": 0,
               "strong_merges": 0, "fuzzy_merges": 0,
               "doi_split_components": 0, "ambiguous": 0,
-              "version_splits": 0, "fuzzy": fuzzy_enabled(fuzzy)}
+              "version_splits": 0, "fuzzy": fuzzy_enabled(fuzzy),
+              "doi_equivalences": 0, "rules": rules.as_dict()}
     if not items:
         if with_groups:
             report["groups"] = []
         return [], report
 
-    groups, ambiguous, dois, n_split, withheld = _strong_groups(items)
+    canon, eq_motifs = doi_equivalences(items, rules)
+    groups, ambiguous, dois, n_split, withheld = _strong_groups(items, canon)
     report["strong_merges"] = len(items) - len(groups)
     report["doi_split_components"] = n_split
 
@@ -2046,7 +2532,8 @@ def deduplicate_with_report(items: List[Dict],
     # égalité exacte seule (titre normalisé, année, premier auteur), comme
     # l'empreinte exacte historique.
     groups, motifs, ambiguous, n_fuzzy = _fuzzy_rounds(
-        items, groups, ambiguous, dois, approximate=report["fuzzy"])
+        items, groups, ambiguous, dois, approximate=report["fuzzy"],
+        rules=rules)
     report["fuzzy_merges"] = n_fuzzy
 
     # Versions distinctes d'un même dépôt HAL restées dans des notices
@@ -2081,6 +2568,18 @@ def deduplicate_with_report(items: List[Dict],
                 report["version_splits"] += 1
             if notes:
                 evidence["ambiguous"] = " + ".join(notes)
+            # Équivalence de DOI (règles optionnelles) : DOI conservé et
+            # autres DOI des membres, gardés en « DOI alias ».
+            label = _group_doi(members, dois)
+            raw = {d for d in (_identity_doi(it) for it in member_items) if d}
+            if label and len(raw) > 1:
+                evidence["doi_equivalence"] = {
+                    "canonical": label,
+                    "aliases": {d: alias_kind(label, d)
+                                for d in sorted(raw - {label})},
+                    "motifs": eq_motifs.get(label, []),
+                }
+                report["doi_equivalences"] += 1
         if len(members) > 1:
             report["merged_groups"] += 1
         out.append((merge_items(member_items, evidence), members))
@@ -2108,7 +2607,8 @@ def _shared_keys(member_items: List[Dict]) -> List[str]:
 
 def _fuzzy_edges(feats: List["_Features"], approximate: bool = True,
                  ids: Optional[List[Tuple[int, ...]]] = None,
-                 cache: Optional[Dict[Tuple, Any]] = None):
+                 cache: Optional[Dict[Tuple, Any]] = None,
+                 rules: Optional[DedupRules] = None):
     """
     Appariements sans clé commune entre groupes.
 
@@ -2163,10 +2663,10 @@ def _fuzzy_edges(feats: List["_Features"], approximate: bool = True,
                 if ckey in cache:
                     m = cache[ckey]
                 else:
-                    m = _match(feats[pair[0]], feats[pair[1]], approximate)
+                    m = _match(feats[pair[0]], feats[pair[1]], approximate, rules)
                     cache[ckey] = m
             else:
-                m = _match(feats[pair[0]], feats[pair[1]], approximate)
+                m = _match(feats[pair[0]], feats[pair[1]], approximate, rules)
             if m:
                 edges[pair] = m
 
@@ -2231,10 +2731,10 @@ def _fuzzy_edges(feats: List["_Features"], approximate: bool = True,
                     if ckey in cache:
                         m = cache[ckey]
                     else:
-                        m = _match(feats[pair[0]], feats[pair[1]], approximate)
+                        m = _match(feats[pair[0]], feats[pair[1]], approximate, rules)
                         cache[ckey] = m
                 else:
-                    m = _match(feats[pair[0]], feats[pair[1]], approximate)
+                    m = _match(feats[pair[0]], feats[pair[1]], approximate, rules)
                 if m:
                     edges[pair] = m
     return edges
@@ -2251,7 +2751,8 @@ def _token_subsets(tokens: frozenset) -> Tuple[frozenset, ...]:
 
 
 def _constrained_merge(parts: List[int], edges: Dict[Tuple[int, int], Tuple],
-                       feats: List["_Features"], sort_keys: List[Tuple]):
+                       feats: List["_Features"], sort_keys: List[Tuple],
+                       rules: Optional[DedupRules] = None):
     """
     Regroupe les groupes ``parts`` reliés par ``edges`` sans jamais réunir
     deux groupes incompatibles (:func:`hard_compatible`), même par
@@ -2269,12 +2770,13 @@ def _constrained_merge(parts: List[int], edges: Dict[Tuple[int, int], Tuple],
     clusters = {g: [g] for g in parts}
     owner = {g: g for g in parts}
     # Chemin rapide : toutes les paires compatibles.
-    if all(hard_compatible(feats[x], feats[y])
+    if all(hard_compatible(feats[x], feats[y], rules)
            for i, x in enumerate(parts) for y in parts[i + 1:]):
         return [sorted(parts)]
 
     def edge_order(item):
-        (ga, gb), (exact, ratio, by_prefix, gap, _author) = item
+        (ga, gb), match = item
+        exact, ratio, by_prefix, gap = match[:4]
         ka, kb = sorted((sort_keys[ga], sort_keys[gb]))
         return (not exact, -ratio, by_prefix, gap, ka, kb)
 
@@ -2282,7 +2784,7 @@ def _constrained_merge(parts: List[int], edges: Dict[Tuple[int, int], Tuple],
         ca, cb = owner[ga], owner[gb]
         if ca == cb:
             continue
-        if all(hard_compatible(feats[x], feats[y])
+        if all(hard_compatible(feats[x], feats[y], rules)
                for x in clusters[ca] for y in clusters[cb]):
             keep, drop = min(ca, cb), max(ca, cb)
             clusters[keep].extend(clusters.pop(drop))
@@ -2293,7 +2795,8 @@ def _constrained_merge(parts: List[int], edges: Dict[Tuple[int, int], Tuple],
 
 def _fuzzy_rounds(items: List[Dict], groups: List[List[int]],
                   ambiguous: Dict[Tuple[int, ...], List[str]],
-                  dois: Dict[int, Optional[str]], approximate: bool = True):
+                  dois: Dict[int, Optional[str]], approximate: bool = True,
+                  rules: Optional[DedupRules] = None):
     """
     Étape 2 : appariement sans clé commune, itéré jusqu'à stabilité.
 
@@ -2303,6 +2806,7 @@ def _fuzzy_rounds(items: List[Dict], groups: List[List[int]],
     chaque regroupement proposé, les contraintes dures paire à paire
     (:func:`_constrained_merge`).
     """
+    rules = rules if rules is not None else dedup_rules()
     motifs: Dict[Tuple[int, ...], List[str]] = {}
     total = 0
     # Caches d'un tour à l'autre, indexés par les membres d'un groupe : la
@@ -2316,10 +2820,16 @@ def _fuzzy_rounds(items: List[Dict], groups: List[List[int]],
         for gid in ids:
             if gid not in group_cache:
                 record = merge_items([items[i] for i in gid])
-                group_cache[gid] = (record, _Features(record))
+                feat = _Features(record)
+                # Classe DOI du groupe (étiquette canonique d'une famille
+                # d'équivalence) : le veto compare les DOI conservés.
+                label = _group_doi(list(gid), dois)
+                if label and feat.doi and feat.doi != label:
+                    feat.doi = label
+                group_cache[gid] = (record, feat)
         records = [group_cache[gid][0] for gid in ids]
         feats = [group_cache[gid][1] for gid in ids]
-        edges = _fuzzy_edges(feats, approximate, ids, match_cache)
+        edges = _fuzzy_edges(feats, approximate, ids, match_cache, rules)
         if not edges:
             break
         involved = {g for pair in edges for g in pair}
@@ -2347,7 +2857,8 @@ def _fuzzy_rounds(items: List[Dict], groups: List[List[int]],
         for comp in _components(len(groups), edges.keys()):
             proposed, _split = _split_by_doi(comp, g_doi, adjacency)
             for parts, linked in proposed:
-                for sub in _constrained_merge(parts, edges, feats, sort_keys):
+                for sub in _constrained_merge(parts, edges, feats, sort_keys,
+                                              rules):
                     members = sorted(i for gi in sub for i in groups[gi])
                     key = tuple(members)
                     sub_set = set(sub)

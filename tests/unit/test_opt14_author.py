@@ -677,6 +677,10 @@ class TestStatusesAndErrors:
         st = res.structuredContent["by_source_status"]
         assert {v["status"] for v in st.values()} == {"error"}
         assert st["Semantic Scholar"]["reason"] == "network_error"
+        # PAT-05 (B5) : une panne d'Isidore garde son motif ; jamais
+        # « erreur inattendue » (le vrai connecteur : test_author_isidore_outage).
+        assert st["Isidore"]["reason"] == "http_error"
+        assert all(v["reason"] != "exception" for v in st.values())
         assert list(out_dir.glob("corpus_*")) == []
 
     def test_empty_results_are_not_an_error(self, monkeypatch, keys):

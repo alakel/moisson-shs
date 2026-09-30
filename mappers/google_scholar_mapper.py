@@ -177,18 +177,27 @@ def extract_doi(*urls: Optional[str]) -> str:
     """
     Extrait un DOI d'une ou plusieurs URL, sans jamais le deviner.
 
-    Seuls deux motifs sont acceptés, parce qu'eux seuls désignent le document
-    lui-même : un hôte ``doi.org``/``dx.doi.org``, ou un chemin contenant
-    ``/doi/`` (motif des plateformes éditeurs : Taylor & Francis, Wiley, ACM,
-    Sage). Un identifiant qui apparaîtrait ailleurs dans une URL (paramètre de
-    suivi, DOI du numéro et non de l'article) est écarté.
+    Quatre motifs sont acceptés, parce qu'eux seuls désignent le document
+    lui-même : un hôte ``doi.org``/``dx.doi.org`` ; un chemin contenant
+    ``/doi/`` (plateformes éditeurs : Taylor & Francis, Wiley, ACM, Sage,
+    PNAS, Science) ; le chemin Springer ``/article/10.`` ou ``/chapter/10.`` ;
+    les paramètres ``identifierName=doi&identifierValue=10.…`` des liens de
+    téléchargement Taylor & Francis (ajouté le 2026-09-30, PAT-07 : 40
+    notices Scholar sans DOI portaient ainsi le leur). Un identifiant qui
+    apparaîtrait ailleurs dans une URL (paramètre de suivi, DOI du numéro et
+    non de l'article) est écarté.
 
     Returns:
         Le DOI normalisé en minuscules, ou une chaîne vide.
     """
+    from utils.identity import doi_from_identifier_query
+
     for url in urls:
         if not url:
             continue
+        from_query = doi_from_identifier_query(url)
+        if from_query:
+            return from_query
         decoded = unquote(url)
         try:
             host = (urlparse(decoded).netloc or "").lower()

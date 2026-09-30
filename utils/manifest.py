@@ -366,6 +366,11 @@ def software_versions() -> Dict[str, Any]:
             "version": getattr(dd, "RULES_VERSION", DEDUP_RULES_ID),
             "fuzzy_title_threshold": getattr(dd, "FUZZY_TITLE_THRESHOLD", None),
             "fuzzy_year_tolerance": getattr(dd, "FUZZY_YEAR_TOLERANCE", None),
+            # Règles optionnelles du sprint patch (drapeaux lus au premier
+            # manifeste du processus) : co-diffusion, versions Zenodo,
+            # chapitres Google Books.
+            "options": (dd.dedup_rules().as_dict()
+                        if hasattr(dd, "dedup_rules") else {}),
         }
     except Exception:  # noqa: BLE001
         versions["dedup_rules"] = {"version": DEDUP_RULES_ID}
