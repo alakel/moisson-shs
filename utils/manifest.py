@@ -110,6 +110,7 @@ import logging
 import os
 import platform
 import re
+import socket
 import threading
 import time
 import unicodedata
@@ -519,7 +520,14 @@ def _thread_lock(key: str) -> threading.Lock:
         return lock
 
 
-def _try_file_lock(fd: int) -> bool:
+def _try_file_lock(fd: int) -> Optional[bool]:
+    """
+    ``True`` : verrou pris ; ``False`` : tenu par un autre processus ;
+    ``None`` : verrou de fichier non pris en charge par le système de
+    fichiers (NFS, SMB, certains FUSE). Jusqu'au 2026-09-30, ce dernier cas
+    valait verrou obtenu : mesuré avec deux processus, la moitié des entrées
+    d'index et des ajouts de manifeste se perdaient (FIN-18, PAT-10).
+    """
     if _fcntl is not None:
         try:
             _fcntl.flock(fd, _fcntl.LOCK_EX | _fcntl.LOCK_NB)
@@ -528,14 +536,101 @@ def _try_file_lock(fd: int) -> bool:
             return False
         except OSError as exc:  # verrou non pris en charge (système distant)
             logger.debug(f"Verrou de fichier indisponible : {exc}")
-            return True
+            return None
     if _msvcrt is not None:  # pragma: no cover - Windows
         try:
             _msvcrt.locking(fd, _msvcrt.LK_NBLCK, 1)
             return True
         except OSError:
             return False
+    return None
+
+
+# Repli quand le verrou de fichier n'est pas pris en charge (PAT-10,
+# décision DP-9) : un répertoire de verrou, créé par os.mkdir (atomique, y
+# compris sur NFS), qui porte le propriétaire (PID, hôte, date). Un
+# répertoire dont le propriétaire est mort (même hôte) ou plus ancien que
+# DIR_LOCK_STALE_S est tenu pour abandonné et retiré.
+DIR_LOCK_SUFFIX = ".d"
+_DIR_LOCK_OWNER = "owner.json"
+DIR_LOCK_STALE_S = 600.0
+_FALLBACK_WARNED: set = set()
+
+
+def dir_lock_path(directory: Path) -> Path:
+    """Répertoire de verrou de repli d'un dossier de publication."""
+    return Path(directory) / (LOCK_NAME + DIR_LOCK_SUFFIX)
+
+
+def _pid_alive(pid: int) -> Optional[bool]:
+    try:
+        os.kill(pid, 0)
+    except ProcessLookupError:
+        return False
+    except PermissionError:
+        return True
+    except OSError:
+        return None
     return True
+
+
+def _dir_lock_stale(lock_dir: Path) -> bool:
+    try:
+        age = time.time() - lock_dir.stat().st_mtime
+    except OSError:
+        return False
+    try:
+        owner = json.loads((lock_dir / _DIR_LOCK_OWNER).read_text(
+            encoding="utf-8"))
+    except (OSError, ValueError):
+        owner = {}
+    pid = owner.get("pid") if isinstance(owner, dict) else None
+    if isinstance(pid, int) and owner.get("host") == socket.gethostname() \
+            and _pid_alive(pid) is False:
+        return True
+    return age > DIR_LOCK_STALE_S
+
+
+def _remove_dir_lock(lock_dir: Path) -> None:
+    try:
+        (lock_dir / _DIR_LOCK_OWNER).unlink()
+    except OSError:
+        pass
+    try:
+        os.rmdir(lock_dir)
+    except OSError:
+        pass
+
+
+def _try_dir_lock(lock_dir: Path, retry_stale: bool = True) -> bool:
+    try:
+        os.mkdir(lock_dir)
+    except FileExistsError:
+        if retry_stale and _dir_lock_stale(lock_dir):
+            logger.warning("Verrou de publication abandonné retiré (%s)",
+                           lock_dir.name)
+            _remove_dir_lock(lock_dir)
+            return _try_dir_lock(lock_dir, retry_stale=False)
+        return False
+    try:
+        (lock_dir / _DIR_LOCK_OWNER).write_text(json.dumps({
+            "pid": os.getpid(), "host": socket.gethostname(),
+            "since": now_iso()}), encoding="utf-8")
+    except OSError:
+        pass
+    return True
+
+
+def _warn_lock_fallback(directory: Path) -> None:
+    key = str(directory)
+    with _THREAD_LOCKS_GUARD:
+        if key in _FALLBACK_WARNED:
+            return
+        _FALLBACK_WARNED.add(key)
+    logger.warning(
+        "Verrou de fichier (flock) indisponible pour le dossier %s "
+        "(système de fichiers distant ?) : repli sur un répertoire de verrou",
+        Path(directory).name)
 
 
 def _file_unlock(fd: int) -> None:
@@ -578,17 +673,32 @@ def directory_lock(directory: Path, timeout: Optional[float] = None) -> Iterator
         fd = os.open(str(directory / LOCK_NAME), os.O_RDWR | os.O_CREAT, 0o666)
         try:
             delay = 0.005
-            while not _try_file_lock(fd):
+            lock_dir: Optional[Path] = None
+            got = _try_file_lock(fd)
+            while not got:
+                if got is None:
+                    # Verrou de fichier non pris en charge : répertoire de
+                    # verrou (jamais un verrou réputé obtenu).
+                    _warn_lock_fallback(directory)
+                    lock_dir = dir_lock_path(directory)
+                    got = _try_dir_lock(lock_dir)
+                    if got:
+                        break
                 if time.monotonic() >= deadline:
                     raise LockTimeout(
                         f"verrou de publication du dossier non obtenu en "
                         f"{timeout:g} s (autre publication en cours)")
                 time.sleep(delay)
                 delay = min(delay * 2, 0.1)
+                got = (_try_dir_lock(lock_dir) if lock_dir is not None
+                       else _try_file_lock(fd))
             try:
                 yield
             finally:
-                _file_unlock(fd)
+                if lock_dir is not None:
+                    _remove_dir_lock(lock_dir)
+                else:
+                    _file_unlock(fd)
         finally:
             os.close(fd)
     finally:
@@ -626,6 +736,32 @@ def load_manifest_for(path: Path) -> Optional[Dict[str, Any]]:
     """Manifeste valide du corpus auquel appartient ``path``, ou None."""
     target = manifest_path_for(path)
     return read_manifest(target) if target is not None else None
+
+
+def manifest_describes(doc: Optional[Dict[str, Any]], path: Path) -> bool:
+    """
+    Vrai si le manifeste ``doc`` décrit ``path`` tel qu'il est sur disque :
+    même taille et, quand elle est consignée, même empreinte SHA-256. Ses
+    rangs par position ne s'appliquent qu'à cette condition : une
+    republication concurrente de même taille (deux instances du serveur)
+    attribuerait sinon des rangs aux mauvaises notices (PAT-10).
+    """
+    if not doc:
+        return False
+    path = Path(path)
+    described = next((e for e in doc.get("files") or []
+                      if isinstance(e, dict) and e.get("name") == path.name),
+                     None)
+    if described is None:
+        return False
+    try:
+        if described.get("bytes") != path.stat().st_size:
+            return False
+        if described.get("sha256"):
+            return file_digest(path)[1] == described["sha256"]
+    except OSError:
+        return False
+    return True
 
 
 def detect_items_format(data: Any) -> str:

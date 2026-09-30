@@ -3925,6 +3925,11 @@ def _corpus_list_sync(args: dict[str, Any]) -> str:
     header = ("=== Corpus disponibles ===" if http
               else f"=== Corpus disponibles dans {OUTPUT_DIR} ===")
     lines = [header]
+    if not http:
+        # Instance au code différent sur le même dossier (PAT-10) : rappel
+        # en tête, sans refus (décision DP-10).
+        from utils.instances import stale_warnings
+        lines.extend(f"Attention : {w}." for w in stale_warnings(OUTPUT_DIR))
     filtered = bool(pattern or args.get("since"))
     count = (f"{len(listing.entries)} corpus affiché(s) sur {listing.matched}"
              + (f" correspondant aux filtres ({listing.total} au total)"
@@ -4708,9 +4713,13 @@ def _corpus_export_sync(args: dict[str, Any]) -> str | tuple[list, dict]:
         # corpus source, avec leur clé de citation (BibTeX, BibLaTeX).
         from mappers.bibtex_exporter import make_citation_keys
         source_doc = load_manifest_for(corpus_path)
+        # Rangs du manifeste seulement s'il décrit le fichier lu (taille et
+        # empreinte : republication concurrente, PAT-10).
+        from utils.manifest import manifest_describes
         digest = DigestSpec(
             items=result.items,
-            records=(source_doc or {}).get("records"),
+            records=((source_doc or {}).get("records")
+                     if manifest_describes(source_doc, corpus_path) else None),
             query=_manifest_query_text(source_doc),
             corpus_path=corpus_path,
             source_status=(source_doc or {}).get("sources"),
@@ -6899,6 +6908,21 @@ async def get_prompt(name: str, arguments: dict[str, str] | None) -> types.GetPr
     )
 
 
+# === Registre des instances (PAT-10) ===
+
+def _register_instance(transport: str) -> None:
+    """Inscrit l'instance dans ``OUTPUT_DIR/.instances`` et signale les
+    autres instances vivantes dont le code diffère (ancienne instance restée
+    ouverte après une mise à jour)."""
+    try:
+        from utils.instances import register, stale_warnings
+        register(OUTPUT_DIR, transport)
+        for warning in stale_warnings(OUTPUT_DIR):
+            logger.warning(warning)
+    except Exception as exc:  # noqa: BLE001 - le registre n'arrête jamais le serveur
+        logger.debug(f"Registre des instances indisponible : {exc}")
+
+
 # === Transport STDIO (défaut, Claude Desktop local) ===
 
 async def run_stdio():
@@ -6912,6 +6936,7 @@ async def run_stdio():
     logger.info("Démarrage serveur MCP moisson-shs (stdio) : %s ; PID %d",
                 describe_build(), os.getpid())
     logger.info(f"OUTPUT_DIR = {OUTPUT_DIR}")
+    _register_instance("stdio")
 
     async with stdio_server() as (read_stream, write_stream):
         await server.run(
@@ -7507,6 +7532,7 @@ def serve_http(
     logger.info("Démarrage serveur MCP moisson-shs (HTTP / Streamable HTTP) : "
                 "%s ; PID %d", describe_build(), os.getpid())
     logger.info(f"OUTPUT_DIR = {OUTPUT_DIR}")
+    _register_instance("http")
     logger.info(f"Écoute uvicorn : http://{host}:{port}{path}")
     logger.info(f"Allowed hosts : {allowed_hosts or '(aucun)'}")
     logger.info(f"Base URL publique : {PUBLIC_BASE_URL or '(relative)'}")

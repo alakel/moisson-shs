@@ -97,7 +97,7 @@ PUBLISHABLE_SUFFIXES = (CSL_SUFFIX, ZOTERO_SUFFIX, STATS_SUFFIX)
 INDEX_NAME = ".index.json"
 LOCK_NAME = ".moisson.lock"
 NATIVE_AUDIT_DIR = ".native_audit"
-SERVICE_DIRS = (".oauth", ".audit", NATIVE_AUDIT_DIR)
+SERVICE_DIRS = (".oauth", ".audit", NATIVE_AUDIT_DIR, ".instances")
 
 # Publication atomique (OPT-16) : temporaires et marqueurs, fichiers de
 # service du dossier de publication (nom commençant par un point).

@@ -1098,6 +1098,11 @@ class ManifestView:
                 break
         if described is None or described.get("bytes") != size:
             return cls()        # fichier modifié ou non décrit : rien de sûr
+        # Même taille ne suffit pas : l'empreinte consignée doit concorder
+        # (republication concurrente de même taille, PAT-10).
+        from utils.manifest import manifest_describes
+        if not manifest_describes(doc, path):
+            return cls()
         count = described.get("items")
         records = doc.get("records") or []
         view = cls(item_count=count if isinstance(count, int) else None)

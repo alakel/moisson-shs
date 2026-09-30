@@ -369,6 +369,21 @@ Le SDK MCP installé est de la **série 2.x**, qui retire les décorateurs `Serv
 
 `constraints.txt`, à la racine du dépôt, fige les versions testées de toutes les dépendances ; l'image Docker et la CI l'utilisent aussi (voir `DEPLOY.md`, § 6).
 
+### Deux instances du serveur écrivent-elles sans risque dans le même dossier ?
+
+Oui sur un disque local. Claude Desktop lance d'ordinaire deux instances du serveur, qui écrivent dans le même `output/`. Chaque publication (fichiers, manifeste, index) se fait sous un verrou de dossier (`output/.moisson.lock`), les données sont écrites dans des temporaires puis renommées, et l'index se recalcule à la lecture. Mesure du 2026-09-30 : 440 publications concurrentes sans perte, 272 lectures pendant les écritures sans JSON invalide, ajouts concurrents au même manifeste tous conservés.
+
+Limites :
+
+- sur un disque réseau (NFS, SMB) où `flock` n'est pas pris en charge, le serveur se replie sur un répertoire de verrou (`output/.moisson.lock.d`) et le signale une fois par dossier dans son journal ; avant ce repli, la moitié des entrées d'index et des ajouts de manifeste pouvaient se perdre ;
+- deux filtrages de même suffixe sur le même corpus (`_filtered`, `_doi`, ou un `output_path` explicite) produisent le même nom de fichier : le dernier écrivain l'emporte ;
+- une instance restée ouverte après une mise à jour du code n'applique pas les mêmes règles, et peut ne pas prendre le verrou. Chaque instance s'inscrit dans `output/.instances/` (version, commit, empreinte du code) : le serveur signale au démarrage, et `corpus_list` rappelle en tête, toute autre instance vivante dont le code diffère. Il suffit alors de quitter complètement Claude Desktop (Cmd+Q) et de le relancer ; `ps -axo pid,lstart,command | grep "[m]cp_server.py"` montre les instances et leur heure de lancement ;
+- la politesse envers les sources est propre à chaque instance : deux moissons simultanées doublent le débit vers un même hôte.
+
+### Plus aucun outil ne répond, même d'autres serveurs MCP
+
+Si les appels à moisson-shs et à un autre serveur (Desktop Commander, par exemple) restent tous sans réponse, le blocage est en amont des serveurs, dans le lien entre Claude et le poste : l'échéance `deadline_seconds` n'y peut rien. Quitter complètement Claude Desktop et le relancer (constaté le 2026-09-30 : blocage d'une vingtaine de minutes, levé par un redémarrage).
+
 ### Comment désinstaller le serveur MCP ?
 
 ```bash
