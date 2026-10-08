@@ -23,7 +23,7 @@ En MCP : `sources: ["international"]`, `["all"]`, `["scholar"]` ou une liste de 
 - **CORE** : clé **requise** (`CORE_API_KEY`).
 - **Google Scholar** : clé SerpAPI **requise** (`SERPAPI_API_KEY`), et source **facturée à la requête**.
 
-Trois façons de les fournir : le bloc `env` du client MCP (Claude Desktop ou Claude Code), où `moisson-shs setup` inscrit toujours les quatre variables, vides si elles ne sont pas fournies (voir `MCP_INSTALL.md`, ou `moisson-shs setup --openalex-key …`) ; des variables d'environnement du shell (CLI) ; un fichier `.env` à la racine du projet (voir `.env.example` ; nécessite `python-dotenv`, extra `[dotenv]`). La déclaration du client fait autorité ; le `.env` est la réserve du développeur : il sert quand la clé n'est pas déclarée, et, pour les sources de `MOISSON_KEY_FALLBACK` (défaut `openalex,semantic_scholar,core` ; jamais SerpAPI par défaut, source facturée), quand elle est vide ou refusée (HTTP 401 ou 403, signalé dans le statut de la source). `MOISSON_NO_DOTENV=1` interdit toute lecture de `.env`. **Ne jamais committer de clé** : `.env` est ignoré par git.
+Trois façons de les fournir : le bloc `env` du client MCP (Claude Desktop, Claude Code, Codex, Gemini CLI, Antigravity, Hermes), où `moisson-shs setup` inscrit toujours les quatre variables, vides si elles ne sont pas fournies (voir `MCP_INSTALL.md`, ou `moisson-shs setup --openalex-key …`) ; des variables d'environnement du shell (CLI) ; un fichier `.env` à la racine du projet (voir `.env.example` ; nécessite `python-dotenv`, extra `[dotenv]`). La déclaration du client fait autorité ; le `.env` est la réserve du développeur : il sert quand la clé n'est pas déclarée, et, pour les sources de `MOISSON_KEY_FALLBACK` (défaut `openalex,semantic_scholar,core` ; jamais SerpAPI par défaut, source facturée), quand elle est vide ou refusée (HTTP 401 ou 403, signalé dans le statut de la source). `MOISSON_NO_DOTENV=1` interdit toute lecture de `.env`. **Ne jamais committer de clé** : `.env` est ignoré par git.
 
 ### Que se passe-t-il si une clé requise est absente ?
 
@@ -346,7 +346,7 @@ moisson est annulée sans publication partielle.
 moisson-shs setup --status
 ```
 
-Affiche l'état : présence dans `claude_desktop_config.json`, chemins configurés, clés (masquées), état de chaque clé (renseignée, vide ou absente dans la déclaration ; réserve du `.env` présente ou non ; repli permis ou non), autres serveurs détectés. `--client code` (ou `all`) donne le même état pour Claude Code (portée utilisateur).
+Affiche l'état de chaque client MCP (Claude Desktop, Claude Code, Codex, Gemini CLI, Antigravity, Hermes) : présence de l'entrée `moisson-shs`, chemins configurés (signalés s'ils n'existent plus), délais, clés (masquées), état de chaque clé (renseignée, vide ou absente dans la déclaration ; réserve du `.env` présente ou non ; repli permis ou non), autres serveurs détectés, fichier lisible par d'autres comptes. `--client <id>` restreint l'état à certains clients.
 
 ### Le serveur MCP ne démarre pas après `setup`
 

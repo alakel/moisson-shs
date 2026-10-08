@@ -269,35 +269,49 @@ class TestClaudeCodeStatusAndUninstall:
 
 
 class TestMainClientOption:
-    def test_client_code_routes_to_claude_code(self, tmp_path, server,
-                                               monkeypatch):
-        seen = {}
-        monkeypatch.setattr(S, "install_claude_code",
-                            lambda *a, **k: seen.setdefault("code", k) and "ok")
-        monkeypatch.setattr(S, "install",
-                            lambda *a, **k: pytest.fail("Claude Desktop non visé"))
+    """Sprint « universel » : main() passe par les adaptateurs (et non plus
+    par install/install_claude_code). Dossier personnel factice, CLI claude
+    simulée : jamais les vraies configurations ni la vraie CLI."""
+
+    @pytest.fixture(autouse=True)
+    def _no_real_client(self, fake_home, monkeypatch):
+        monkeypatch.setattr(S, "find_claude_cli", lambda: None)
+        monkeypatch.setattr(S, "_CLI_RUNNER", None)
+
+    def _desktop(self, home):
+        return S.get_claude_config_path()
+
+    def test_client_code_routes_to_claude_code(self, server, monkeypatch, fake_home):
+        runner = _Runner()
+        monkeypatch.setattr(S, "find_claude_cli", lambda: "claude")
+        monkeypatch.setattr(S, "_CLI_RUNNER", runner)
         rc = S.main(["--client", "code", "--no-prompt", "--skip-deps-check",
                      "--server-path", str(server), "--python", "/py"])
-        assert rc == 0 and "code" in seen
+        assert rc == 0
+        assert _added_entry(runner.calls[-1])["command"] == "/py"
+        assert not self._desktop(fake_home).exists()
 
-    def test_client_all_installs_both(self, tmp_path, server, monkeypatch):
-        seen = []
-        monkeypatch.setattr(S, "install_claude_code",
-                            lambda *a, **k: seen.append("code") or "ok")
-        monkeypatch.setattr(S, "install",
-                            lambda *a, **k: seen.append("desktop") or "ok")
+    def test_client_all_installs_detected_clients(self, server, fake_home):
+        desktop = self._desktop(fake_home)
+        desktop.parent.mkdir(parents=True)
+        gemini = fake_home / ".gemini" / "settings.json"
+        gemini.parent.mkdir(parents=True)
+        gemini.write_text('{"mcpServers": {}}', encoding="utf-8")
         rc = S.main(["--client", "all", "--no-prompt", "--skip-deps-check",
-                     "--server-path", str(server), "--python", "/py",
-                     "--config", str(tmp_path / "d.json")])
-        assert rc == 0 and seen == ["desktop", "code"]
+                     "--server-path", str(server), "--python", "/py"])
+        assert rc == 0
+        for path in (desktop, gemini):
+            assert "moisson-shs" in json.loads(path.read_text())["mcpServers"]
+        # Ni Codex ni Hermes, non détectés.
+        assert not (fake_home / ".codex").exists()
+        assert not (fake_home / ".hermes").exists()
 
-    def test_default_client_is_desktop(self, tmp_path, server, monkeypatch):
-        seen = []
-        monkeypatch.setattr(S, "install_claude_code",
-                            lambda *a, **k: seen.append("code") or "ok")
-        monkeypatch.setattr(S, "install",
-                            lambda *a, **k: seen.append("desktop") or "ok")
+    def test_default_client_is_desktop(self, server, fake_home):
+        gemini = fake_home / ".gemini" / "settings.json"
+        gemini.parent.mkdir(parents=True)
+        gemini.write_text('{"mcpServers": {}}', encoding="utf-8")
         S.main(["--no-prompt", "--skip-deps-check", "--server-path",
-                str(server), "--python", "/py", "--config",
-                str(tmp_path / "d.json")])
-        assert seen == ["desktop"]
+                str(server), "--python", "/py"])
+        assert "moisson-shs" in json.loads(
+            self._desktop(fake_home).read_text())["mcpServers"]
+        assert json.loads(gemini.read_text()) == {"mcpServers": {}}

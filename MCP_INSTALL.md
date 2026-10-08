@@ -1,11 +1,11 @@
-# Installation du serveur MCP moisson-shs dans Claude Desktop
+# Installation du serveur MCP moisson-shs dans les clients MCP
 
-Ce document décrit l'installation du serveur MCP **local** (transport stdio), qui expose le moissonneur à Claude Desktop sous la forme de douze outils, quatre prompts et des ressources `corpus://`. Pour un serveur **distant** (HTTPS authentifié), voir [REMOTE.md](REMOTE.md) et [DEPLOY.md](DEPLOY.md).
+Ce document décrit l'installation du serveur MCP **local** (transport stdio), qui expose le moissonneur aux clients MCP (Claude Desktop, Claude Code, OpenAI Codex, Gemini CLI, Antigravity, Hermes Agent) sous la forme de douze outils, quatre prompts et des ressources `corpus://`. Pour un serveur **distant** (HTTPS authentifié), voir [REMOTE.md](REMOTE.md) et [DEPLOY.md](DEPLOY.md).
 
 ## Prérequis
 
 - Python 3.10 ou supérieur.
-- Claude Desktop (macOS, Windows ou Linux).
+- Un client MCP : Claude Desktop, Claude Code, OpenAI Codex (application ChatGPT, CLI ou IDE), Gemini CLI, Antigravity ou Hermes Agent (macOS, Windows ou Linux).
 - Le projet `moisson_shs/` sur le poste.
 - Un accès Internet vers les API des sources (HAL, Isidore, et, selon les sources demandées, OAI-PMH d'OpenEdition, Cairn, Persée et Érudit, CrossRef, OpenAlex, Semantic Scholar, CORE, SerpAPI).
 
@@ -28,9 +28,40 @@ pip install -e ".[mcp]" -c constraints.txt
 moisson-shs setup
 ```
 
-La commande détecte l'OS, le Python du venv et le chemin de `mcp_server.py`, ajoute l'entrée `moisson-shs` à `claude_desktop_config.json` en préservant les autres serveurs, et crée une sauvegarde `.bak`. Le bloc `env` porte toujours les quatre clés d'API, vides si elles ne sont pas fournies (voir « Clés API » plus bas). Options utiles : `--client` (`desktop` par défaut, `code` pour Claude Code, `all` pour les deux), `--output-dir` (répertoire des corpus), `--dry-run` (aperçu), `--status` (état, dont celui des clés), `--uninstall`, et les options de clés décrites plus bas.
+**En terminal**, la commande affiche les clients MCP connus, ceux détectés sur la machine déjà cochés :
 
-Pour **Claude Code**, `moisson-shs setup --client code` déclare le serveur en portée utilisateur par `claude mcp add-json --scope user` (CLI `claude` requise) : une entrée existante est retirée puis ajoutée de nouveau, et restaurée si l'ajout échoue. Jamais en portée projet (`.mcp.json`) : ce fichier est versionné, les clés y seraient en clair. La CLI recevant l'entrée en argument, les clés sont visibles dans la liste des processus le temps de l'appel.
+```
+Clients MCP (cochés : ceux qui seront traités) :
+  [x] 1. Claude Desktop                                déclaré · clés 4/4
+  [x] 3. OpenAI Codex (application ChatGPT, CLI, IDE)  déclaré · clés 1/4
+  [ ] 7. Hermes Agent (Nous Research)                  non détecté
+Entrée = valider · numéros (ex. « 3 4 ») = cocher ou décocher · tous · aucun · q = quitter
+```
+
+Les clés d'API sont ensuite demandées **une seule fois** (saisie masquée ; Entrée vide : garder la valeur déjà déclarée) et inscrites chez chaque client retenu. Une clé vide chez un client est complétée par la valeur déjà déclarée chez les autres clients, si elle est la même partout ; si elle diffère, rien n'est mis en commun et setup le signale, sans afficher de valeur. **Hors terminal** (script), sans `--client`, seul Claude Desktop est configuré, comme avant.
+
+Pour chaque client, setup :
+- vérifie que l'application n'est pas ouverte (Claude Desktop, l'application ChatGPT/Codex et Hermes réécrivent leur fichier) : en terminal, il propose de la quitter, de continuer ou de sauter ; hors terminal, le client est sauté sauf `--force` ;
+- fait une sauvegarde horodatée `<fichier>.moisson-bak-AAAAmmjj-HHMMSS` (les cinq plus récentes sont gardées), puis écrit de façon atomique ;
+- contrôle que rien d'autre que l'entrée `moisson-shs` ne change dans le fichier ; sinon (fichier JSON avec commentaires, mise en forme non reproductible, bibliothèque absente), il n'écrit pas et affiche un **extrait à coller**, clés remplacées par des marqueurs `<NOM_DE_LA_CLÉ>` ;
+- passe en 0600 un fichier lisible par d'autres comptes qui reçoit des clés ;
+- conserve les variables `env` déjà déclarées (un `MOISSON_OUTPUT_DIR` ou un `MOISSON_KEY_FALLBACK` posés à la main).
+
+Options utiles : `--client` (liste d'ids ou d'alias, ou `all` pour tous les clients détectés), `--client-config ID=CHEMIN`, `--output-dir`, `--dry-run` (aperçu : entrée masquée et noms des autres serveurs, jamais leur contenu), `--status` (état de chaque client : déclaration, chemins, délais, clés), `--uninstall`, `--force`, et les options de clés décrites plus bas.
+
+### Clients pris en charge
+
+| Client (id, alias) | Fichier (macOS, Linux) | Écriture | À savoir |
+|---|---|---|---|
+| Claude Desktop (`claude-desktop`, `desktop`) | `~/Library/Application Support/Claude/claude_desktop_config.json` (Windows `%APPDATA%\Claude\`, Linux `~/.config/Claude/`) | JSON `mcpServers` | Quitter l'application (Cmd+Q) avant, la relancer après |
+| Claude Code (`claude-code`, `code`) | `~/.claude.json` (lu seulement) | `claude mcp add-json --scope user` | Jamais `.mcp.json` (versionné) ; clés visibles dans la liste des processus le temps de l'appel ; relancer les sessions, vérifier avec `/mcp` |
+| OpenAI Codex (`codex`, `chatgpt`) | `$CODEX_HOME/config.toml` ou `~/.codex/config.toml` (commun à l'application ChatGPT, au CLI et à l'IDE) | TOML `[mcp_servers.moisson-shs]` (tomlkit) | Ne transmet au serveur que le bloc `env` ; délais relevés : `startup_timeout_sec = 60`, `tool_timeout_sec = 960` |
+| Gemini CLI (`gemini-cli`, `gemini`) | `~/.gemini/settings.json` | JSON `mcpServers` | Les serveurs ne se connectent que dans un dossier de confiance (`gemini trust`) ; `timeout = 960000` ms |
+| Antigravity CLI (`antigravity`, `agy`) | `~/.gemini/config/mcp_config.json` | JSON `mcpServers` | Remplace Gemini CLI pour les comptes gratuits ; chemin d'après la documentation de Google |
+| Antigravity IDE (`antigravity-ide`) | `~/.gemini/antigravity/mcp_config.json` | JSON `mcpServers` | Relancer l'IDE |
+| Hermes Agent (`hermes`, `hermes-agent`) | `$HERMES_HOME/config.yaml` ou `~/.hermes/config.yaml` (Windows `%LOCALAPPDATA%\hermes\`) | YAML `mcp_servers` (ruamel.yaml) | `connect_timeout = 120`, `timeout = 960` ; `/reload-mcp` dans la session, la passerelle relit le fichier en une minute environ |
+
+Les délais ne sont jamais abaissés : 960 s couvre l'échéance maximale de `moisson_search` (900 s) ; c'est le serveur qui borne la durée, pas le client. Sans `tomlkit` ou `ruamel.yaml` (extra `[mcp]`), setup affiche l'extrait à coller pour Codex ou Hermes.
 
 Passer directement à l'étape 5.
 
@@ -236,7 +267,7 @@ Le confinement des chemins sous `OUTPUT_DIR`, l'authentification et l'absence de
 moisson-shs setup --uninstall
 ```
 
-La commande retire l'entrée `moisson-shs` de `claude_desktop_config.json` (sauvegarde `.bak`) sans toucher aux autres serveurs. Redémarrer Claude Desktop. Les corpus de `MOISSON_OUTPUT_DIR` restent intacts.
+En terminal, la commande propose les clients où l'entrée `moisson-shs` est déclarée (rien n'est coché d'avance) ; hors terminal, elle vise Claude Desktop, ou les clients de `--client`. Elle retire l'entrée après une sauvegarde horodatée, sans toucher aux autres serveurs. Redémarrer les clients modifiés. Les corpus de `MOISSON_OUTPUT_DIR` restent intacts.
 
 ## Référence
 

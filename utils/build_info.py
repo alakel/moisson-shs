@@ -50,7 +50,7 @@ PACKAGED_MODULES = (
     "cli", "main", "mcp_server", "config", "setup_claude_desktop", "auth",
     "remote_auth", "oauth_provider", "_version",
 )
-PACKAGED_PACKAGES = ("connectors", "mappers", "utils", "engine")
+PACKAGED_PACKAGES = ("connectors", "mappers", "utils", "engine", "mcp_clients")
 
 # Délai maximal du calcul de l'état de l'arbre (secondes).
 DIRTY_TIMEOUT_S = 2.0

@@ -1,0 +1,18 @@
+# Configuration Hermes (exemple nettoyé : valeurs factices)
+model:
+  default: "anthropic/claude-opus"   # modèle par défaut
+  provider: openrouter
+mcp_servers:
+  github:
+    url: https://api.githubcopilot.com/mcp/
+    headers:
+      Authorization: 'Bearer tok-autre'
+  filesystem:
+    command: npx
+    args: ["-y", "@modelcontextprotocol/server-filesystem", "/Users/x/Documents"]
+    env:
+      API_KEY: "${AUTRE_KEY}"
+    timeout: 120
+display:
+  skin: default
+  tool_progress: true

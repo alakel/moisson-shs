@@ -13,6 +13,10 @@ mcp>=1.27,<2
 # déclarés explicitement car le mode `serve --http` en dépend directement.
 starlette>=0.46
 uvicorn>=0.30
+# Setup universel : écriture de la configuration de Codex (TOML) et de
+# Hermes (YAML) en conservant commentaires et mise en forme.
+tomlkit>=0.13
+ruamel.yaml>=0.18
 # Optionnel — chargement automatique d'un .env pour les clés des sources
 # internationales (OpenAlex/Semantic Scholar/CORE). À défaut, exporter les
 # variables dans le shell ou le bloc env MCP. Voir .env.example.

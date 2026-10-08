@@ -362,3 +362,30 @@ def make_zotero_item():
         base.update(overrides)
         return base
     return _make
+
+
+# Variables qui désignent le dossier personnel et les dossiers de
+# configuration des clients MCP (setup universel).
+_HOME_ENV_VARS = ("HOME", "USERPROFILE", "APPDATA", "LOCALAPPDATA",
+                  "XDG_CONFIG_HOME", "HERMES_HOME", "CODEX_HOME")
+
+
+@pytest.fixture
+def fake_home(tmp_path, monkeypatch):
+    """
+    Dossier personnel factice pour les tests du setup (sprint « universel ») :
+    ``HOME`` et les dossiers de configuration des clients MCP pointent dans
+    ``tmp_path``, et ``PATH`` vers un dossier vide (aucune CLI ``claude``,
+    ``codex``, ``gemini``, ``hermes`` ni ``pgrep`` trouvée). Aucun test ne
+    lit ni n'écrit ainsi les vraies configurations du poste.
+    """
+    home = tmp_path / "home"
+    home.mkdir()
+    for var in _HOME_ENV_VARS:
+        monkeypatch.delenv(var, raising=False)
+    monkeypatch.setenv("HOME", str(home))
+    monkeypatch.setenv("USERPROFILE", str(home))
+    empty_bin = tmp_path / "bin"
+    empty_bin.mkdir()
+    monkeypatch.setenv("PATH", str(empty_bin))
+    return home

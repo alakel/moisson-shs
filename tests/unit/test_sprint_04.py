@@ -230,8 +230,10 @@ class TestSetupClaudeDesktop:
             output_dir=None,
             cache_enabled=False,
         )
-        backup = config_path.with_suffix(".json.bak")
-        assert backup.exists()
+        # Sprint « universel » (D1) : sauvegarde horodatée
+        # <fichier>.moisson-bak-AAAAmmjj-HHMMSS, plus de .json.bak écrasé.
+        backups = list(tmp_path.glob("claude.json.moisson-bak-*"))
+        assert len(backups) == 1
 
     def test_dry_run_does_not_modify(self, tmp_path):
         from setup_claude_desktop import install

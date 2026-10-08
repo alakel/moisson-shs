@@ -109,13 +109,13 @@ La fin de la sortie donne le statut de chaque source. Si aucune source n'a répo
 
 La provenance (sources d'origine, identifiants HAL ou OAI, preuves de fusion) passe dans le champ `note` du CSL, que Zotero range dans `extra`.
 
-### 4. (Optionnel) Claude Desktop
+### 4. (Optionnel) Clients MCP : Claude, Codex, Gemini, Hermes
 
 ```bash
 moisson-shs setup
 ```
 
-La commande détecte l'OS et le Python du venv, puis ajoute l'entrée `moisson-shs` à `claude_desktop_config.json` en préservant les autres serveurs (sauvegarde `.bak`). Quitter complètement Claude Desktop puis le relancer. Guide détaillé : [MCP_INSTALL.md](MCP_INSTALL.md).
+En terminal, la commande affiche le menu des clients MCP détectés sur la machine (Claude Desktop, Claude Code, OpenAI Codex, Gemini CLI, Antigravity, Hermes Agent), déjà cochés ; on valide ou on modifie la sélection. Elle déclare l'entrée `moisson-shs` chez chacun en préservant les autres serveurs, après une sauvegarde horodatée. Redémarrer ensuite les clients modifiés (consignes affichées). Guide détaillé : [MCP_INSTALL.md](MCP_INSTALL.md).
 
 ---
 
@@ -173,21 +173,23 @@ Les clés de citation sont stables (`nom + année + premier mot du titre`, suffi
 ### `moisson-shs setup`
 
 ```bash
-moisson-shs setup                    # installation dans Claude Desktop
-moisson-shs setup --client code      # Claude Code, portée utilisateur (all : les deux)
+moisson-shs setup                    # menu des clients détectés (terminal) ; hors terminal : Claude Desktop
+moisson-shs setup --client codex,gemini   # clients nommés (ids ou alias)
+moisson-shs setup --client all --dry-run  # tous les clients détectés, aperçu sans modifier
 moisson-shs setup --output-dir ~/corpus_shs
-moisson-shs setup --dry-run          # aperçu sans modifier
-moisson-shs setup --status           # état actuel
-moisson-shs setup --uninstall        # désinstaller (préserve les autres serveurs)
+moisson-shs setup --status           # état de chaque client
+moisson-shs setup --uninstall        # retirer (menu ; préserve les autres serveurs)
 moisson-shs setup --remote https://moisson.example.org/mcp --token "$MOISSON_API_TOKEN"   # bloc client d'un serveur distant
 ```
 
 | Option | Effet |
 |--------|-------|
-| `--client` | Client configuré : `desktop` (défaut), `code` (Claude Code, portée utilisateur, par `claude mcp add-json`), `all` |
-| `--output-dir` | Répertoire des corpus du serveur (`MOISSON_OUTPUT_DIR`) |
+| `--client` | Clients, séparés par des virgules : `claude-desktop` (`desktop`), `claude-code` (`code`), `codex` (`chatgpt`), `gemini-cli` (`gemini`), `antigravity` (`agy`), `antigravity-ide`, `hermes` ; `all` = tous les clients détectés. Absent : menu en terminal, Claude Desktop seul sinon |
+| `--client-config` | Fichier de configuration imposé pour un client, répétable : `--client-config hermes=~/autre/config.yaml` |
+| `--force` | Écrire même si l'application cliente est ouverte (hors terminal, un client ouvert est sinon sauté) |
+| `--output-dir` | Répertoire des corpus du serveur (`MOISSON_OUTPUT_DIR`) ; absent, la valeur déjà déclarée chez le client est conservée |
 | `--cache` | Écrit `MOISSON_CACHE=1` dans le bloc `env` (le cache est déjà actif par défaut côté MCP) |
-| `--openalex-key`, `--semantic-scholar-key`, `--core-key`, `--serpapi-key` | Clés inscrites dans le bloc `env` (sinon reprises du shell, sinon demandées en saisie masquée, sinon valeur déjà déclarée, sinon vides : les quatre variables sont toujours déclarées) |
+| `--openalex-key`, `--semantic-scholar-key`, `--core-key`, `--serpapi-key` | Clés inscrites dans le bloc `env` de chaque client visé (sinon reprises du shell, sinon demandées une seule fois en saisie masquée, sinon valeur déjà déclarée chez ce client, sinon valeur commune aux autres clients, sinon vides : les quatre variables sont toujours déclarées) |
 | `--no-prompt` | Aucune saisie interactive (installation scriptée) |
 | `--dry-run`, `--status`, `--uninstall` | Aperçu, état (dont celui de chaque clé : déclaration, réserve du `.env`, repli permis), désinstallation |
 | `--python`, `--server-path`, `--config`, `--claude-code-config` | Chemins imposés (défaut : détection automatique) |
@@ -465,7 +467,8 @@ moisson_shs/
 ├── config.py                 # Endpoints et constantes (surchargeables par variables d'environnement)
 ├── auth.py, remote_auth.py   # Jetons Bearer du serveur distant
 ├── oauth_provider.py         # OAuth 2.1 (connecteur web)
-├── setup_claude_desktop.py   # Installation dans Claude Desktop
+├── setup_claude_desktop.py   # moisson-shs setup : menu, clés, rendu (setup universel)
+├── mcp_clients/              # Un adaptateur par client MCP (JSON, CLI claude, TOML Codex, YAML Hermes)
 │
 ├── engine/                   # Moteur commun CLI et MCP
 │   ├── models.py             # SearchRequest, RunContext, SourceResult, HarvestResult, statuts

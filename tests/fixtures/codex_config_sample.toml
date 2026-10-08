@@ -1,0 +1,43 @@
+# Réplique nettoyée de ~/.codex/config.toml (structure du poste, 2026-10-08) :
+# valeurs factices, aucune clé réelle.
+model = "gpt-5-codex"
+approval_policy = "on-request"
+
+[mcp_servers.Context7]
+command = "npx"
+args = ["-y", "@upstash/context7-mcp"]
+
+[mcp_servers.MCP_DOCKER]
+command = "docker"
+args = ["mcp", "gateway", "run"]
+
+[mcp_servers.corpus_pro]
+command = "/opt/corpus/bin/python"
+args = ["/opt/corpus/server.py", "--index", "pro"]
+startup_timeout_sec = 30
+
+[mcp_servers.corpus_pro.env]
+PINECONE_API_KEY = "pcsk-autre-secret"   # clé d'un autre serveur
+
+[mcp_servers.github-official-docker]
+command = "docker"
+args = ["run", "-i", "--rm", "ghcr.io/github/github-mcp-server"]
+env = { GITHUB_PERSONAL_ACCESS_TOKEN = "ghp-autre-secret" }
+
+[mcp_servers.moisson-shs]
+command = "/Users/x/Google Drive/MCP-moisson_shs/venv/bin/python"
+args = ["/Users/x/Google Drive/MCP-moisson_shs/mcp_server.py"]
+enabled = true
+
+[mcp_servers.moisson-shs.env]
+OPENALEX_API_KEY = "oa-existante"
+
+[mcp_servers.node_repl]
+command = "node"
+args = ["repl.js"]
+
+[projects."/Users/x/Google Drive/Mon Projet"]
+trust_level = "trusted"
+
+[projects."/Users/x/Documents/thèse"]
+trust_level = "trusted"

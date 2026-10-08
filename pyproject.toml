@@ -58,7 +58,11 @@ dependencies = [
 # plus ancienne version testée ; elle fournit `streamable_http_client`, qui
 # remplace le client déprécié `streamablehttp_client`. Versions exactes
 # testées : constraints.txt (`pip install ... -c constraints.txt`).
-mcp = ["mcp>=1.27,<2", "starlette>=0.46", "uvicorn>=0.30"]
+# tomlkit et ruamel.yaml : `moisson-shs setup` écrit la configuration de
+# Codex (TOML) et de Hermes (YAML) en conservant commentaires et mise en
+# forme ; absentes, setup donne un extrait à coller.
+mcp = ["mcp>=1.27,<2", "starlette>=0.46", "uvicorn>=0.30", "tomlkit>=0.13",
+       "ruamel.yaml>=0.18"]
 # Alias explicite pour le serveur distant HTTP (mêmes dépendances que [mcp]).
 http = ["mcp>=1.27,<2", "starlette>=0.46", "uvicorn>=0.30"]
 # Serveur MCP distant complet (auth Bearer + sandbox + durcissement). Mêmes
@@ -80,7 +84,7 @@ dev = [
 
 [project.scripts]
 # Commande principale : moisson-shs <sous-commande>
-# - moisson-shs setup       : configure le serveur MCP dans Claude Desktop
+# - moisson-shs setup       : configure le serveur MCP dans les clients MCP
 # - moisson-shs serve       : lance le serveur MCP en mode stdio (debug)
 # - moisson-shs search Q    : moisson sur la requête Q
 # - moisson-shs Q           : alias rétro-compatible (assume search)
@@ -101,7 +105,7 @@ py-modules = ["cli", "main", "mcp_server", "config", "setup_claude_desktop", "au
 version = { attr = "_version.__version__" }
 
 [tool.setuptools.packages.find]
-include = ["connectors*", "mappers*", "utils*", "engine*"]
+include = ["connectors*", "mappers*", "utils*", "engine*", "mcp_clients*"]
 
 # === pytest ===
 [tool.pytest.ini_options]

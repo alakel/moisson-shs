@@ -2,7 +2,7 @@
 Point d'entrée unifié de la commande `moisson-shs`.
 
 Sous-commandes :
-    moisson-shs setup ...      → configure le MCP dans Claude Desktop
+    moisson-shs setup ...      → configure le MCP dans les clients (Claude, Codex, Gemini, Hermes…)
     moisson-shs serve          → lance le serveur MCP en mode stdio
     moisson-shs serve --http   → lance le serveur MCP distant (Streamable HTTP)
     moisson-shs search Q ...   → moisson sur la requête Q (alias : moisson-shs Q)
@@ -30,7 +30,9 @@ def _print_top_level_help() -> None:
   (groupe international) ; Google Scholar (SerpAPI, facturé : à nommer)
 
 Usage :
-  moisson-shs setup [options]      Configure le serveur MCP dans Claude Desktop
+  moisson-shs setup [options]      Configure le serveur MCP dans les clients MCP
+                                   (Claude Desktop, Claude Code, Codex, Gemini,
+                                   Antigravity, Hermes ; menu en terminal)
   moisson-shs serve                Lance le serveur MCP en mode stdio (debug)
   moisson-shs serve --http         Lance le serveur MCP distant (Streamable HTTP)
   moisson-shs search QUERY ...     Moisson sur la requête QUERY
@@ -44,6 +46,7 @@ Exemples :
   moisson-shs setup
   moisson-shs setup --output-dir ~/Documents/corpus_shs
   moisson-shs setup --status
+  moisson-shs setup --client codex,gemini
   moisson-shs serve --http --host 127.0.0.1 --port 8000
   moisson-shs search "discours numérique" --max 500 --workers 4 --cache
   moisson-shs "Foucault" --from-date 2020 --to-date 2024
