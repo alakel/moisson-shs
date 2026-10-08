@@ -77,7 +77,9 @@ from engine.models import (
 )
 from engine.outputs import cleanup_raw, raw_path, write_raw
 from utils.http import CancelSignal, HTTPClient, OperationCancelled
-from utils.secrets import MissingAPIKey
+from utils.secrets import (
+    SOURCE_KEY_VARS, MissingAPIKey, missing_key_detail, reserve_note,
+)
 from utils.source_labels import canonical_source_key, display_name
 
 logger = logging.getLogger("moisson.engine")
@@ -310,10 +312,10 @@ def run_source(
         result.status = STATUS_SKIPPED
         result.reason = REASON_MISSING_KEY
         # Détail court : le libellé du motif dit déjà « clé d'API absente »
-        # (le message complet le répétait : PAT-16).
+        # (le message complet le répétait : PAT-16) ; il nomme la politique
+        # de réserve quand le .env ne remplace pas une clé déclarée vide.
         env_var = getattr(exc, "env_var", None)
-        result.detail = (f"définir {env_var} (.env, shell ou bloc env de "
-                         f"claude_desktop_config.json)" if env_var else str(exc))
+        result.detail = missing_key_detail(env_var) if env_var else str(exc)
         logger.warning(f"=== Source {name} ignorée : {exc} ===")
     except Exception as exc:  # noqa: BLE001 - une source n'arrête pas les autres
         reason, detail = classify_exception(exc)
@@ -328,6 +330,11 @@ def run_source(
             except Exception:  # noqa: BLE001 - fermeture best-effort
                 logger.debug(f"[{name}] fermeture du connecteur", exc_info=True)
         result.duration_s = time.monotonic() - start
+    # Clé du client refusée et remplacée par la réserve du .env (sprint
+    # « clés ») : dit dans le statut de la source, sans valeur.
+    note = reserve_note(SOURCE_KEY_VARS[key]) if key in SOURCE_KEY_VARS else None
+    if note and note not in result.warnings:
+        result.warnings.append(note)
     level = logging.INFO if result.succeeded else logging.WARNING
     logger.log(
         level,

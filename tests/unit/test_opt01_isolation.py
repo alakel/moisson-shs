@@ -122,10 +122,13 @@ class TestConftestIsolation:
 # === Garde MOISSON_NO_DOTENV de utils/secrets.py ===
 
 def _fake_dotenv(monkeypatch):
-    """Installe un faux module `dotenv` qui enregistre ses appels."""
+    """Installe un faux module `dotenv` qui enregistre ses lectures
+    (``dotenv_values``, sprint « clés » : la réserve des clés est lue à
+    part) ; la recherche par défaut ne trouve rien."""
     calls = []
     fake = types.ModuleType("dotenv")
-    fake.load_dotenv = lambda *a, **k: calls.append((a, k)) or True
+    fake.dotenv_values = lambda *a, **k: calls.append((a, k)) or {}
+    fake.find_dotenv = lambda *a, **k: ""
     monkeypatch.setitem(sys.modules, "dotenv", fake)
     return calls
 
@@ -139,25 +142,31 @@ class TestSecretsDotenvGuard:
         assert secrets._load_dotenv_files() is False
         assert calls == []
 
-    def test_loads_dotenv_when_guard_absent(self, monkeypatch):
+    def test_loads_dotenv_when_guard_absent(self, monkeypatch, tmp_path):
         from utils import secrets
 
+        env_file = tmp_path / ".env"
+        env_file.write_text("MOISSON_OPT01_SENTINEL=x\n", encoding="utf-8")
         calls = _fake_dotenv(monkeypatch)
         monkeypatch.delenv("MOISSON_NO_DOTENV", raising=False)
-        assert secrets._load_dotenv_files() is True
-        # Au moins la recherche par défaut ; le .env de la racine en plus s'il
-        # existe sur ce poste.
-        assert calls
-        project_env = PROJECT_ROOT / ".env"
-        if project_env.is_file():
-            assert calls[0][0][0] == project_env
+        assert secrets._load_dotenv_files([env_file]) is True
+        assert [c[0][0] for c in calls] == [env_file]
 
-    def test_other_values_do_not_disable_loading(self, monkeypatch):
+    def test_project_env_is_read_first(self):
+        # Le .env de la racine, résolu depuis le module (le serveur MCP est
+        # lancé depuis un répertoire arbitraire), puis la recherche par défaut.
         from utils import secrets
 
+        assert secrets._default_env_files()[0] == PROJECT_ROOT / ".env"
+
+    def test_other_values_do_not_disable_loading(self, monkeypatch, tmp_path):
+        from utils import secrets
+
+        env_file = tmp_path / ".env"
+        env_file.write_text("MOISSON_OPT01_SENTINEL=x\n", encoding="utf-8")
         calls = _fake_dotenv(monkeypatch)
         monkeypatch.setenv("MOISSON_NO_DOTENV", "0")
-        assert secrets._load_dotenv_files() is True
+        assert secrets._load_dotenv_files([env_file]) is True
         assert calls
 
 

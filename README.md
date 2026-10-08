@@ -174,6 +174,7 @@ Les clés de citation sont stables (`nom + année + premier mot du titre`, suffi
 
 ```bash
 moisson-shs setup                    # installation dans Claude Desktop
+moisson-shs setup --client code      # Claude Code, portée utilisateur (all : les deux)
 moisson-shs setup --output-dir ~/corpus_shs
 moisson-shs setup --dry-run          # aperçu sans modifier
 moisson-shs setup --status           # état actuel
@@ -183,12 +184,13 @@ moisson-shs setup --remote https://moisson.example.org/mcp --token "$MOISSON_API
 
 | Option | Effet |
 |--------|-------|
+| `--client` | Client configuré : `desktop` (défaut), `code` (Claude Code, portée utilisateur, par `claude mcp add-json`), `all` |
 | `--output-dir` | Répertoire des corpus du serveur (`MOISSON_OUTPUT_DIR`) |
 | `--cache` | Écrit `MOISSON_CACHE=1` dans le bloc `env` (le cache est déjà actif par défaut côté MCP) |
-| `--openalex-key`, `--semantic-scholar-key`, `--core-key`, `--serpapi-key` | Clés injectées dans le bloc `env` (sinon reprises du shell, sinon demandées en saisie masquée) |
+| `--openalex-key`, `--semantic-scholar-key`, `--core-key`, `--serpapi-key` | Clés inscrites dans le bloc `env` (sinon reprises du shell, sinon demandées en saisie masquée, sinon valeur déjà déclarée, sinon vides : les quatre variables sont toujours déclarées) |
 | `--no-prompt` | Aucune saisie interactive (installation scriptée) |
-| `--dry-run`, `--status`, `--uninstall` | Aperçu, état, désinstallation |
-| `--python`, `--server-path`, `--config` | Chemins imposés (défaut : détection automatique) |
+| `--dry-run`, `--status`, `--uninstall` | Aperçu, état (dont celui de chaque clé : déclaration, réserve du `.env`, repli permis), désinstallation |
+| `--python`, `--server-path`, `--config`, `--claude-code-config` | Chemins imposés (défaut : détection automatique) |
 | `--remote` | Imprime le bloc de configuration d'un client distant (avec `--token`, `--name`) |
 
 ### `moisson-shs serve`
@@ -417,7 +419,7 @@ Toutes les variables d'environnement utiles sont listées et commentées dans [`
 | `MOISSON_REQUEST_DELAY` | 0.3 | Intervalle minimal entre deux requêtes vers un même hôte |
 | `MOISSON_NO_DOTENV` | — | `1` : ne lire aucun `.env` |
 
-Le fichier `.env` de la racine est lu par `utils/secrets.py` (chemin résolu depuis le module, pas depuis le répertoire courant) sans écraser l'environnement ; le bloc `env` de `claude_desktop_config.json` reste prioritaire. Ce chargement a lieu après la lecture de `config.py` : il est garanti pour les clés d'API, mais les réglages `MOISSON_*` doivent être posés dans l'environnement réel du processus (shell, bloc `env`, ou `env_file` de Docker Compose, qui injecte tout le fichier). `config.py` centralise les endpoints et les constantes : toutes ses constantes de réglage sont surchargeables par variable d'environnement.
+Le fichier `.env` de la racine est lu par `utils/secrets.py` (chemin résolu depuis le module, pas depuis le répertoire courant) sans écraser l'environnement ; le bloc `env` du client MCP reste prioritaire. Ses clés d'API sont une réserve, jamais injectée dans l'environnement : elle sert quand la clé du client n'est pas déclarée, ou, pour les sources de `MOISSON_KEY_FALLBACK` (défaut `openalex,semantic_scholar,core`, jamais SerpAPI), quand elle est vide ou refusée (HTTP 401 ou 403) ; détail dans [MCP_INSTALL.md](MCP_INSTALL.md). Ce chargement a lieu après la lecture de `config.py` : il est garanti pour les clés d'API, mais les réglages `MOISSON_*` doivent être posés dans l'environnement réel du processus (shell, bloc `env`, ou `env_file` de Docker Compose, qui injecte tout le fichier). `config.py` centralise les endpoints et les constantes : toutes ses constantes de réglage sont surchargeables par variable d'environnement.
 
 ---
 

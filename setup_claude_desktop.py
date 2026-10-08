@@ -1,20 +1,31 @@
 """
-Configuration automatique du serveur MCP moisson-shs dans Claude Desktop.
+Configuration automatique du serveur MCP moisson-shs dans Claude Desktop et
+dans Claude Code.
 
 Usage :
     moisson-shs setup
+    moisson-shs setup --client code          # Claude Code (portée utilisateur)
+    moisson-shs setup --client all           # les deux
     moisson-shs setup --output-dir /chemin/personnalise
     moisson-shs setup --uninstall
     moisson-shs setup --dry-run
 
 Le script :
-1. Détecte l'OS et localise `claude_desktop_config.json`
+1. Détecte l'OS et localise `claude_desktop_config.json` (Claude Desktop) ou
+   `~/.claude.json` (Claude Code, lu seulement : l'écriture passe par
+   `claude mcp add-json --scope user`)
 2. Détecte l'interpréteur Python actif (venv prioritaire)
 3. Calcule le chemin absolu de mcp_server.py
-4. Insère/met à jour la section `mcpServers.moisson-shs`
-   en préservant les autres serveurs MCP existants
-5. Affiche un récapitulatif et demande à l'utilisateur de redémarrer
-   Claude Desktop pour activer le serveur.
+4. Insère/met à jour l'entrée `moisson-shs` en préservant les autres serveurs
+   MCP existants ; le bloc `env` porte TOUJOURS les quatre clés d'API
+   (renseignées, ou vides : la déclaration montre ce qui reste à fournir)
+5. Affiche un récapitulatif et demande à l'utilisateur de redémarrer le
+   client pour activer le serveur.
+
+Clés d'API (sprint « clés ») : la déclaration du client fait autorité ; le
+`.env` du projet sert de réserve côté serveur (``utils.secrets``) quand une
+clé y est vide ou refusée, selon ``MOISSON_KEY_FALLBACK``. ``setup`` ne copie
+jamais les clés du `.env` dans la déclaration du client.
 
 Le script ne modifie aucun autre fichier ni paramètre du système.
 """
@@ -27,6 +38,7 @@ import json
 import os
 import platform
 import shutil
+import subprocess
 import sys
 from pathlib import Path
 from typing import Optional, Callable
@@ -59,6 +71,22 @@ def get_claude_config_path() -> Path:
     xdg_config = os.environ.get("XDG_CONFIG_HOME")
     base = Path(xdg_config) if xdg_config else home / ".config"
     return base / "Claude" / "claude_desktop_config.json"
+
+
+def get_claude_code_config_path() -> Path:
+    """Fichier d'état de Claude Code, qui porte les serveurs MCP de portée
+    utilisateur (clé ``mcpServers`` de premier niveau). Lu seulement :
+    Claude Code le réécrit en continu, l'écriture passe par sa CLI."""
+    return Path.home() / ".claude.json"
+
+
+def find_claude_cli() -> Optional[str]:
+    """Chemin de la CLI ``claude`` (Claude Code), ou None."""
+    found = shutil.which("claude")
+    if found:
+        return found
+    local = Path.home() / ".local" / "bin" / "claude"
+    return str(local) if local.is_file() else None
 
 
 def get_python_executable() -> str:
@@ -224,6 +252,40 @@ API_KEY_PROMPTS = {
 }
 
 
+def complete_api_key_env(provided: Optional[dict],
+                         previous_env: Optional[dict]) -> dict:
+    """
+    Les quatre clés d'API de la déclaration du client : valeur fournie à
+    cette exécution, sinon valeur déjà déclarée, sinon chaîne vide. Une
+    variable vide reste visible (à renseigner) et le serveur la traite comme
+    absente : la réserve du `.env` peut alors servir (``utils.secrets``).
+    """
+    provided = provided or {}
+    previous_env = previous_env if isinstance(previous_env, dict) else {}
+    out = {}
+    for var in API_KEY_ENV_VARS:
+        out[var] = (str(provided.get(var) or "").strip()
+                    or str(previous_env.get(var) or "").strip())
+    return out
+
+
+def missing_keys_notice(env: dict, where: str) -> str:
+    """Avertissement listant les clés inscrites vides ("" si aucune)."""
+    empty = [v for v in API_KEY_ENV_VARS if not str(env.get(v) or "").strip()]
+    if not empty:
+        return ""
+    return "\n".join([
+        f"⚠️ Clés vides (inscrites sans valeur) : {', '.join(empty)}.",
+        f"   À renseigner dans {where}, ou relancer `moisson-shs setup` dans "
+        "un terminal (saisie masquée).",
+        "   Sans clé, la source concernée n'est pas interrogée ; les autres "
+        "sources restent disponibles.",
+        "   Le .env du projet sert de réserve côté serveur pour OpenAlex, "
+        "Semantic Scholar et CORE (MOISSON_KEY_FALLBACK), jamais pour SerpAPI "
+        "par défaut (source facturée).",
+    ])
+
+
 def collect_api_key_env(args) -> dict:
     """
     Construit le dict de clés API à injecter dans le bloc `env` du serveur.
@@ -311,8 +373,44 @@ def _redact_env(entry: dict) -> dict:
             if env_copy.get(var):
                 n = len(str(env_copy[var]))
                 env_copy[var] = f"*** masqué ({n} caractères) ***"
+            elif var in env_copy:
+                env_copy[var] = "(vide)"
         redacted["env"] = env_copy
     return redacted
+
+
+def key_report(env: Optional[dict]) -> list:
+    """
+    État des quatre clés d'une déclaration de client, sans aucune valeur :
+    déclaration (renseignée, vide, absente), réserve du `.env` du projet
+    (présente, absente) et repli permis (``MOISSON_KEY_FALLBACK`` de la
+    déclaration, sinon de l'environnement, sinon défaut).
+    """
+    env = env if isinstance(env, dict) else {}
+    try:
+        from utils import secrets
+    except Exception:  # noqa: BLE001 - paquet incomplet : état partiel
+        secrets = None
+    policy = env.get("MOISSON_KEY_FALLBACK")
+    width = max(len(v) for v in API_KEY_ENV_VARS)
+    lines = ["   Clés d'API (déclaration du client · réserve du .env · "
+             "repli permis) :"]
+    for var in API_KEY_ENV_VARS:
+        if var not in env:
+            declared = "absente"
+        elif str(env[var]).strip():
+            declared = "renseignée"
+        else:
+            declared = "vide"
+        if secrets is None:
+            reserve, allowed = "inconnue", "inconnu"
+        else:
+            reserve = "présente" if secrets.reserve_value(var) else "absente"
+            allowed = "oui" if secrets.fallback_allowed(var, policy) else "non"
+            if allowed == "non" and var == "SERPAPI_API_KEY":
+                allowed = "non (source facturée)"
+        lines.append(f"     {var.ljust(width)}  {declared} · {reserve} · {allowed}")
+    return lines
 
 
 def install(
@@ -342,38 +440,39 @@ def install(
     config.setdefault("mcpServers", {})
     previous = config["mcpServers"].get(SERVER_KEY)
 
-    # Conserver les clés API déjà présentes dans l'entrée moisson-shs si elles
-    # ne sont pas re-fournies à cette exécution (évite de les effacer sur un
-    # `setup` ultérieur sans clé).
+    # Les quatre clés sont toujours déclarées : valeur fournie, sinon valeur
+    # déjà présente dans l'entrée moisson-shs (un `setup` ultérieur sans clé
+    # ne l'efface pas), sinon vide.
     merged_env = dict(extra_env or {})
-    if previous and isinstance(previous.get("env"), dict):
-        for var in API_KEY_ENV_VARS:
-            if var not in merged_env and previous["env"].get(var):
-                merged_env[var] = previous["env"][var]
+    merged_env.update(complete_api_key_env(
+        extra_env, previous.get("env") if previous else None))
 
     config["mcpServers"][SERVER_KEY] = build_server_entry(
         python_exe, server_path, output_dir, cache_enabled,
-        extra_env=merged_env or None,
+        extra_env=merged_env,
     )
+    notice = missing_keys_notice(merged_env, str(config_path))
 
     # Sérialisation finale (réelle, écrite sur disque — clés en clair)
     serialized = json.dumps(config, indent=2, ensure_ascii=False)
 
     if dry_run:
-        # Aperçu console avec clés masquées
-        display_config = dict(config)
-        display_config["mcpServers"] = dict(config["mcpServers"])
-        display_config["mcpServers"][SERVER_KEY] = _redact_env(
-            config["mcpServers"][SERVER_KEY]
-        )
+        # Aperçu console : l'entrée moisson-shs seule, clés masquées. Les
+        # autres serveurs sont seulement nommés : leurs blocs env portent
+        # leurs propres secrets, que l'aperçu imprimait en clair.
         serialized_display = json.dumps(
-            display_config, indent=2, ensure_ascii=False
+            {SERVER_KEY: _redact_env(config["mcpServers"][SERVER_KEY])},
+            indent=2, ensure_ascii=False,
         )
+        other = [k for k in config["mcpServers"] if k != SERVER_KEY]
         return (
             f"--- DRY RUN ---\n"
-            f"Aucun fichier n'a été modifié. Aperçu du contenu qui aurait "
-            f"été écrit dans {config_path} (clés API masquées) :\n\n"
+            f"Aucun fichier n'a été modifié. Entrée qui serait écrite dans "
+            f"{config_path} (clés API masquées) :\n\n"
             f"{serialized_display}"
+            + (f"\n\nAutres serveurs MCP préservés : {', '.join(other)}"
+               if other else "")
+            + (f"\n\n{notice}" if notice else "")
         )
 
     # Écriture
@@ -393,6 +492,8 @@ def install(
     ]
     if backup_path:
         lines += ["", f"💾 Sauvegarde précédente : {backup_path}"]
+    if notice:
+        lines += ["", notice]
     return "\n".join(lines)
 
 
@@ -452,9 +553,170 @@ def status(config_path: Path) -> str:
     if entry.get("env"):
         # Masquer les valeurs de clés API à l'affichage
         lines.append(f"   env     : {_redact_env(entry)['env']}")
+    lines += key_report(entry.get("env"))
     other = [k for k in servers if k != SERVER_KEY]
     if other:
         lines.append(f"   Autres serveurs MCP configurés : {', '.join(other)}")
+    return "\n".join(lines)
+
+
+# === Claude Code (portée utilisateur) ===
+
+def read_claude_code_entry(config_path: Path) -> Optional[dict]:
+    """Entrée ``moisson-shs`` de portée utilisateur de Claude Code (None :
+    absente). Lecture seule de ``~/.claude.json``."""
+    if not config_path.exists():
+        return None
+    try:
+        data = json.loads(config_path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as e:
+        raise ValueError(f"{config_path} illisible : {type(e).__name__}") from e
+    entry = (data.get("mcpServers") or {}).get(SERVER_KEY)
+    return entry if isinstance(entry, dict) else None
+
+
+def _scrub(text: str, values) -> str:
+    """Retire d'un message (sortie de la CLI) toute valeur de clé connue."""
+    text = str(text or "").strip()
+    for value in values:
+        if value:
+            text = text.replace(str(value), "***")
+    return text
+
+
+def _claude_cmd(runner, cmd: list):
+    return runner(cmd, capture_output=True, text=True, timeout=60)
+
+
+def install_claude_code(
+    python_exe: str,
+    server_path: Path,
+    output_dir: Optional[Path],
+    cache_enabled: bool,
+    dry_run: bool = False,
+    extra_env: Optional[dict] = None,
+    config_path: Optional[Path] = None,
+    runner: Optional[Callable] = None,
+    claude_bin: Optional[str] = None,
+) -> str:
+    """
+    Déclare le serveur dans Claude Code, portée utilisateur, par
+    ``claude mcp add-json --scope user`` (jamais ``.mcp.json`` : fichier de
+    projet versionné, les clés y seraient en clair). Une entrée existante est
+    retirée puis ajoutée de nouveau ; si l'ajout échoue, l'entrée précédente
+    est restaurée. Les quatre clés sont toujours déclarées (voir
+    ``complete_api_key_env``).
+
+    Limite : la CLI reçoit l'entrée en argument, les clés sont donc visibles
+    dans la liste des processus le temps de l'appel.
+
+    Returns:
+        Texte décrivant l'action effectuée (clés masquées).
+    """
+    config_path = config_path or get_claude_code_config_path()
+    try:
+        previous = read_claude_code_entry(config_path)
+    except ValueError as e:
+        return f"❌ {e}"
+    previous_env = previous.get("env") if previous else None
+    env = dict(extra_env or {})
+    env.update(complete_api_key_env(extra_env, previous_env))
+    entry = {"type": "stdio", **build_server_entry(
+        python_exe, server_path, output_dir, cache_enabled, extra_env=env)}
+    shown = json.dumps({SERVER_KEY: _redact_env(entry)}, indent=2,
+                       ensure_ascii=False)
+    notice = missing_keys_notice(
+        env, f"{config_path} (entrée moisson-shs, portée utilisateur)")
+
+    if dry_run:
+        return "\n".join(
+            ["--- DRY RUN (Claude Code) ---",
+             "Aucune commande lancée. Entrée qui serait déclarée en portée "
+             "utilisateur (clés masquées) :", "", shown]
+            + (["", notice] if notice else []))
+
+    claude = claude_bin or find_claude_cli()
+    if not claude:
+        return ("❌ CLI `claude` introuvable : installer Claude Code, ou "
+                "utiliser --client desktop.")
+    runner = runner or subprocess.run
+    known = list(env.values()) + list((previous_env or {}).values())
+    scope = ["--scope", "user"]
+
+    if previous is not None:
+        done = _claude_cmd(runner, [claude, "mcp", "remove", SERVER_KEY] + scope)
+        if done.returncode != 0:
+            return (f"❌ Échec du retrait de l'entrée existante (code "
+                    f"{done.returncode}) : {_scrub(done.stderr, known)}")
+    done = _claude_cmd(runner, [claude, "mcp", "add-json", SERVER_KEY,
+                                json.dumps(entry, ensure_ascii=False)] + scope)
+    if done.returncode != 0:
+        lines = [f"❌ Échec de l'ajout dans Claude Code (code "
+                 f"{done.returncode}) : {_scrub(done.stderr, known)}"]
+        if previous is not None:
+            back = _claude_cmd(runner, [claude, "mcp", "add-json", SERVER_KEY,
+                                        json.dumps(previous, ensure_ascii=False)]
+                               + scope)
+            lines.append("   Entrée précédente restaurée." if back.returncode == 0
+                         else "   ⚠️ Restauration de l'entrée précédente en "
+                              "échec : relancer la commande.")
+        return "\n".join(lines)
+
+    action = "mise à jour" if previous else "ajoutée"
+    lines = [f"✅ Configuration moisson-shs {action} dans Claude Code "
+             f"(portée utilisateur, {config_path}) :", shown]
+    if notice:
+        lines += ["", notice]
+    return "\n".join(lines)
+
+
+def uninstall_claude_code(config_path: Optional[Path] = None,
+                          dry_run: bool = False,
+                          runner: Optional[Callable] = None,
+                          claude_bin: Optional[str] = None) -> str:
+    """Retire l'entrée moisson-shs de portée utilisateur de Claude Code."""
+    config_path = config_path or get_claude_code_config_path()
+    try:
+        entry = read_claude_code_entry(config_path)
+    except ValueError as e:
+        return f"❌ {e}"
+    if entry is None:
+        return (f"⚠️ Aucune entrée 'moisson-shs' en portée utilisateur dans "
+                f"{config_path}.")
+    if dry_run:
+        return ("--- DRY RUN (Claude Code) ---\nL'entrée 'moisson-shs' de "
+                "portée utilisateur serait retirée.")
+    claude = claude_bin or find_claude_cli()
+    if not claude:
+        return "❌ CLI `claude` introuvable."
+    done = _claude_cmd(runner or subprocess.run,
+                       [claude, "mcp", "remove", SERVER_KEY, "--scope", "user"])
+    if done.returncode != 0:
+        known = list((entry.get("env") or {}).values())
+        return (f"❌ Échec du retrait (code {done.returncode}) : "
+                f"{_scrub(done.stderr, known)}")
+    return "✅ Entrée 'moisson-shs' retirée de Claude Code (portée utilisateur)."
+
+
+def status_claude_code(config_path: Optional[Path] = None) -> str:
+    """État de la déclaration dans Claude Code (clés masquées)."""
+    config_path = config_path or get_claude_code_config_path()
+    try:
+        entry = read_claude_code_entry(config_path)
+    except ValueError as e:
+        return f"❌ {e}"
+    if entry is None:
+        return (f"⚠️ Aucune entrée 'moisson-shs' en portée utilisateur dans "
+                f"{config_path} (lancez 'moisson-shs setup --client code').")
+    lines = [
+        f"✅ Serveur moisson-shs déclaré dans Claude Code (portée utilisateur, "
+        f"{config_path})",
+        f"   command : {entry.get('command')}",
+        f"   args    : {entry.get('args')}",
+    ]
+    if entry.get("env"):
+        lines.append(f"   env     : {_redact_env(entry)['env']}")
+    lines += key_report(entry.get("env"))
     return "\n".join(lines)
 
 
@@ -510,20 +772,32 @@ def main(argv: list[str] = None) -> int:
     parser = argparse.ArgumentParser(
         prog="moisson-shs setup",
         description=(
-            "Configure le serveur MCP moisson-shs dans Claude Desktop. "
-            "Détecte automatiquement l'OS, le venv Python et le chemin du "
-            "serveur. Préserve les autres serveurs MCP existants."
+            "Configure le serveur MCP moisson-shs dans Claude Desktop et/ou "
+            "Claude Code (portée utilisateur). Détecte automatiquement l'OS, "
+            "le venv Python et le chemin du serveur. Préserve les autres "
+            "serveurs MCP existants. Le bloc env porte toujours les quatre "
+            "clés d'API (vides si non fournies)."
         ),
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Exemples :
   moisson-shs setup
+  moisson-shs setup --client code
+  moisson-shs setup --client all
   moisson-shs setup --output-dir ~/Documents/corpus_shs
   moisson-shs setup --cache
   moisson-shs setup --dry-run
-  moisson-shs setup --status
+  moisson-shs setup --status --client all
   moisson-shs setup --uninstall
         """,
+    )
+    parser.add_argument(
+        "--client",
+        choices=("desktop", "code", "all"),
+        default="desktop",
+        help="Client MCP à configurer : desktop (Claude Desktop, défaut), "
+             "code (Claude Code, portée utilisateur, par `claude mcp "
+             "add-json`), all (les deux)",
     )
     parser.add_argument(
         "--config",
@@ -531,6 +805,13 @@ Exemples :
         default=None,
         help="Chemin personnalisé vers claude_desktop_config.json "
              "(défaut : auto-détection selon l'OS)",
+    )
+    parser.add_argument(
+        "--claude-code-config",
+        type=Path,
+        default=None,
+        help="Fichier d'état de Claude Code lu pour l'entrée existante "
+             "(défaut : ~/.claude.json)",
     )
     parser.add_argument(
         "--output-dir",
@@ -623,17 +904,28 @@ Exemples :
         print(f"❌ {e}", file=sys.stderr)
         return 1
 
+    desktop = args.client in ("desktop", "all")
+    code = args.client in ("code", "all")
+    code_config = args.claude_code_config or get_claude_code_config_path()
+
     # Mode status
     if args.status:
-        print(status(config_path))
+        if desktop:
+            print(status(config_path))
+        if code:
+            print(status_claude_code(code_config))
         return 0
 
     # Mode uninstall
     if args.uninstall:
-        print(uninstall(config_path, dry_run=args.dry_run))
+        if desktop:
+            print(uninstall(config_path, dry_run=args.dry_run))
+        if code:
+            print(uninstall_claude_code(code_config, dry_run=args.dry_run))
         if not args.dry_run:
             print()
-            print("⚠️ Redémarrez Claude Desktop pour que le changement soit pris en compte.")
+            print("⚠️ Redémarrez le client (Claude Desktop, sessions Claude Code) "
+                  "pour que le changement soit pris en compte.")
         return 0
 
     # Vérification des dépendances dans le Python cible
@@ -652,35 +944,61 @@ Exemples :
             print("Ou utiliser --skip-deps-check pour forcer (déconseillé).")
             return 1
 
-    # Clés API à injecter dans le bloc env : flags / environnement, puis
+    # Clés API à inscrire dans le bloc env : flags / environnement, puis
     # saisie interactive des clés encore manquantes (sauf --no-prompt /
     # dry-run / terminal non interactif). Les clés déjà présentes dans la
-    # config sont préservées par install() si on les saute (Entrée vide).
+    # déclaration sont préservées si on les saute (Entrée vide) ; les autres
+    # sont inscrites vides.
     api_key_env = collect_api_key_env(args)
     if not args.dry_run:
+        try:
+            interactive = sys.stdin.isatty()
+        except Exception:  # noqa: BLE001
+            interactive = False
+        if not interactive and not args.no_prompt:
+            print("ℹ️ Terminal non interactif : saisie masquée des clés non "
+                  "proposée (relancer dans un terminal pour la saisie).")
         api_key_env.update(
-            prompt_missing_api_keys(api_key_env, no_prompt=args.no_prompt)
+            prompt_missing_api_keys(api_key_env, no_prompt=args.no_prompt,
+                                    interactive=interactive)
         )
     if api_key_env:
-        print(f"🔑 Clés API injectées : {', '.join(sorted(api_key_env))}")
+        print(f"🔑 Clés API fournies : {', '.join(sorted(api_key_env))}")
 
     # Installation
-    print(install(
-        config_path=config_path,
-        python_exe=python_exe,
-        server_path=server_path,
-        output_dir=args.output_dir,
-        cache_enabled=args.cache,
-        dry_run=args.dry_run,
-        extra_env=api_key_env,
-    ))
+    if desktop:
+        print(install(
+            config_path=config_path,
+            python_exe=python_exe,
+            server_path=server_path,
+            output_dir=args.output_dir,
+            cache_enabled=args.cache,
+            dry_run=args.dry_run,
+            extra_env=api_key_env,
+        ))
+    if code:
+        if desktop:
+            print()
+        print(install_claude_code(
+            python_exe=python_exe,
+            server_path=server_path,
+            output_dir=args.output_dir,
+            cache_enabled=args.cache,
+            dry_run=args.dry_run,
+            extra_env=api_key_env,
+            config_path=code_config,
+        ))
 
     if not args.dry_run:
         print()
-        print("🔄 Étape suivante : quitter et relancer **complètement** Claude Desktop")
-        print("   (Cmd+Q sur macOS, fermer toutes les fenêtres puis relancer).")
+        if desktop:
+            print("🔄 Claude Desktop : quitter et relancer **complètement** "
+                  "(Cmd+Q sur macOS, fermer toutes les fenêtres puis relancer).")
+        if code:
+            print("🔄 Claude Code : relancer les sessions ouvertes pour charger "
+                  "la nouvelle entrée.")
         print()
-        print("📚 Dans Claude Desktop, vous pouvez tester avec :")
+        print("📚 Vous pouvez tester avec :")
         print('   « Liste mes corpus disponibles »')
         print('   « Moissonne les sources SHS sur "discours numérique", plafond 100 »')
 

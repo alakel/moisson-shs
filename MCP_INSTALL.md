@@ -28,7 +28,9 @@ pip install -e ".[mcp]" -c constraints.txt
 moisson-shs setup
 ```
 
-La commande détecte l'OS, le Python du venv et le chemin de `mcp_server.py`, ajoute l'entrée `moisson-shs` à `claude_desktop_config.json` en préservant les autres serveurs, et crée une sauvegarde `.bak`. Options utiles : `--output-dir` (répertoire des corpus), `--dry-run` (aperçu), `--status` (état), `--uninstall`, et les options de clés décrites plus bas.
+La commande détecte l'OS, le Python du venv et le chemin de `mcp_server.py`, ajoute l'entrée `moisson-shs` à `claude_desktop_config.json` en préservant les autres serveurs, et crée une sauvegarde `.bak`. Le bloc `env` porte toujours les quatre clés d'API, vides si elles ne sont pas fournies (voir « Clés API » plus bas). Options utiles : `--client` (`desktop` par défaut, `code` pour Claude Code, `all` pour les deux), `--output-dir` (répertoire des corpus), `--dry-run` (aperçu), `--status` (état, dont celui des clés), `--uninstall`, et les options de clés décrites plus bas.
+
+Pour **Claude Code**, `moisson-shs setup --client code` déclare le serveur en portée utilisateur par `claude mcp add-json --scope user` (CLI `claude` requise) : une entrée existante est retirée puis ajoutée de nouveau, et restaurée si l'ajout échoue. Jamais en portée projet (`.mcp.json`) : ce fichier est versionné, les clés y seraient en clair. La CLI recevant l'entrée en argument, les clés sont visibles dans la liste des processus le temps de l'appel.
 
 Passer directement à l'étape 5.
 
@@ -99,13 +101,23 @@ Les sources internationales ne sont moissonnées que demandées (`sources: ["int
 - **CrossRef** : aucune clé (pool poli par l'adresse `MOISSON_CONTACT_EMAIL`).
 - **SerpAPI (Google Scholar)** : clé **requise** — https://serpapi.com/manage-api-key — et seule source **facturée à la requête** (un crédit par page de vingt résultats ; offre à 5 000 requêtes par mois, partagée avec le projet MyWebIntelligence). Plafonds : `MOISSON_SERPAPI_MAX_PAGES` (10 pages par appel) et `MOISSON_SERPAPI_MIN_CREDITS` (refus sous 100 crédits restants).
 
-Une source dont la clé requise manque n'est pas interrogée : statut `skipped` (motif `missing_key`), les autres sources continuent.
+Une source dont la clé requise manque n'est pas interrogée : statut `skipped` (motif `missing_key`), les autres sources continuent. Sans aucune clé, HAL, Isidore et ses sous-sources, et CrossRef restent disponibles.
 
-`moisson-shs setup` injecte les clés, par ordre de priorité : options `--openalex-key`, `--semantic-scholar-key`, `--core-key`, `--serpapi-key` ; sinon variables du shell ; sinon saisie masquée en terminal interactif (désactivable par `--no-prompt`). Les clés déjà présentes sont préservées et masquées à l'affichage (`setup`, `setup --status`).
+`moisson-shs setup` inscrit **toujours** les quatre variables dans la déclaration du client. Chaque valeur vient, par ordre de priorité, des options `--openalex-key`, `--semantic-scholar-key`, `--core-key`, `--serpapi-key` ; sinon des variables du shell ; sinon de la saisie masquée en terminal interactif (désactivable par `--no-prompt` ; hors terminal, la saisie n'est pas proposée et `setup` le dit) ; sinon de la valeur déjà déclarée ; sinon elle reste vide, et `setup` liste les clés vides à renseigner. Les valeurs sont masquées à l'affichage (`setup`, `setup --status`).
 
-À défaut du bloc `env`, les clés peuvent venir d'un fichier `.env` **à la racine du projet**, lu au démarrage par `utils/secrets.py` (chemin résolu depuis le module, pas depuis le répertoire courant : Claude Desktop lance le serveur depuis un répertoire arbitraire). Le bloc `env` reste prioritaire ; `MOISSON_NO_DOTENV=1` interdit toute lecture de `.env`. Les réglages `MOISSON_*` se posent dans le bloc `env` : le `.env` est lu après `config.py` et n'est garanti que pour les clés.
+**Réserve du `.env`.** Le fichier `.env` **à la racine du projet**, créé par le développeur à partir de `.env.example`, est lu au démarrage par `utils/secrets.py` (chemin résolu depuis le module : le client lance le serveur depuis un répertoire arbitraire). La déclaration du client fait autorité ; la clé du `.env` ne sert que :
 
-**Rotation** : régénérer la clé sur le tableau de bord de la source, remplacer la valeur dans le bloc `env` (ou relancer `moisson-shs setup --<source>-key …`), puis redémarrer Claude Desktop. Ne jamais committer de clé : `.env` est ignoré par git (voir `.env.example`).
+| Clé déclarée par le client | Clé dans `.env` | Clé utilisée |
+|---|---|---|
+| renseignée et acceptée | indifférent | celle du client |
+| non déclarée (CLI, ancienne déclaration) | présente | celle du `.env` |
+| vide | présente, source dans `MOISSON_KEY_FALLBACK` | celle du `.env` |
+| refusée (HTTP 401 ou 403) | présente, différente, source dans `MOISSON_KEY_FALLBACK` | celle du `.env`, signalée dans le statut de la source |
+| vide ou refusée | absente, ou source hors `MOISSON_KEY_FALLBACK` | aucune : source non exécutée (ou en échec si refusée) |
+
+`MOISSON_KEY_FALLBACK` vaut par défaut `openalex,semantic_scholar,core` : SerpAPI, seule source facturée, n'est jamais complétée ni remplacée par la clé du développeur sans l'y ajouter. Après un refus, la réserve sert pour le reste du processus (une seule requête refusée). `setup` ne copie jamais les clés du `.env` dans la déclaration ; `setup --status` indique pour chaque clé son état dans la déclaration, la présence d'une réserve et si le repli est permis. `MOISSON_NO_DOTENV=1` interdit toute lecture de `.env`. Les réglages `MOISSON_*` lus au démarrage se posent dans le bloc `env` : le `.env` est lu après `config.py`.
+
+**Rotation** : régénérer la clé sur le tableau de bord de la source, remplacer la valeur dans le bloc `env` (ou relancer `moisson-shs setup --<source>-key …`), puis redémarrer le client. Ne jamais committer de clé : `.env` est ignoré par git (voir `.env.example`).
 
 ### Autres réglages utiles dans le bloc `env`
 

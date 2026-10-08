@@ -10,6 +10,11 @@ search_by_author) appliquent tous la même politique, implémentée par
 
 - **4xx définitif** (400, 401, 403, 404, 405, 410, 422…) : une seule tentative,
   l'erreur HTTP est levée immédiatement (un nouvel essai ne changerait rien) ;
+  seule exception, un changement d'identifiant et non un réessai (sprint
+  « clés ») : un 401 ou un 403 reçu avec la clé d'API du client est suivi
+  d'UNE requête avec la clé de réserve du `.env` quand ``utils.secrets`` le
+  permet (``MOISSON_KEY_FALLBACK``, réserve différente) ; le refus est
+  mémorisé et les requêtes suivantes partent directement avec la réserve ;
 - **429 et transitoires** (500, 502, 503, 504, délai dépassé, erreur de
   connexion, connexion rompue en cours de lecture du corps) : au plus
   ``HTTP_MAX_RETRIES`` tentatives, ``Retry-After`` respecté (secondes ou date
@@ -105,6 +110,7 @@ from config import (
     REQUEST_DELAY_CROSSREF_LIST,
     CROSSREF_MAX_IN_FLIGHT,
 )
+from utils.secrets import substitute_credential
 
 # Configuration du logger pour tracer les échecs réseau
 logger = logging.getLogger(__name__)
@@ -461,6 +467,47 @@ def account_fingerprint(params=None, headers=None) -> str:
         return ""
     digest = hashlib.sha256("\n".join(sorted(secrets)).encode("utf-8"))
     return digest.hexdigest()[:12]
+
+
+# Refus d'une clé d'API : statuts qui déclenchent le repli sur la clé de
+# réserve du .env (sprint « clés », décision D2 : ni 429 ni quota épuisé).
+KEY_REFUSAL_STATUSES = (401, 403)
+
+
+def _swap_credentials(params, headers, *, on_refusal: bool,
+                      status: Optional[int] = None):
+    """
+    Identifiants de compte (``_ACCOUNT_PARAMS``, ``_ACCOUNT_HEADERS``) qui
+    portent la clé du client, remplacés par la clé de réserve du `.env`
+    (``utils.secrets.substitute_credential``) : après un refus de cette
+    requête (``on_refusal``), ou pour une clé déjà refusée. Les objets de
+    l'appelant ne sont jamais modifiés.
+
+    Returns:
+        ``(params, headers, variables remplacées)``.
+    """
+    swapped: List[str] = []
+
+    def _rewrite(pairs, names):
+        out, changed = [], False
+        for k, v in pairs:
+            if str(k).lower() in names and v:
+                sub = substitute_credential(str(v), on_refusal=on_refusal,
+                                            status=status)
+                if sub is not None:
+                    swapped.append(sub[0])
+                    v, changed = sub[1], True
+            out.append((k, v))
+        return out, changed
+
+    new_params, new_headers = params, headers
+    pairs, changed = _rewrite(_pairs(params), _ACCOUNT_PARAMS)
+    if changed:
+        new_params = dict(pairs) if isinstance(params, Mapping) else pairs
+    pairs, changed = _rewrite(_pairs(headers), _ACCOUNT_HEADERS)
+    if changed:
+        new_headers = dict(pairs)
+    return new_params, new_headers, swapped
 
 
 def redact_secrets(text: str) -> str:
@@ -1123,20 +1170,39 @@ def policy_get(
     host = _host_of(url)
     if cancel is not None:
         cancel.check()
-    account = account_fingerprint(params, headers)
-    _bump(host, "logical")
-    key = _flight_key(url, params, account,
-                      use_cache and _is_cached_session(session))
-    return _single_flight.do(
-        key,
-        lambda: _execute(
-            session, url, host, account, params, headers, timeout,
-            max_attempts, backoff_factor, min_interval, use_cache,
-            response_hook, budget, cancel,
-        ),
-        host,
-        cancel,
-    )
+    # Clé du client déjà refusée : la clé de réserve part directement.
+    params, headers, _ = _swap_credentials(params, headers, on_refusal=False)
+
+    def _send(params, headers):
+        account = account_fingerprint(params, headers)
+        _bump(host, "logical")
+        key = _flight_key(url, params, account,
+                          use_cache and _is_cached_session(session))
+        return _single_flight.do(
+            key,
+            lambda: _execute(
+                session, url, host, account, params, headers, timeout,
+                max_attempts, backoff_factor, min_interval, use_cache,
+                response_hook, budget, cancel,
+            ),
+            host,
+            cancel,
+        )
+
+    try:
+        return _send(params, headers)
+    except requests.HTTPError as exc:
+        status = getattr(getattr(exc, "response", None), "status_code", None)
+        if status not in KEY_REFUSAL_STATUSES:
+            raise
+        retry_params, retry_headers, swapped = _swap_credentials(
+            params, headers, on_refusal=True, status=status)
+        if not swapped:
+            raise
+        logger.warning(
+            "%s : clé du client refusée (HTTP %s), clé de réserve du .env "
+            "utilisée (%s)", host, status, ", ".join(sorted(set(swapped))))
+        return _send(retry_params, retry_headers)
 
 
 def _acquire_slot(semaphore, remaining: Optional[float],
