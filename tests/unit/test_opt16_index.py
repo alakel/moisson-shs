@@ -95,11 +95,11 @@ class TestPerformance:
         print(f"\n400 corpus ({'manifestes' if manifests else 'anciens'}) : "
               f"froid {cold_s * 1000:.1f} ms, chaud médiane "
               f"{median * 1000:.1f} ms (min {min(timings) * 1000:.1f} ms)")
-        # Cible OPT-16 : 50 ms, mesurée sur le poste de développement. Les
-        # runners partagés de la CI la dépassent sans régression (55 ms sous
-        # CPython 3.10 le 2026-09-30) : marge ×2 en CI, qui détecte encore
-        # une dérive d'un ordre de grandeur ; la relecture des corpus est
-        # exclue à part par _forbid_reads.
+        # Cible OPT-16 : 50 ms, mesurée sur le poste de développement. La CI,
+        # qui mesure sous couverture de code, la dépasse sans régression
+        # (55 ms sous CPython 3.10 le 2026-09-30) : marge ×2 en CI, qui
+        # détecte encore une dérive d'un ordre de grandeur ; la relecture
+        # des corpus est exclue à part par _forbid_reads.
         budget = 0.100 if os.environ.get("CI") else 0.050
         assert median < budget, timings
 
