@@ -137,7 +137,7 @@ Au fur et à mesure de la réalisation des sprints, un **fichier rapport** est p
 
 ## Où nous en sommes (mise à jour 2026-10-12)
 
-**État actuel** : sprints patch, « clés » et « universel » terminés et commités (version 0.4.0 dans `_version.py`, numéro suivant à décider) ; branche `feat/setup-universel` poussée, PR #1 vers `main` ouverte le 2026-10-12. `main` (`e61c2b9`, v0.3.0) a une CI rouge sous Python 3.10 : le test de durée d'OPT-16 y mesurait 55 ms pour un budget de 50 ms ; le budget est doublé en CI depuis le 2026-10-12. 12 sources, 12 outils MCP, 4 prompts, 4 138 tests verts hors intégration et sockets (+ 25 sockets). Historique des extensions et des sprints 01 à 05 (chiffres et commandes de leur date) : [docs/HISTORIQUE.md](docs/HISTORIQUE.md).
+**État actuel** : sprints patch, « clés » et « universel » terminés et commités (version 0.4.0 dans `_version.py`, numéro suivant à décider) ; branche `feat/setup-universel` poussée, PR #1 vers `main` ouverte le 2026-10-12. `main` (`e61c2b9`, v0.3.0) a une CI rouge sous Python 3.10, où deux tests de durée dépassent leur budget sous couverture de code, sans régression (index d'OPT-16 : 55 ms pour 50 ; déduplication d'OPT-06 : 6,1 s pour 6) ; budgets doublés en CI depuis le 2026-10-12. 12 sources, 12 outils MCP, 4 prompts, 4 138 tests verts hors intégration et sockets (+ 25 sockets). Historique des extensions et des sprints 01 à 05 (chiffres et commandes de leur date) : [docs/HISTORIQUE.md](docs/HISTORIQUE.md).
 
 ### Outils MCP disponibles (12, état au 2026-09-30)
 
