@@ -19,9 +19,9 @@ Moissonneur Python multi-sources d'articles SHS (douze sources : sept francophon
 - [docs/FAQ.md](docs/FAQ.md) · [docs/API_SPECS.md](docs/API_SPECS.md) (capacités de requête vérifiées par source) · [docs/EVALUATION.md](docs/EVALUATION.md) (protocole d'évaluation du classement)
 - [.claude/dev/spritn_optimise.md](.claude/dev/spritn_optimise.md) · [.claude/dev/sprint-optimise_report.md](.claude/dev/sprint-optimise_report.md) — plan et rapport du chantier d'optimisation
 
-## Plan de développement en 4 sprints
+## Plan de développement initial (sprints 01 à 05)
 
-Le travail de finalisation est organisé en 4 sprints. Chaque fichier contient : objectif, tâches incluses, ordre d'exécution, critères de sortie (DoD), détails techniques, risques, livrables et estimation.
+Le travail de finalisation est organisé en cinq sprints. Chaque fichier contient : objectif, tâches incluses, ordre d'exécution, critères de sortie (DoD), détails techniques, risques, livrables et estimation.
 
 | Sprint | Fichier | Objectif | Statut |
 |--------|---------|----------|--------|
@@ -104,6 +104,18 @@ Plan : [.claude/dev/sprint-patch.md](.claude/dev/sprint-patch.md) (PAT-01 à PAT
 
 **En attente de l'utilisateur** : clés S2 et CORE puis redémarrage complet de Claude Desktop ; jugement des fiches `output/eval/patch-2026-09-30/fiches/verification_regles.html` (environ 20 min) puis `verification_regles_B.html` (environ 4 min) et calcul (`rules_check.py metrics` puis `decide`) ; relecture puis fusion de `sprint-patch` dans `main` et push des tags ; redéploiement du serveur distant (FIN-02) ; ménage de `output/` (annexe B du plan).
 
+### Sprint « clés » (déclaration du client, réserve du `.env`) — ✅ TERMINÉ (2026-10-08)
+
+Plan : [.claude/dev/sprint-cles.md](.claude/dev/sprint-cles.md) (CLE-01 à CLE-08) · Rapport : [.claude/dev/sprint-cles_report.md](.claude/dev/sprint-cles_report.md). Arbre de travail de `sprint-patch`, aucun commit. `setup` inscrit **toujours** les quatre clés dans la déclaration du client (vides si non fournies), pour Claude Desktop et désormais Claude Code (`--client desktop|code|all`, portée utilisateur par `claude mcp add-json`) ; `--status` donne l'état de chaque clé. Le `.env` du projet devient la **réserve** du développeur : ses clés ne vont plus dans `os.environ` ; elles servent si la clé du client n'est pas déclarée, ou, pour les sources de `MOISSON_KEY_FALLBACK` (défaut `openalex,semantic_scholar,core`, jamais SerpAPI), si elle est vide ou refusée (401, 403 : une requête de plus dans `policy_get`, refus mémorisé, signalé dans le statut de la source). Sans aucune clé, les autres sources restent disponibles (testé). Fuite corrigée au passage : `setup --dry-run` imprimait les clés des autres serveurs MCP. **Tests : 3 959 verts** hors intégration et sockets (+ 25 sockets). `config.py` inchangé.
+
+**En attente de l'utilisateur** : `venv/bin/python cli.py setup --client all` dans Terminal.app, puis relance des clients ; rotation des clés d'autres serveurs affichées pendant le sprint (rapport § 5) ; réinstallation du paquet (`venv/bin/moisson-shs` pointe vers l'ancien dossier) ; relecture et commits ; version (0.4.0 ou 0.4.1).
+
+### Sprint « universel » (setup des clients MCP) — ✅ TERMINÉ (2026-10-08)
+
+Plan : [.claude/dev/sprint-universel.md](.claude/dev/sprint-universel.md) · Rapport : [.claude/dev/sprint-universel_report.md](.claude/dev/sprint-universel_report.md). Arbre de travail de `sprint-patch`, aucun commit. `moisson-shs setup` configure sept clients : Claude Desktop, Claude Code, OpenAI Codex (application ChatGPT, CLI, IDE ; TOML par `tomlkit`), Gemini CLI, Antigravity CLI et IDE, Hermes Agent (YAML par `ruamel.yaml`). Sans `--client` en terminal : menu des clients détectés, déjà cochés ; hors terminal : Claude Desktop seul. `--client` accepte ids et alias séparés par des virgules ; `all` = tous les clients détectés (changement de sens). Nouveau paquet `mcp_clients/` (un adaptateur par client) ; chaque écriture : sauvegarde horodatée `.moisson-bak-*`, écriture atomique, garde sémantique (sinon extrait à coller, clés en marqueurs), passage en 0600 si le fichier porte des clés ; application ouverte vérifiée (`--force` hors terminal) ; clés saisies une fois et mises en commun entre clients ; délais Codex et Hermes relevés à 960 s. Aucune valeur secrète affichée (testé sur les sept clients). **Tests : 4 138 verts** hors intégration et sockets (180 nouveaux), 25 sockets verts.
+
+**En attente de l'utilisateur** : `venv/bin/python cli.py setup` dans Terminal.app (cocher au moins Codex : son entrée pointe vers l'ancien dossier du projet) ; relance des clients ; relecture et commits ; version (0.5.0 ou 0.4.1).
+
 ## Rapports d'exécution
 
 Au fur et à mesure de la réalisation des sprints, un **fichier rapport** est produit dans `.claude/dev/` au format `sprint_0X_report.md`. Il documente les découvertes, corrections appliquées, résultats des tests et statut final des tâches. Les rapports sont la trace historique du projet — ne jamais les supprimer.
@@ -120,156 +132,12 @@ Au fur et à mesure de la réalisation des sprints, un **fichier rapport** est p
 | Extension Google Scholar | [.claude/dev/EXTENSION_GOOGLE_SCHOLAR_report.md](.claude/dev/EXTENSION_GOOGLE_SCHOLAR_report.md) |
 | Chantier optimisation | [.claude/dev/sprint-optimise_report.md](.claude/dev/sprint-optimise_report.md) |
 | Sprint patch | [.claude/dev/sprint-patch_report.md](.claude/dev/sprint-patch_report.md) |
+| Sprint « clés » | [.claude/dev/sprint-cles_report.md](.claude/dev/sprint-cles_report.md) |
+| Sprint « universel » | [.claude/dev/sprint-universel_report.md](.claude/dev/sprint-universel_report.md) |
 
 ## Où nous en sommes (mise à jour 2026-09-30)
 
-**État actuel** : sprint patch terminé (version 0.4.0, branche `sprint-patch`, section ci-dessus) après le chantier d'optimisation ; 12 sources, 12 outils MCP, 4 prompts, 3 909 tests verts hors intégration. Les sections qui suivent retracent l'historique des extensions et des sprints : les chiffres qu'elles citent (nombre de sources, d'outils, de tests, durées) sont ceux de leur date.
-
-### Extension internationale ✅ TERMINÉE (2026-06-16)
-
-Ajout de **4 sources internationales** (CrossRef, OpenAlex, Semantic Scholar,
-CORE) → **11 sources** au total. Plan :
-[.claude/dev/PLAN_EXTENSION_INTERNATIONALE_moisson-shs.md](.claude/dev/PLAN_EXTENSION_INTERNATIONALE_moisson-shs.md)
-· Rapport :
-[.claude/dev/PLAN_EXTENSION_INTERNATIONALE_report.md](.claude/dev/PLAN_EXTENSION_INTERNATIONALE_report.md).
-
-- Connecteurs REST natifs (cursor/token/offset, throttle, budget-aware via `utils/http_scholarly.py`).
-- Secrets : `utils/secrets.py` + `.env`/`.env.example` (OpenAlex/CORE requis, S2 optionnel) ; clé manquante = source ignorée proprement.
-- Groupes de sources `--sources francophone|international|all` (défaut francophone) ; `resolve_sources` (registry).
-- Dédup FR/EN : IDs OpenAlex/S2/CORE + `SOURCE_FIELD_PRIORITY` + matrice de recouvrement.
-- MCP étendu : `moisson_search` (+4 + groupes), `fetch_by_doi` (+OpenAlex/S2/CORE), `search_by_author` (+OpenAlex/S2), prompt `etat-de-l-art` multilingue.
-- `setup` injecte les clés dans le bloc `env` (valeurs masquées à l'affichage).
-- Revue adversariale croisée (12 relecteurs) : 6 findings corrigés, dont un **showstopper CrossRef** (`select=language` → HTTP 400 → 0 résultat) confirmé puis corrigé en live.
-- **Tests : 420 PASS** (hors réseau) ; couverture mappers+utils **82 %** ; tests d'intégration `skip` sans clé ; CI : job `integration` conditionné aux secrets.
-
-### Extension Google Scholar (SerpAPI) — ✅ TERMINÉE (2026-09-22)
-
-Ajout d'une **douzième source**, Google Scholar via SerpAPI. Rapport :
-[.claude/dev/EXTENSION_GOOGLE_SCHOLAR_report.md](.claude/dev/EXTENSION_GOOGLE_SCHOLAR_report.md).
-
-- Connecteur `connectors/google_scholar.py` + `mappers/google_scholar_mapper.py`.
-- **Seule source facturée à la requête** (1 crédit par page de 20 résultats ;
-  compte payant à 5 000 requêtes/mois, partagé avec MyWebIntelligence).
-  Elle est **exclue des groupes `international` et `all`** (constante
-  `METERED_SOURCES` dans le registry) : elle reste volontaire, pour son coût à
-  la requête et son quota partagé avec MyWebIntelligence. *(Motif corrigé le
-  2026-09-29 : l'argument de syntaxe d'origine — Scholar honorerait des
-  guillemets et booléens que les quatre sources internationales ignoreraient —
-  est faux ; la vérification live d'OPT-11 montre que seul CrossRef traite la
-  requête en sac de mots, OpenAlex et Semantic Scholar honorant phrases et
-  opérateurs. Chaque source reçoit désormais la requête traduite dans sa
-  syntaxe par le plan de requête.)* Elle ne s'active donc que nommée, ou
-  par le groupe dédié `scholar`. Plafond `MOISSON_SERPAPI_MAX_PAGES` (défaut
-  10) et refus de démarrage sous `MOISSON_SERPAPI_MIN_CREDITS` (défaut 100,
-  contrôle gratuit via l'Account API).
-- Métadonnées pauvres par nature : pas de DOI (le champ n'est rempli que depuis
-  une URL `doi.org` ou `/doi/`, jamais deviné), pas de résumé (l'extrait Scholar
-  est signalé comme tel dans `extra`), auteurs et revue tronqués par Google et
-  marqués `Scholar truncation`. Conservés en revanche : `Cited by`,
-  `Scholar cluster ID`, lien de texte intégral.
-- **Correctif de fond** : `utils/secrets.py` résolvait le `.env` depuis le
-  répertoire courant, donc jamais en production (le serveur MCP est lancé depuis
-  un répertoire arbitraire). Le chemin est désormais résolu depuis le module.
-  Le bloc `env` de `claude_desktop_config.json` reste prioritaire.
-- **Outil MCP `corpus_resolve_dois`** (9e outil) : Scholar ne renvoyant aucun
-  DOI, le rangement automatique dans Zotero (`zotero_add_by_doi`) tombait. Le
-  module `utils/doi_resolver.py` retrouve les DOI manquants par appariement
-  bibliographique contre CrossRef (gratuit, sans clé). Règle d'acceptation
-  stricte et traçable : similarité de titre ≥ 0.90, corroborée par l'année
-  (±1 an) et le nom du premier auteur ; appariement par préfixe pour les
-  sous-titres absents d'un côté, jamais accepté sans corroboration ; ligne
-  `DOI source` dans `extra` énonçant le score. **Ne jamais abaisser le seuil
-  pour relever le taux** : un DOI faux entre silencieusement dans Zotero.
-- Tests : **+67** (`test_serpapi_connector.py` 38, `test_doi_resolver.py` 29),
-  suite à **558 PASS**.
-
-### Sprint 01 ✅ TERMINÉ et VALIDÉ utilisateur (2026-05-23)
-
-Toutes les tâches du sprint sont complétées (+ hotfix CSL-JSON anticipé). **Import dans Zotero Desktop confirmé fonctionnel par l'utilisateur** sur le corpus de 103 items.
-
-- ✅ **#1** — Test end-to-end sur requête réelle (`discours numérique`, 30 items × 4 sources → 103 uniques)
-- ✅ **#2** — Validation Zotero (0 erreur / 0 avertissement contre le schéma officiel `https://api.zotero.org/schema`)
-- ✅ **#4** — Vérification des endpoints actuels (HAL, Isidore, OpenEdition v2, Cairn)
-- ✅ **#5** — Correction de la pagination Isidore avec source_filter
-- ✅ **#6** — Vérification du format d'identifiant OAI Cairn
-- ✅ **#20** (anticipé) — Export CSL-JSON (BibTeX JSON) pour import Zotero direct
-
-**Découvertes critiques traitées :**
-
-1. URL Cairn OAI obsolète → corrigée en `/oai.php`
-2. Format identifiant OAI Cairn fautif (`{DOI}` → `{CODE_REVUE_VOL_PAGE}`)
-3. Structure de réponse Isidore complètement différente du format initialement supposé → mapper réécrit
-4. Champs Isidore tous multilingues `[{@xml:lang, $}]`
-5. Filtrage par nom de source remplacé par filtrage par domaine d'URL
-6. +20 types Dublin Core ajoutés au mapping
-7. **Hotfix CSL-JSON** : le format Zotero API JSON natif n'est PAS reconnu par Zotero Desktop à l'import. Ajout d'un exporteur CSL-JSON (Citation Style Language JSON, le format « BibTeX JSON » standard) en sortie parallèle.
-
-**Artefacts produits :**
-
-- [tests/test_sprint_01.py](tests/test_sprint_01.py) — suite de non-régression (**30/30 PASS**)
-- [mappers/csl_exporter.py](mappers/csl_exporter.py) — exporteur CSL-JSON
-- `output/corpus_discours_numerique_*.json` — corpus Zotero JSON interne (riche, consommé par le MCP)
-- `output/corpus_discours_numerique_*.csl.json` — corpus CSL-JSON (importable Zotero Desktop)
-- `output/corpus_discours_numerique_*_stats.txt` — statistiques
-- `output/raw/` — payloads bruts par source pour audit
-
-**Deux formats de sortie à chaque moisson :**
-
-| Fichier | Format | Usage |
-|---------|--------|-------|
-| `corpus_*.json` | Zotero API JSON interne | Consommé par le MCP, analyses programmatiques, filtrage |
-| `corpus_*.csl.json` | **CSL-JSON (BibTeX JSON standard)** | **Import direct Zotero Desktop**, lisible par tout outil CSL |
-
-**Outils MCP exposés (5) :**
-1. `moisson_search` — moisson multi-sources, produit les deux formats
-2. `corpus_analyze` — statistiques d'un corpus
-3. `corpus_list` — liste les corpus disponibles
-4. `corpus_filter` — filtrage par critères
-5. `corpus_to_csl` — convertit un corpus interne en CSL-JSON (utile pour anciens corpus)
-
-### Sprint 02 ✅ TERMINÉ (2026-05-23)
-
-- ✅ **#3** — Tests unitaires (148 unit + 16 sprint_02 + 15 sprint_01 + 15 csl + integration = **214 tests, tous PASS, couverture 82%** sur mappers+utils)
-- ✅ **#8** — Signature uniforme des connecteurs (`**kwargs`) → préalable au registry du Sprint 03
-- ✅ **#9** — Moissonnage parallèle (`--workers 2`, ThreadPoolExecutor, gain ÷2)
-- ✅ **#10** — Cache HTTP local (`--cache`, requests-cache, **gain ×17 mesuré** : 21 s → 1.2 s)
-- ✅ **#11** — Validation contre schéma Zotero officiel (téléchargement + cache 30 j + fallback embarqué)
-- ✅ **#12** — Filtres temporels `--from-date` / `--to-date` (HAL natif Solr `fq`, autres post-pagination)
-
-**Nouveau module** : [mappers/zotero_schema_loader.py](mappers/zotero_schema_loader.py) — chargement du schéma officiel `https://api.zotero.org/schema`.
-
-**Architecture tests** :
-```
-tests/
-├── conftest.py                  # fixtures pytest
-├── fixtures/                    # payloads réels API (HAL, Isidore, OAI)
-└── unit/                        # 8 fichiers de tests unitaires
-```
-
-**Lancer les tests** :
-```bash
-source venv/bin/activate
-python -m pytest tests/ -q                                  # 214 PASS
-python -m pytest tests/ --cov=mappers --cov=utils -q       # avec couverture
-```
-
-### Sprint 03 ✅ TERMINÉ (2026-05-23)
-
-- ✅ **#16** — Registry pattern : `connectors/registry.py` posé, ajouter une source = 1 import + 1 entrée
-- ✅ **#13** — Connecteur **Persée** (proxy Isidore + OAI optionnel)
-- ✅ **#14** — Connecteur **Theses.fr** (proxy Isidore uniquement, API REST publique retirée en 2026)
-- ✅ **#15** — Connecteur **Érudit** (proxy Isidore + OAI optionnel)
-- ✅ **#17** — Outil MCP `fetch_by_doi` (Crossref + HAL + Isidore)
-- ✅ **#18** — Outil MCP `search_by_author` (HAL Solr + Isidore, trié par année)
-- ✅ **#19** — Outil MCP `corpus_merge` (fusion N corpus avec rapport)
-- ✅ **#21** — Resources MCP : corpus exposés via `corpus://<filename>`
-- ✅ **#22** — 4 Prompts MCP : `bibliographie-thematique`, `profil-chercheur`, `veille-mensuelle`, `etat-de-l-art`
-
-**7 sources couvertes** : HAL, Isidore, OpenEdition, Cairn, Persée, Theses.fr, Érudit
-
-**8 outils MCP + 4 prompts + Resources** exposés. Tests : 241 PASS.
-
-**Lien ProfilBiblio** : ProfilBiblio (profil bibliographique d'un chercheur) peut désormais déléguer la récupération bibliographique à `search_by_author` via MCP.
+**État actuel** : sprint patch terminé (version 0.4.0, branche `sprint-patch`, section ci-dessus) après le chantier d'optimisation ; 12 sources, 12 outils MCP, 4 prompts, 3 909 tests verts hors intégration. Historique des extensions et des sprints 01 à 05 (chiffres et commandes de leur date) : [docs/HISTORIQUE.md](docs/HISTORIQUE.md).
 
 ### Outils MCP disponibles (12, état au 2026-09-30)
 
@@ -287,62 +155,6 @@ python -m pytest tests/ --cov=mappers --cov=utils -q       # avec couverture
 | `corpus_export` | Export BibTeX, BibLaTeX ou RIS |
 | `corpus_query` | Consultation d'un corpus : recherche classée, filtres, pagination, notices complètes par `ids` (≤ 20) |
 | `corpus_diff` | Comparaison de deux corpus d'une même requête (ajouts, retraits, enrichissements ; rapport `.diff.json`) ; une fusion garde le contexte de ses entrées |
-
-### Sprint 04 ✅ TERMINÉ (2026-05-23)
-
-- ✅ **#7** — `mcp>=1.0.0` activé dans requirements.txt et pyproject extras
-- ✅ **#23** — `pyproject.toml` PEP 621 avec entry_point `moisson-shs`
-- ✅ **#24** — `git init` (branche main) + `.gitignore` complet
-- ✅ **#25** — CI GitHub Actions (matrix Python 3.10/3.11/3.12 + smoke test CLI)
-- ✅ **#26** — Tutoriel README en 4 étapes + référence outils MCP
-- ✅ **#27** — `docs/FAQ.md` avec 17 questions/réponses
-- ✅ **Bonus** — `moisson-shs setup` : installation Claude Desktop automatisée cross-platform
-
-**Installation utilisateur final (3 commandes)** :
-
-```bash
-pip install -e ".[mcp]"      # ou pipx install moisson-shs[mcp]
-moisson-shs setup            # configure Claude Desktop automatiquement
-# → Quitter et relancer Claude Desktop
-```
-
-Le script `setup_claude_desktop.py` détecte l'OS, le venv Python, le chemin du serveur MCP, **préserve les autres serveurs MCP existants**, crée un backup `.bak`, valide les dépendances.
-
-### Sprint 05 ✅ TERMINÉ (2026-06-16)
-
-Retour MCP enrichi : à la fin d'une recherche, les outils producteurs renvoient
-**directement au client MCP** le lien cliquable vers le(s) fichier(s) + le JSON
-du corpus inline, en un seul retour (sous garde de volumétrie).
-
-- ✅ **#28** — Helper `_build_corpus_tool_result` + dispatcher acceptant `str` / `list[ContentBlock]` / `tuple(content, structured)` (*CombinationContent* SDK)
-- ✅ **#29** — `moisson_search` : `ResourceLink`(json/csl/stats) + `EmbeddedResource` Zotero inline + `structuredContent`
-- ✅ **#30** — Généralisation : `corpus_filter`, `corpus_to_csl` (CSL primaire), `corpus_merge`, `search_by_author`
-- ✅ **#31** — Seuil `INLINE_MAX_ITEMS` (défaut 300, env `MOISSON_INLINE_MAX_ITEMS`), aligné sur la garde 2 Mo de `read_resource`
-- ✅ **#32** — `tests/unit/test_tool_result.py` : **27 tests PASS**
-- ✅ **#33** — README (section « Retour MCP ») + CLAUDE.md + `sprint_05_report.md`
-- ✅ **Correctif latent** — `read_resource` durci aux `AnyUrl` (le SDK passe un `AnyUrl`, pas une `str` : `uri.startswith` plantait en production ; round-trip `corpus://` désormais sûr)
-- ✅ **Correctif revue** — registre `_EMITTED_RESOURCES` : les liens `corpus://` des fichiers écrits HORS de OUTPUT_DIR (`corpus_filter` à côté de la source, `corpus_to_csl`/`corpus_merge` avec `output_path` arbitraire) sont désormais résolus par `read_resource` (round-trip fiable, DoD #80)
-- ✅ **Durcissement réseau** — `config.py` : `HTTP_TIMEOUT` devient un tuple `(connect=8, read=45)`, `HTTP_MAX_RETRIES=3`, backoff `1.0`, pas de sleep après la dernière tentative, tout surchargeable par env. Pire cas par source morte : **~262 s → ~27 s** ⇒ `moisson_search` ne dépasse plus le délai d'outil de Claude Desktop quand une source est lente/injoignable. Couvert par `tests/unit/test_http_resilience.py` (5 tests)
-
-**5 outils producteurs** au retour enrichi : `moisson_search`, `corpus_filter`,
-`corpus_to_csl`, `corpus_merge`, `search_by_author`. `fetch_by_doi` reste hors
-périmètre (pas de fichier primaire). `outputSchema` écarté (masquerait les
-erreurs ; cf. rapport).
-
-**État du projet à la fin du sprint 05** (historique ; état actuel : section « Chantier optimisation ») :
-
-| Métrique | Valeur |
-|----------|--------|
-| Sources couvertes | **7** (HAL, Isidore, OpenEdition, Cairn, Persée, Theses.fr, Érudit) |
-| Outils MCP exposés | **9** + 4 prompts + Resources `corpus://` (5 producteurs au retour enrichi lien+JSON) |
-| Tests | **308** (303 non-integration + 5 integration network) — dont 32 Sprint 05 ; `tests/unit/` = 273 PASS en ~1,8 s hors ligne |
-| Couverture mappers+utils | **78%** |
-| Formats de sortie | Zotero JSON interne + CSL-JSON (Zotero import) |
-| Retour MCP | Résumé texte + `ResourceLink` + `EmbeddedResource` (JSON inline ≤ seuil) + `structuredContent` |
-| Performance | chiffre d'alors « 21 s pour 4×500 items » : projection du sprint 02 (mesure sur 4×20), non une mesure ; remplacé par les mesures du chantier d'optimisation |
-| Packaging | `pip install -e .` opérationnel, entry_point `moisson-shs` |
-| Git | Initialisé branche `main` (pas de commit auto) |
-| Documentation | README walkthrough + FAQ 17 questions + 5 rapports sprints |
 
 ### Commandes utiles (mises à jour le 2026-09-29, depuis la racine du projet)
 
@@ -390,17 +202,19 @@ venv/bin/python scripts/eval/pool.py --date 2026-09-29 build && venv/bin/python 
 venv/bin/python scripts/eval/rules_check.py metrics --date patch-2026-09-30 && venv/bin/python scripts/eval/rules_check.py decide --date patch-2026-09-30
 ```
 
-## Système de suivi des tâches
+## Reprise de contexte
 
-Les 27 tâches du backlog complet sont suivies via `TaskList` / `TaskUpdate`. Marquer `in_progress` au démarrage d'une tâche, `completed` à la fin (jamais en avance). Au démarrage d'une nouvelle session, faire un `TaskList` pour reprendre le contexte.
+En début de session : section « Où nous en sommes », puis le rapport du dernier chantier (tableau « Rapports d'exécution »).
 
 ## Conventions techniques
 
 - **Sortie** : tous les corpus produits vont dans `output/corpus_*.json` (+ `.csl.json`, `_stats.txt`, `.manifest.json` publié en dernier ; selon l'outil `.doi_report.json`, `.diff.json`, `.bib`/`.ris`). `output/raw/<source>_<run_id>.json` contient les notices normalisées par source (pas les réponses natives : celles-ci vont dans `.native_audit/` si `MOISSON_AUDIT_NATIVE=1`). Index dérivé `output/.index.json`. Fichiers de service (commençant par un point : `.oauth/`, `.audit/`, `.native_audit/`, temporaires, `.moisson.lock`) jamais listés, lus ni téléchargés. Ces dossiers sont à `.gitignore`. Scores, rangs et plan de requête : dans le manifeste, **jamais** dans le JSON Zotero ni dans `extra`.
 - **Logs** : niveau INFO par défaut, DEBUG avec `--verbose`. Sur MCP (stdio), les logs vont sur stderr (stdout réservé au JSON-RPC).
-- **Tests** : `tests/test_sprint_0X.py` par sprint, exécutables avec `venv/bin/python tests/test_sprint_0X.py` (mode standalone) ou `pytest` ; chantier d'optimisation : `tests/unit/test_opt<NN>_*.py` et `tests/unit/test_lot*_integration.py`. Aucune clé ni `.env` pour les tests unitaires (`tests/conftest.py`) ; marqueurs `integration` (API réelles) et `sockets` (transport local).
+- **Tests** : `tests/test_sprint_01.py`, seul exécutable hors pytest (`venv/bin/python tests/test_sprint_01.py`) ; sprints suivants : `tests/unit/test_sprint_0X.py` et `tests/integration/test_sprint_06_http.py` ; chantier d'optimisation : `tests/unit/test_opt<NN>_*.py` et `tests/unit/test_lot*_integration.py` ; sprint patch : `tests/unit/test_pat*.py`. Aucune clé ni `.env` pour les tests unitaires (`tests/conftest.py`) ; marqueurs `integration` (API réelles) et `sockets` (transport local).
 - **Pas de modification du config.py** sans mise à jour conjointe du report concerné — le fichier centralise les endpoints et constantes critiques. Toute constante ajoutée est surchargeable par une variable `MOISSON_*`, commentée, et recensée dans `.env.example`.
-- **Seuils d'identité et de DOI jamais abaissés** (0,90 titre, 0,97 sans corroboration, 0,93 passe floue, corroboration année et auteur) ; Google Scholar reste volontaire (hors `all` et `international`). Les règles optionnelles `dedup/2` et `doi-match/4` (co-diffusion, versions Zenodo, chapitres Google Books) restent derrière leurs drapeaux tant que leur vérification humaine n'a pas passé le gate (`docs/EVALUATION.md` § 9).
+- **Seuils d'identité et de DOI jamais abaissés** (0,90 titre, 0,97 sans corroboration, 0,93 passe floue, corroboration année et auteur) : un DOI faux entre silencieusement dans Zotero. Google Scholar reste volontaire (hors `all` et `international`) : facturé à la requête, quota SerpAPI partagé avec MyWebIntelligence. Les règles optionnelles `dedup/2` et `doi-match/4` (co-diffusion, versions Zenodo, chapitres Google Books) restent derrière leurs drapeaux tant que leur vérification humaine n'a pas passé le gate (`docs/EVALUATION.md` § 9).
+- **Formats** : le `.csl.json` est le format d'import de Zotero Desktop (Fichier > Importer) ; le `.json` interne (format de l'API Zotero) n'y est pas reconnu : il sert au serveur MCP et aux outils de corpus.
+- **Secrets** : `utils/secrets.py` lit le `.env` du projet, chemin résolu depuis le module (le serveur MCP est lancé depuis un répertoire arbitraire). La déclaration du client (bloc `env` de Claude Desktop ou de Claude Code, où `moisson-shs setup` inscrit toujours les quatre clés) fait autorité ; les clés du `.env` sont une réserve, jamais injectée dans `os.environ`, qui sert si la clé n'est pas déclarée, ou, selon `MOISSON_KEY_FALLBACK` (jamais SerpAPI par défaut), si elle est vide ou refusée (401, 403). `setup` ne copie jamais les clés du `.env` chez le client. Clé absente : source « non exécutée », la moisson continue.
 - **Git** : aucun commit automatique ; les commits se font à la demande de l'utilisateur, avec un message factuel signé de l'auteur et sans mention d'outil. `main` = `e61c2b9` (poussé, tag local `v0.3.0`) ; le sprint patch est sur la branche `sprint-patch` (tag local `v0.4.0`), ni fusionnée ni poussée.
 
 ## Lancer une moisson de test
